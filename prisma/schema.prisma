@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+
 }
 
 // ============================================
@@ -72,25 +72,31 @@ enum AuditAction {
 // ============================================
 
 model User {
-  id            String   @id @default(cuid())
-  email         String   @unique
-  passwordHash  String
-  firstName     String
-  lastName      String
-  role          UserRole @default(STUDENT)
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  
+  firstName     String?
+  lastName      String?
+  role          UserRole  @default(STUDENT)
   phoneNumber   String?
-  profileImage  String?
-  emailVerified Boolean  @default(false)
-  isActive      Boolean  @default(true)
+  isActive      Boolean   @default(true)
   
   // Soft delete
   deletedAt     DateTime?
   
   // Timestamps
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
   
-  // Relations
+  // NextAuth relations
+  accounts      Account[]
+  sessions      Session[]
+  
+  // App relations
   instructorCourses Course[]       @relation("InstructorCourses")
   bookings          Booking[]
   waitlists         Waitlist[]
@@ -101,6 +107,46 @@ model User {
   @@index([email])
   @@index([role])
   @@map("users")
+}
+
+// NextAuth models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
 }
 
 model Course {
@@ -136,7 +182,7 @@ model Course {
   updatedAt        DateTime @updatedAt
   
   // Relations
-  sessions         Session[]
+  sessions         CourseSession[]
   bookings         Booking[]
   waitlists        Waitlist[]
   certificates     Certificate[]
@@ -147,7 +193,7 @@ model Course {
   @@map("courses")
 }
 
-model Session {
+model CourseSession {
   id           String        @id @default(cuid())
   courseId     String
   course       Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
@@ -176,7 +222,7 @@ model Session {
   @@index([courseId])
   @@index([sessionDate])
   @@index([status])
-  @@map("sessions")
+  @@map("course_sessions")
 }
 
 model Booking {
@@ -191,7 +237,7 @@ model Booking {
   courseId         String
   course           Course        @relation(fields: [courseId], references: [id])
   sessionId        String
-  session          Session       @relation(fields: [sessionId], references: [id])
+  session          CourseSession @relation(fields: [sessionId], references: [id])
   
   // Booking details
   status           BookingStatus @default(PENDING)
