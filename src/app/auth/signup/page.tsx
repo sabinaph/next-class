@@ -1,35 +1,137 @@
-'use client';
+"use client";
 
-import { signIn } from 'next-auth/react';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { signIn } from "next-auth/react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Gender } from "@/types";
+import { Eye, EyeOff } from "lucide-react";
+import { signUpSchema } from "@/lib/validations/auth";
+import { type ZodIssue } from "zod";
 
 export default function SignUpPage() {
   const router = useRouter();
-  
+
+  // "form" | "otp"
+  const [step, setStep] = useState<"form" | "otp">("form");
+
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
+    firstName: "",
+    lastName: "",
+    username: "",
+    gender: "" as Gender,
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
-  const [error, setError] = useState('');
+  const [otp, setOtp] = useState("");
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Availability states
+  const [usernameStatus, setUsernameStatus] = useState<
+    "loading" | "available" | "taken" | null
+  >(null);
+  const [emailStatus, setEmailStatus] = useState<
+    "loading" | "available" | "taken" | null
+  >(null);
+
+  // Toggle Password Visibility
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Form validation errors
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  // Debounce logic
+  useEffect(() => {
+    const checkUsername = async () => {
+      if (!formData.username || formData.username.length < 3) {
+        setUsernameStatus(null);
+        return;
+      }
+      setUsernameStatus("loading");
+      try {
+        const res = await fetch("/api/auth/check-availability", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ field: "username", value: formData.username }),
+        });
+        const data = await res.json();
+        setUsernameStatus(data.available ? "available" : "taken");
+      } catch (error) {
+        console.error("Error checking username:", error);
+        setUsernameStatus(null);
+      }
+    };
+
+    const timeoutId = setTimeout(() => {
+      checkUsername();
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [formData.username]);
+
+  useEffect(() => {
+    const checkEmail = async () => {
+      if (!formData.email || !formData.email.includes("@")) {
+        setEmailStatus(null);
+        return;
+      }
+      setEmailStatus("loading");
+      try {
+        const res = await fetch("/api/auth/check-availability", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ field: "email", value: formData.email }),
+        });
+        const data = await res.json();
+        setEmailStatus(data.available ? "available" : "taken");
+      } catch (error) {
+        console.error("Error checking email:", error);
+        setEmailStatus(null);
+      }
+    };
+
+    const timeoutId = setTimeout(() => {
+      checkEmail();
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [formData.email]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
+    setFormErrors({});
 
-    // Validation
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+    // 1. Zod Validation
+    const validationResult = signUpSchema.safeParse(formData);
+
+    if (!validationResult.success) {
+      const errors: Record<string, string> = {};
+      validationResult.error.issues.forEach((issue: ZodIssue) => {
+        if (issue.path[0]) {
+          errors[issue.path[0] as string] = issue.message;
+        }
+      });
+      setFormErrors(errors);
       return;
     }
 
-    if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters long');
+    // 2. Availability Checks
+    if (usernameStatus === "taken") {
+      setFormErrors((prev) => ({
+        ...prev,
+        username: "Username is already taken",
+      }));
+      return;
+    }
+    if (emailStatus === "taken") {
+      setFormErrors((prev) => ({
+        ...prev,
+        email: "Email is already registered",
+      }));
       return;
     }
 
@@ -37,12 +139,14 @@ export default function SignUpPage() {
 
     try {
       // Create user via API
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           firstName: formData.firstName,
           lastName: formData.lastName,
+          username: formData.username,
+          gender: formData.gender,
           email: formData.email,
           password: formData.password,
         }),
@@ -51,32 +155,50 @@ export default function SignUpPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to create account');
+        throw new Error(data.error || "Failed to create account");
       }
 
-      // Auto sign in after registration
-      const signInResult = await signIn('credentials', {
-        redirect: false,
-        email: formData.email,
-        password: formData.password,
+      // Success, move to OTP step
+      setStep("otp");
+    } catch (err: any) {
+      setError(err.message || "An error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.email,
+          otp,
+        }),
       });
 
-      if (signInResult?.error) {
-        setError('Account created but sign in failed. Please sign in manually.');
-        setTimeout(() => router.push('/auth/signin'), 2000);
-      } else {
-        router.push('/courses');
-        router.refresh();
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to verify OTP");
       }
+
+      // Success
+      router.push("/auth/signin");
     } catch (err: any) {
-      setError(err.message || 'An error occurred. Please try again.');
+      setError(err.message || "Invalid OTP. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleGoogleSignUp = () => {
-    signIn('google', { callbackUrl: '/courses' });
+    signIn("google", { callbackUrl: "/courses" });
   };
 
   return (
@@ -91,241 +213,710 @@ export default function SignUpPage() {
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
-              {/* Illustration SVG - Student with laptop */}
+              {/* Illustration SVG */}
               <g>
-                {/* Plant */}
-                <rect x="40" y="320" width="30" height="20" rx="5" fill="#6B7280" />
-                <path d="M50 320 Q45 300 48 285" stroke="#10B981" strokeWidth="2" fill="none" />
+                <rect
+                  x="40"
+                  y="320"
+                  width="30"
+                  height="20"
+                  rx="5"
+                  fill="#6B7280"
+                />
+                <path
+                  d="M50 320 Q45 300 48 285"
+                  stroke="#10B981"
+                  strokeWidth="2"
+                  fill="none"
+                />
                 <circle cx="48" cy="285" r="8" fill="#10B981" />
-                <path d="M55 320 Q60 305 58 290" stroke="#10B981" strokeWidth="2" fill="none" />
+                <path
+                  d="M55 320 Q60 305 58 290"
+                  stroke="#10B981"
+                  strokeWidth="2"
+                  fill="none"
+                />
                 <circle cx="58" cy="290" r="6" fill="#10B981" />
-                
-                {/* Papers/Documents */}
-                <rect x="120" y="280" width="70" height="90" rx="4" fill="white" stroke="#E5E7EB" strokeWidth="2" />
-                <line x1="130" y1="295" x2="180" y2="295" stroke="#D1D5DB" strokeWidth="2" />
-                <line x1="130" y1="305" x2="175" y2="305" stroke="#D1D5DB" strokeWidth="2" />
-                <line x1="130" y1="315" x2="180" y2="315" stroke="#D1D5DB" strokeWidth="2" />
-                
-                <rect x="140" y="260" width="70" height="90" rx="4" fill="white" stroke="#E5E7EB" strokeWidth="2" />
-                <line x1="150" y1="275" x2="200" y2="275" stroke="#D1D5DB" strokeWidth="2" />
-                <line x1="150" y1="285" x2="195" y2="285" stroke="#D1D5DB" strokeWidth="2" />
-                
-                {/* Person */}
+
+                <rect
+                  x="120"
+                  y="280"
+                  width="70"
+                  height="90"
+                  rx="4"
+                  fill="white"
+                  stroke="#E5E7EB"
+                  strokeWidth="2"
+                />
+                <line
+                  x1="130"
+                  y1="295"
+                  x2="180"
+                  y2="295"
+                  stroke="#D1D5DB"
+                  strokeWidth="2"
+                />
+                <line
+                  x1="130"
+                  y1="305"
+                  x2="175"
+                  y2="305"
+                  stroke="#D1D5DB"
+                  strokeWidth="2"
+                />
+                <line
+                  x1="130"
+                  y1="315"
+                  x2="180"
+                  y2="315"
+                  stroke="#D1D5DB"
+                  strokeWidth="2"
+                />
+
+                <rect
+                  x="140"
+                  y="260"
+                  width="70"
+                  height="90"
+                  rx="4"
+                  fill="white"
+                  stroke="#E5E7EB"
+                  strokeWidth="2"
+                />
+                <line
+                  x1="150"
+                  y1="275"
+                  x2="200"
+                  y2="275"
+                  stroke="#D1D5DB"
+                  strokeWidth="2"
+                />
+                <line
+                  x1="150"
+                  y1="285"
+                  x2="195"
+                  y2="285"
+                  stroke="#D1D5DB"
+                  strokeWidth="2"
+                />
+
                 <circle cx="280" cy="200" r="30" fill="#FCA5A5" />
-                <path d="M260 200 L250 210" stroke="#1F2937" strokeWidth="2" strokeLinecap="round" />
-                
-                <rect x="250" y="230" width="60" height="70" rx="8" fill="#10B981" />
-                
-                {/* Laptop */}
-                <rect x="230" y="290" width="100" height="60" rx="4" fill="#374151" />
-                <rect x="235" y="295" width="90" height="50" rx="2" fill="#60A5FA" />
-                <line x1="245" y1="305" x2="315" y2="305" stroke="white" strokeWidth="1" />
-                <line x1="245" y1="315" x2="310" y2="315" stroke="white" strokeWidth="1" />
-                <line x1="245" y1="325" x2="305" y2="325" stroke="white" strokeWidth="1" />
-                
-                {/* Legs */}
+                <path
+                  d="M260 200 L250 210"
+                  stroke="#1F2937"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+
+                <rect
+                  x="250"
+                  y="230"
+                  width="60"
+                  height="70"
+                  rx="8"
+                  fill="#10B981"
+                />
+
+                <rect
+                  x="230"
+                  y="290"
+                  width="100"
+                  height="60"
+                  rx="4"
+                  fill="#374151"
+                />
+                <rect
+                  x="235"
+                  y="295"
+                  width="90"
+                  height="50"
+                  rx="2"
+                  fill="#60A5FA"
+                />
+                <line
+                  x1="245"
+                  y1="305"
+                  x2="315"
+                  y2="305"
+                  stroke="white"
+                  strokeWidth="1"
+                />
+                <line
+                  x1="245"
+                  y1="315"
+                  x2="310"
+                  y2="315"
+                  stroke="white"
+                  strokeWidth="1"
+                />
+                <line
+                  x1="245"
+                  y1="325"
+                  x2="305"
+                  y2="325"
+                  stroke="white"
+                  strokeWidth="1"
+                />
+
                 <rect x="255" y="300" width="20" height="50" fill="#1F2937" />
                 <rect x="285" y="300" width="20" height="50" fill="#1F2937" />
-                
-                {/* Backpack */}
-                <rect x="315" y="260" width="40" height="50" rx="8" fill="#10B981" />
+
+                <rect
+                  x="315"
+                  y="260"
+                  width="40"
+                  height="50"
+                  rx="8"
+                  fill="#10B981"
+                />
                 <circle cx="335" cy="275" r="8" fill="#34D399" />
-                
-                {/* Floating icons */}
-                <circle cx="80" cy="120" r="20" fill="white" stroke="#E5E7EB" strokeWidth="2" />
-                <path d="M80 110 L80 130 M70 120 L90 120" stroke="#10B981" strokeWidth="2" />
-                
-                <circle cx="350" cy="100" r="20" fill="white" stroke="#E5E7EB" strokeWidth="2" />
-                <path d="M345 100 L350 110 L355 100" stroke="#F59E0B" strokeWidth="2" fill="none" />
-                
-                <circle cx="180" cy="80" r="18" fill="white" stroke="#E5E7EB" strokeWidth="2" />
-                <circle cx="180" cy="80" r="10" fill="none" stroke="#3B82F6" strokeWidth="2" />
-                
-                <rect x="320" y="180" width="30" height="30" rx="4" fill="white" stroke="#E5E7EB" strokeWidth="2" />
+
+                <circle
+                  cx="80"
+                  cy="120"
+                  r="20"
+                  fill="white"
+                  stroke="#E5E7EB"
+                  strokeWidth="2"
+                />
+                <path
+                  d="M80 110 L80 130 M70 120 L90 120"
+                  stroke="#10B981"
+                  strokeWidth="2"
+                />
+
+                <circle
+                  cx="350"
+                  cy="100"
+                  r="20"
+                  fill="white"
+                  stroke="#E5E7EB"
+                  strokeWidth="2"
+                />
+                <path
+                  d="M345 100 L350 110 L355 100"
+                  stroke="#F59E0B"
+                  strokeWidth="2"
+                  fill="none"
+                />
+
+                <circle
+                  cx="180"
+                  cy="80"
+                  r="18"
+                  fill="white"
+                  stroke="#E5E7EB"
+                  strokeWidth="2"
+                />
+                <circle
+                  cx="180"
+                  cy="80"
+                  r="10"
+                  fill="none"
+                  stroke="#3B82F6"
+                  strokeWidth="2"
+                />
+
+                <rect
+                  x="320"
+                  y="180"
+                  width="30"
+                  height="30"
+                  rx="4"
+                  fill="white"
+                  stroke="#E5E7EB"
+                  strokeWidth="2"
+                />
                 <path d="M330 185 L330 200 L340 195 Z" fill="#10B981" />
               </g>
             </svg>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Join NextClass Hub</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">
+            Join NextClass 
+          </h1>
           <p className="text-gray-600 text-lg">
             Create your account and start your learning journey today
           </p>
         </div>
       </div>
 
-      {/* Right Side - Sign Up Form */}
+      {/* Right Side - Sign Up Form or OTP Form */}
       <div className="flex-1 flex items-center justify-center p-8 bg-white">
         <div className="w-full max-w-md">
           {/* Logo for mobile */}
           <div className="lg:hidden mb-8 text-center">
             <h1 className="text-2xl font-bold">
               <span className="text-gray-900">NEXT</span>
-              <span className="text-green-600">CLASS</span>{' '}
-              <span className="text-gray-600">HUB</span>
+              <span className="text-green-600">CLASS</span>{" "}
+              <span className="text-gray-600"></span>
             </h1>
           </div>
 
-          {/* Logo */}
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold hidden lg:block">
-              <span className="text-gray-900">NEXT</span>
-              <span className="text-green-600">CLASS</span>{' '}
-              <span className="text-gray-600">HUB</span>
-            </h1>
-            <p className="text-gray-600 mt-2">Create your account</p>
-          </div>
+          {step === "otp" ? (
+            // OTP Form
+            <div>
+              <div className="text-center mb-8">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Verify your email
+                </h2>
+                <p className="text-gray-600 mt-2">
+                  We sent a verification code to {formData.email}
+                </p>
+              </div>
 
-          {/* Error Message */}
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-              {error}
+              {error && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                  {error}
+                </div>
+              )}
+
+              <form onSubmit={handleVerifyOtp} className="space-y-6">
+                <div>
+                  <label
+                    htmlFor="otp"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    Verification Code
+                  </label>
+                  <input
+                    id="otp"
+                    type="text"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    placeholder="Enter 6-digit code"
+                    required
+                    maxLength={6}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition text-gray-900 placeholder-gray-500 text-center tracking-widest text-xl"
+                    disabled={isLoading}
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isLoading || otp.length !== 6}
+                  className="w-full bg-gray-800 text-white py-3 rounded-lg hover:bg-gray-900 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <span>Verifying...</span>
+                    </>
+                  ) : (
+                    "Verify Email"
+                  )}
+                </button>
+              </form>
             </div>
+          ) : (
+            // Sign Up Form
+            <>
+              {/* Logo */}
+              <div className="text-center mb-8">
+                <h1 className="text-2xl font-bold hidden lg:block">
+                  <span className="text-gray-900">NEXT</span>
+                  <span className="text-green-600">CLASS</span>{" "}
+                  <span className="text-gray-600"></span>
+                </h1>
+                <p className="text-gray-600 mt-2">Create your account</p>
+              </div>
+
+              {/* Error Message */}
+              {error && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                  {error}
+                </div>
+              )}
+
+              {/* Sign Up Form */}
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Name Fields */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label
+                      htmlFor="firstName"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
+                      First Name
+                    </label>
+                    <input
+                      id="firstName"
+                      type="text"
+                      value={formData.firstName}
+                      onChange={(e) =>
+                        setFormData({ ...formData, firstName: e.target.value })
+                      }
+                      placeholder="Enter first name"
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition text-gray-900 placeholder-gray-500"
+                      disabled={isLoading}
+                    />
+                    {formErrors.firstName && (
+                      <p className="text-xs text-red-500 mt-1">
+                        {formErrors.firstName}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="lastName"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
+                      Last Name
+                    </label>
+                    <input
+                      id="lastName"
+                      type="text"
+                      value={formData.lastName}
+                      onChange={(e) =>
+                        setFormData({ ...formData, lastName: e.target.value })
+                      }
+                      placeholder="Enter last name"
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition text-gray-900 placeholder-gray-500"
+                      disabled={isLoading}
+                    />
+                    {formErrors.lastName && (
+                      <p className="text-xs text-red-500 mt-1">
+                        {formErrors.lastName}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Username and Gender */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label
+                      htmlFor="username"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
+                      Username
+                    </label>
+                    <div className="relative">
+                      <input
+                        id="username"
+                        type="text"
+                        value={formData.username}
+                        onChange={(e) =>
+                          setFormData({ ...formData, username: e.target.value })
+                        }
+                        placeholder="Enter username"
+                        required
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition text-gray-900 placeholder-gray-500 ${
+                          usernameStatus === "taken"
+                            ? "border-red-300 focus:ring-red-500"
+                            : usernameStatus === "available"
+                            ? "border-green-300 focus:ring-green-500"
+                            : "border-gray-300"
+                        }`}
+                        disabled={isLoading}
+                      />
+                      {usernameStatus === "loading" && (
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
+                        </div>
+                      )}
+                    </div>
+                    {usernameStatus === "available" && (
+                      <p className="text-xs text-green-600 mt-1">
+                        Username is available
+                      </p>
+                    )}
+                    {usernameStatus === "taken" && (
+                      <p className="text-xs text-red-600 mt-1">
+                        Username is already taken
+                      </p>
+                    )}
+                    {formErrors.username && (
+                      <p className="text-xs text-red-500 mt-1">
+                        {formErrors.username}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="gender"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
+                      Gender
+                    </label>
+                    <div className="relative">
+                      <select
+                        id="gender"
+                        value={formData.gender}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            gender: e.target.value as Gender,
+                          })
+                        }
+                        className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition bg-white appearance-none ${
+                          formData.gender ? "text-gray-900" : "text-gray-500"
+                        }`}
+                        disabled={isLoading}
+                        required
+                      >
+                        <option value="" disabled>
+                          Select Gender
+                        </option>
+                        {(Object.values(Gender) as string[]).map((g) => (
+                          <option key={g} value={g} className="text-gray-900">
+                            {g}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-500">
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M19 9l-7 7-7-7"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                    {formErrors.gender && (
+                      <p className="text-xs text-red-500 mt-1">
+                        {formErrors.gender}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    Email
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
+                      placeholder="Enter email address"
+                      required
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition text-gray-900 placeholder-gray-500 ${
+                        emailStatus === "taken"
+                          ? "border-red-300 focus:ring-red-500"
+                          : emailStatus === "available"
+                          ? "border-green-300 focus:ring-green-500"
+                          : "border-gray-300"
+                      }`}
+                      disabled={isLoading}
+                    />
+                    {emailStatus === "loading" && (
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
+                      </div>
+                    )}
+                  </div>
+                  {emailStatus === "available" && (
+                    <p className="text-xs text-green-600 mt-1">
+                      Email is available
+                    </p>
+                  )}
+                  {emailStatus === "taken" && (
+                    <p className="text-xs text-red-600 mt-1">
+                      Email is already registered
+                    </p>
+                  )}
+                  {formErrors.email && (
+                    <p className="text-xs text-red-500 mt-1">
+                      {formErrors.email}
+                    </p>
+                  )}
+                </div>
+
+                {/* Password */}
+                <div>
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      value={formData.password}
+                      onChange={(e) =>
+                        setFormData({ ...formData, password: e.target.value })
+                      }
+                      placeholder="Enter password"
+                      required
+                      minLength={8}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition text-gray-900 placeholder-gray-500 pr-10"
+                      disabled={isLoading}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      disabled={isLoading}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
+                  {formErrors.password && (
+                    <p className="text-xs text-red-500 mt-1">
+                      {formErrors.password}
+                    </p>
+                  )}
+                </div>
+
+                {/* Confirm Password */}
+                <div>
+                  <label
+                    htmlFor="confirmPassword"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    Confirm Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={formData.confirmPassword}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          confirmPassword: e.target.value,
+                        })
+                      }
+                      placeholder="Confirm password"
+                      required
+                      minLength={8}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition text-gray-900 placeholder-gray-500 pr-10"
+                      disabled={isLoading}
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      disabled={isLoading}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
+                  {formErrors.confirmPassword && (
+                    <p className="text-xs text-red-500 mt-1">
+                      {formErrors.confirmPassword}
+                    </p>
+                  )}
+                  {formData.confirmPassword && (
+                    <p
+                      className={`text-xs mt-1 ${
+                        formData.password === formData.confirmPassword
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }`}
+                    >
+                      {formData.password === formData.confirmPassword
+                        ? "Passwords match"
+                        : "Passwords do not match"}
+                    </p>
+                  )}
+                </div>
+
+                {/* Sign Up Button */}
+                <button
+                  type="submit"
+                  disabled={
+                    isLoading ||
+                    usernameStatus === "taken" ||
+                    emailStatus === "taken" ||
+                    Object.values(formData).some(
+                      (val) => !val || val.trim() === ""
+                    )
+                  }
+                  className="w-full bg-gray-800 text-white py-3 rounded-lg hover:bg-gray-900 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed mt-6 flex items-center justify-center gap-2"
+                >
+                  {isLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <span>Creating Account...</span>
+                    </>
+                  ) : (
+                    "Create Account"
+                  )}
+                </button>
+
+                {/* Divider */}
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-300"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-4 bg-white text-gray-500">or</span>
+                  </div>
+                </div>
+
+                {/* Google Sign Up */}
+                <button
+                  type="button"
+                  onClick={handleGoogleSignUp}
+                  disabled={isLoading}
+                  className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24">
+                    <path
+                      fill="#4285F4"
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                    />
+                  </svg>
+                  <span className="text-gray-700 font-medium">
+                    Sign up with Google
+                  </span>
+                </button>
+              </form>
+
+              {/* Sign In Link */}
+              <p className="mt-8 text-center text-sm text-gray-600">
+                Already have an account?{" "}
+                <Link
+                  href="/auth/signin"
+                  className="text-green-600 hover:text-green-700 font-medium"
+                >
+                  Sign In
+                </Link>
+              </p>
+            </>
           )}
-
-          {/* Sign Up Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Name Fields */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
-                  First Name
-                </label>
-                <input
-                  id="firstName"
-                  type="text"
-                  value={formData.firstName}
-                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                  placeholder="John"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-                  disabled={isLoading}
-                />
-              </div>
-              <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
-                  Last Name
-                </label>
-                <input
-                  id="lastName"
-                  type="text"
-                  value={formData.lastName}
-                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                  placeholder="Smith"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-                  disabled={isLoading}
-                />
-              </div>
-            </div>
-
-            {/* Email */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="john.smith@example.com"
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-                disabled={isLoading}
-              />
-            </div>
-
-            {/* Password */}
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                placeholder="••••••••••"
-                required
-                minLength={8}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-                disabled={isLoading}
-              />
-            </div>
-
-            {/* Confirm Password */}
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                Confirm Password
-              </label>
-              <input
-                id="confirmPassword"
-                type="password"
-                value={formData.confirmPassword}
-                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                placeholder="••••••••••"
-                required
-                minLength={8}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-                disabled={isLoading}
-              />
-            </div>
-
-            {/* Sign Up Button */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-gray-800 text-white py-3 rounded-lg hover:bg-gray-900 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed mt-6"
-            >
-              {isLoading ? 'Creating Account...' : 'Create Account'}
-            </button>
-
-            {/* Divider */}
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500">or</span>
-              </div>
-            </div>
-
-            {/* Google Sign Up */}
-            <button
-              type="button"
-              onClick={handleGoogleSignUp}
-              disabled={isLoading}
-              className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
-                <path
-                  fill="#4285F4"
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                />
-                <path
-                  fill="#34A853"
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                />
-                <path
-                  fill="#FBBC05"
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                />
-                <path
-                  fill="#EA4335"
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                />
-              </svg>
-              <span className="text-gray-700 font-medium">Sign up with Google</span>
-            </button>
-          </form>
-
-          {/* Sign In Link */}
-          <p className="mt-8 text-center text-sm text-gray-600">
-            Already have an account?{' '}
-            <Link href="/auth/signin" className="text-green-600 hover:text-green-700 font-medium">
-              Sign In
-            </Link>
-          </p>
         </div>
       </div>
     </div>

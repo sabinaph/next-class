@@ -7,7 +7,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-
 }
 
 // ============================================
@@ -18,6 +17,12 @@ enum UserRole {
   ADMIN
   INSTRUCTOR
   STUDENT
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
 }
 
 enum BookingStatus {
@@ -74,36 +79,43 @@ enum AuditAction {
 model User {
   id            String    @id @default(cuid())
   name          String?
+  username      String?
   email         String    @unique
   emailVerified DateTime?
   image         String?
+  gender        Gender?
   passwordHash  String?
-  
   firstName     String?
   lastName      String?
   role          UserRole  @default(STUDENT)
   phoneNumber   String?
   isActive      Boolean   @default(true)
-  
+  otp           String?
+  otpExpires    DateTime?
+  createdBy     String?
+
   // Soft delete
-  deletedAt     DateTime?
-  
+  deletedAt DateTime?
+
   // Timestamps
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // NextAuth relations
-  accounts      Account[]
-  sessions      Session[]
-  
-  // App relations
+  accounts Account[]
+  sessions Session[]
+
+  // User relations
   instructorCourses Course[]       @relation("InstructorCourses")
   bookings          Booking[]
   waitlists         Waitlist[]
   payments          Payment[]
   certificates      Certificate[]
   auditLogs         Audit[]
-  
+  reviews           Review[]
+  wishlist          Wishlist[]
+  announcements     Announcement[]
+
   @@index([email])
   @@index([role])
   @@map("users")
@@ -150,43 +162,47 @@ model VerificationToken {
 }
 
 model Course {
-  id               String   @id @default(cuid())
+  id               String  @id @default(cuid())
   title            String
-  description      String   @db.Text
-  shortDescription String?  @db.VarChar(500)
+  description      String  @db.Text
+  shortDescription String? @db.VarChar(500)
   category         String
-  level            String   // Beginner, Intermediate, Advanced
+  level            String // Beginner, Intermediate, Advanced
   thumbnail        String?
-  price            Decimal  @db.Decimal(10, 2)
-  duration         Int      // Total duration in hours
-  maxStudents      Int      @default(30)
-  
+  price            Decimal @db.Decimal(10, 2)
+  duration         Int // Total duration in hours
+  maxStudents      Int     @default(30)
+
   // Instructor
-  instructorId     String
-  instructor       User     @relation("InstructorCourses", fields: [instructorId], references: [id])
-  
+  instructorId String
+  instructor   User   @relation("InstructorCourses", fields: [instructorId], references: [id])
+
   // Course metadata
-  prerequisites    String?  @db.Text
-  learningOutcomes String?  @db.Text
-  syllabus         String?  @db.Text
-  
+  prerequisites    String? @db.Text
+  learningOutcomes String? @db.Text
+  syllabus         String? @db.Text
+
   // Status
-  isPublished      Boolean  @default(false)
-  isActive         Boolean  @default(true)
-  
+  isPublished Boolean @default(false)
+  isActive    Boolean @default(true)
+
   // Soft delete
-  deletedAt        DateTime?
-  
+  deletedAt DateTime?
+
   // Timestamps
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relations
-  sessions         CourseSession[]
-  bookings         Booking[]
-  waitlists        Waitlist[]
-  certificates     Certificate[]
-  
+  sessions      CourseSession[]
+  bookings      Booking[]
+  waitlists     Waitlist[]
+  certificates  Certificate[]
+  lessons       Lesson[]
+  reviews       Review[]
+  wishlist      Wishlist[]
+  announcements Announcement[]
+
   @@index([instructorId])
   @@index([category])
   @@index([isPublished])
@@ -194,31 +210,31 @@ model Course {
 }
 
 model CourseSession {
-  id           String        @id @default(cuid())
-  courseId     String
-  course       Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  
-  title        String
-  description  String?       @db.Text
-  sessionDate  DateTime
-  startTime    DateTime
-  endTime      DateTime
-  location     String?       // Physical location or "Online"
-  meetingLink  String?       // For online sessions
-  
-  maxStudents  Int           @default(30)
-  status       SessionStatus @default(SCHEDULED)
-  
+  id       String @id @default(cuid())
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  title       String
+  description String?  @db.Text
+  sessionDate DateTime
+  startTime   DateTime
+  endTime     DateTime
+  location    String? // Physical location or "Online"
+  meetingLink String? // For online sessions
+
+  maxStudents Int           @default(30)
+  status      SessionStatus @default(SCHEDULED)
+
   // Soft delete
-  deletedAt    DateTime?
-  
+  deletedAt DateTime?
+
   // Timestamps
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relations
-  bookings     Booking[]
-  
+  bookings Booking[]
+
   @@index([courseId])
   @@index([sessionDate])
   @@index([status])
@@ -226,42 +242,42 @@ model CourseSession {
 }
 
 model Booking {
-  id               String        @id @default(cuid())
-  bookingReference String        @unique @default(cuid())
-  
+  id               String @id @default(cuid())
+  bookingReference String @unique @default(cuid())
+
   // Student
-  studentId        String
-  student          User          @relation(fields: [studentId], references: [id])
-  
+  studentId String
+  student   User   @relation(fields: [studentId], references: [id])
+
   // Course & Session
-  courseId         String
-  course           Course        @relation(fields: [courseId], references: [id])
-  sessionId        String
-  session          CourseSession @relation(fields: [sessionId], references: [id])
-  
+  courseId  String
+  course    Course        @relation(fields: [courseId], references: [id])
+  sessionId String
+  session   CourseSession @relation(fields: [sessionId], references: [id])
+
   // Booking details
-  status           BookingStatus @default(PENDING)
-  numberOfSeats    Int           @default(1)
-  totalAmount      Decimal       @db.Decimal(10, 2)
-  
+  status        BookingStatus @default(PENDING)
+  numberOfSeats Int           @default(1)
+  totalAmount   Decimal       @db.Decimal(10, 2)
+
   // Cancellation
-  cancellationDate DateTime?
-  cancellationReason String?     @db.Text
-  
+  cancellationDate   DateTime?
+  cancellationReason String?   @db.Text
+
   // Attendance
-  attended         Boolean       @default(false)
+  attended           Boolean   @default(false)
   attendanceMarkedAt DateTime?
-  
+
   // Soft delete
-  deletedAt        DateTime?
-  
+  deletedAt DateTime?
+
   // Timestamps
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relations
-  payments         Payment[]
-  
+  payments Payment[]
+
   @@unique([studentId, sessionId])
   @@index([studentId])
   @@index([courseId])
@@ -272,28 +288,28 @@ model Booking {
 }
 
 model Waitlist {
-  id          String         @id @default(cuid())
-  
+  id String @id @default(cuid())
+
   // Student
-  studentId   String
-  student     User           @relation(fields: [studentId], references: [id])
-  
+  studentId String
+  student   User   @relation(fields: [studentId], references: [id])
+
   // Course
-  courseId    String
-  course      Course         @relation(fields: [courseId], references: [id])
-  
-  status      WaitlistStatus @default(ACTIVE)
-  position    Int            // Position in waitlist queue
-  notifiedAt  DateTime?      // When student was notified of availability
-  expiresAt   DateTime?      // When the notification expires
-  
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id])
+
+  status     WaitlistStatus @default(ACTIVE)
+  position   Int // Position in waitlist queue
+  notifiedAt DateTime? // When student was notified of availability
+  expiresAt  DateTime? // When the notification expires
+
   // Soft delete
-  deletedAt   DateTime?
-  
+  deletedAt DateTime?
+
   // Timestamps
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@unique([studentId, courseId])
   @@index([courseId])
   @@index([status])
@@ -301,37 +317,37 @@ model Waitlist {
 }
 
 model Payment {
-  id                String        @id @default(cuid())
-  transactionId     String        @unique
-  
+  id            String @id @default(cuid())
+  transactionId String @unique
+
   // Student
-  studentId         String
-  student           User          @relation(fields: [studentId], references: [id])
-  
+  studentId String
+  student   User   @relation(fields: [studentId], references: [id])
+
   // Booking
-  bookingId         String
-  booking           Booking       @relation(fields: [bookingId], references: [id])
-  
+  bookingId String
+  booking   Booking @relation(fields: [bookingId], references: [id])
+
   // Payment details
-  amount            Decimal       @db.Decimal(10, 2)
-  currency          String        @default("USD")
-  status            PaymentStatus @default(PENDING)
-  paymentMethod     PaymentMethod
-  
+  amount        Decimal       @db.Decimal(10, 2)
+  currency      String        @default("USD")
+  status        PaymentStatus @default(PENDING)
+  paymentMethod PaymentMethod
+
   // Payment gateway info
-  gatewayResponse   String?       @db.Text
-  gatewayReference  String?
-  
+  gatewayResponse  String? @db.Text
+  gatewayReference String?
+
   // Refund
-  refundAmount      Decimal?      @db.Decimal(10, 2)
-  refundReason      String?       @db.Text
-  refundedAt        DateTime?
-  
+  refundAmount Decimal?  @db.Decimal(10, 2)
+  refundReason String?   @db.Text
+  refundedAt   DateTime?
+
   // Timestamps
-  paidAt            DateTime?
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
-  
+  paidAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
   @@index([studentId])
   @@index([bookingId])
   @@index([status])
@@ -340,30 +356,30 @@ model Payment {
 }
 
 model Certificate {
-  id               String   @id @default(cuid())
-  certificateNumber String  @unique
-  
+  id                String @id @default(cuid())
+  certificateNumber String @unique
+
   // Student
-  studentId        String
-  student          User     @relation(fields: [studentId], references: [id])
-  
+  studentId String
+  student   User   @relation(fields: [studentId], references: [id])
+
   // Course
-  courseId         String
-  course           Course   @relation(fields: [courseId], references: [id])
-  
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id])
+
   // Certificate details
-  issueDate        DateTime @default(now())
-  expiryDate       DateTime?
-  certificateUrl   String?  // URL to PDF or image
-  isValid          Boolean  @default(true)
-  
+  issueDate      DateTime  @default(now())
+  expiryDate     DateTime?
+  certificateUrl String? // URL to PDF or image
+  isValid        Boolean   @default(true)
+
   // Verification
-  verificationCode String   @unique
-  
+  verificationCode String @unique
+
   // Timestamps
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@unique([studentId, courseId])
   @@index([studentId])
   @@index([courseId])
@@ -373,28 +389,114 @@ model Certificate {
 }
 
 model Audit {
-  id          String      @id @default(cuid())
-  
+  id String @id @default(cuid())
+
   // User who performed the action
-  userId      String?
-  user        User?       @relation(fields: [userId], references: [id])
-  
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
   // Audit details
-  action      AuditAction
-  entityType  String      // e.g., "Course", "Booking", "User"
-  entityId    String?     // ID of the affected entity
-  
+  action     AuditAction
+  entityType String // e.g., "Course", "Booking", "User"
+  entityId   String? // ID of the affected entity
+
   // Additional context
-  metadata    Json?       // Store additional information as JSON
-  ipAddress   String?
-  userAgent   String?
-  
+  metadata  Json? // Store additional information as JSON
+  ipAddress String?
+  userAgent String?
+
   // Timestamps
-  timestamp   DateTime    @default(now())
-  
+  timestamp DateTime @default(now())
+
   @@index([userId])
   @@index([action])
   @@index([entityType])
   @@index([timestamp])
   @@map("audit_logs")
+}
+
+// ============================================
+// NEW MODELS FOR INSTRUCTOR ROLE
+// ============================================
+
+enum LessonType {
+  VIDEO
+  TEXT
+  PDF
+  QUIZ
+  ASSIGNMENT
+}
+
+model Lesson {
+  id       String     @id @default(cuid())
+  title    String
+  content  String?    @db.Text // Store text content or URL for video/pdf
+  type     LessonType
+  duration Int? // in minutes
+  order    Int // To order lessons within a course/module
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  isPublished Boolean @default(false)
+  isFree      Boolean @default(false) // Previewable?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courseId])
+  @@map("lessons")
+}
+
+model Review {
+  id      String  @id @default(cuid())
+  rating  Int     @default(5) // 1-5
+  comment String? @db.Text
+
+  studentId String
+  student   User   @relation(fields: [studentId], references: [id])
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([studentId, courseId]) // One review per student per course
+  @@index([courseId])
+  @@map("reviews")
+}
+
+model Wishlist {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@map("wishlists")
+}
+
+model Announcement {
+  id      String @id @default(cuid())
+  title   String
+  content String @db.Text
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  instructorId String
+  instructor   User   @relation(fields: [instructorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courseId])
+  @@map("announcements")
 }

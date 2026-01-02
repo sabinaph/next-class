@@ -1,30 +1,49 @@
-'use client';
+"use client";
 
-import { signIn } from 'next-auth/react';
-import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import Image from 'next/image';
+import { signIn } from "next-auth/react";
+import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react";
+import { signInSchema } from "@/lib/validations/auth";
 
 export default function SignInPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/courses';
-  
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
+
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
+    setFormErrors({});
+
+    // Zod Validation
+    const validationResult = signInSchema.safeParse(formData);
+
+    if (!validationResult.success) {
+      const errors: Record<string, string> = {};
+      validationResult.error.issues.forEach((issue: any) => {
+        if (issue.path[0]) {
+          errors[issue.path[0] as string] = issue.message;
+        }
+      });
+      setFormErrors(errors);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const result = await signIn('credentials', {
+      const result = await signIn("credentials", {
         redirect: false,
         email: formData.email,
         password: formData.password,
@@ -37,14 +56,14 @@ export default function SignInPage() {
         router.refresh();
       }
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      setError("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleGoogleSignIn = () => {
-    signIn('google', { callbackUrl });
+    signIn("google", { callbackUrl });
   };
 
   return (
@@ -62,61 +81,234 @@ export default function SignInPage() {
               {/* Illustration SVG - Student with laptop */}
               <g>
                 {/* Plant */}
-                <rect x="40" y="320" width="30" height="20" rx="5" fill="#6B7280" />
-                <path d="M50 320 Q45 300 48 285" stroke="#10B981" strokeWidth="2" fill="none" />
+                <rect
+                  x="40"
+                  y="320"
+                  width="30"
+                  height="20"
+                  rx="5"
+                  fill="#6B7280"
+                />
+                <path
+                  d="M50 320 Q45 300 48 285"
+                  stroke="#10B981"
+                  strokeWidth="2"
+                  fill="none"
+                />
                 <circle cx="48" cy="285" r="8" fill="#10B981" />
-                <path d="M55 320 Q60 305 58 290" stroke="#10B981" strokeWidth="2" fill="none" />
+                <path
+                  d="M55 320 Q60 305 58 290"
+                  stroke="#10B981"
+                  strokeWidth="2"
+                  fill="none"
+                />
                 <circle cx="58" cy="290" r="6" fill="#10B981" />
-                
+
                 {/* Papers/Documents */}
-                <rect x="120" y="280" width="70" height="90" rx="4" fill="white" stroke="#E5E7EB" strokeWidth="2" />
-                <line x1="130" y1="295" x2="180" y2="295" stroke="#D1D5DB" strokeWidth="2" />
-                <line x1="130" y1="305" x2="175" y2="305" stroke="#D1D5DB" strokeWidth="2" />
-                <line x1="130" y1="315" x2="180" y2="315" stroke="#D1D5DB" strokeWidth="2" />
-                
-                <rect x="140" y="260" width="70" height="90" rx="4" fill="white" stroke="#E5E7EB" strokeWidth="2" />
-                <line x1="150" y1="275" x2="200" y2="275" stroke="#D1D5DB" strokeWidth="2" />
-                <line x1="150" y1="285" x2="195" y2="285" stroke="#D1D5DB" strokeWidth="2" />
-                
+                <rect
+                  x="120"
+                  y="280"
+                  width="70"
+                  height="90"
+                  rx="4"
+                  fill="white"
+                  stroke="#E5E7EB"
+                  strokeWidth="2"
+                />
+                <line
+                  x1="130"
+                  y1="295"
+                  x2="180"
+                  y2="295"
+                  stroke="#D1D5DB"
+                  strokeWidth="2"
+                />
+                <line
+                  x1="130"
+                  y1="305"
+                  x2="175"
+                  y2="305"
+                  stroke="#D1D5DB"
+                  strokeWidth="2"
+                />
+                <line
+                  x1="130"
+                  y1="315"
+                  x2="180"
+                  y2="315"
+                  stroke="#D1D5DB"
+                  strokeWidth="2"
+                />
+
+                <rect
+                  x="140"
+                  y="260"
+                  width="70"
+                  height="90"
+                  rx="4"
+                  fill="white"
+                  stroke="#E5E7EB"
+                  strokeWidth="2"
+                />
+                <line
+                  x1="150"
+                  y1="275"
+                  x2="200"
+                  y2="275"
+                  stroke="#D1D5DB"
+                  strokeWidth="2"
+                />
+                <line
+                  x1="150"
+                  y1="285"
+                  x2="195"
+                  y2="285"
+                  stroke="#D1D5DB"
+                  strokeWidth="2"
+                />
+
                 {/* Person */}
                 <circle cx="280" cy="200" r="30" fill="#FCA5A5" />
-                <path d="M260 200 L250 210" stroke="#1F2937" strokeWidth="2" strokeLinecap="round" />
-                
-                <rect x="250" y="230" width="60" height="70" rx="8" fill="#10B981" />
-                
+                <path
+                  d="M260 200 L250 210"
+                  stroke="#1F2937"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+
+                <rect
+                  x="250"
+                  y="230"
+                  width="60"
+                  height="70"
+                  rx="8"
+                  fill="#10B981"
+                />
+
                 {/* Laptop */}
-                <rect x="230" y="290" width="100" height="60" rx="4" fill="#374151" />
-                <rect x="235" y="295" width="90" height="50" rx="2" fill="#60A5FA" />
-                <line x1="245" y1="305" x2="315" y2="305" stroke="white" strokeWidth="1" />
-                <line x1="245" y1="315" x2="310" y2="315" stroke="white" strokeWidth="1" />
-                <line x1="245" y1="325" x2="305" y2="325" stroke="white" strokeWidth="1" />
-                
+                <rect
+                  x="230"
+                  y="290"
+                  width="100"
+                  height="60"
+                  rx="4"
+                  fill="#374151"
+                />
+                <rect
+                  x="235"
+                  y="295"
+                  width="90"
+                  height="50"
+                  rx="2"
+                  fill="#60A5FA"
+                />
+                <line
+                  x1="245"
+                  y1="305"
+                  x2="315"
+                  y2="305"
+                  stroke="white"
+                  strokeWidth="1"
+                />
+                <line
+                  x1="245"
+                  y1="315"
+                  x2="310"
+                  y2="315"
+                  stroke="white"
+                  strokeWidth="1"
+                />
+                <line
+                  x1="245"
+                  y1="325"
+                  x2="305"
+                  y2="325"
+                  stroke="white"
+                  strokeWidth="1"
+                />
+
                 {/* Legs */}
                 <rect x="255" y="300" width="20" height="50" fill="#1F2937" />
                 <rect x="285" y="300" width="20" height="50" fill="#1F2937" />
-                
+
                 {/* Backpack */}
-                <rect x="315" y="260" width="40" height="50" rx="8" fill="#10B981" />
+                <rect
+                  x="315"
+                  y="260"
+                  width="40"
+                  height="50"
+                  rx="8"
+                  fill="#10B981"
+                />
                 <circle cx="335" cy="275" r="8" fill="#34D399" />
-                
+
                 {/* Floating icons */}
-                <circle cx="80" cy="120" r="20" fill="white" stroke="#E5E7EB" strokeWidth="2" />
-                <path d="M80 110 L80 130 M70 120 L90 120" stroke="#10B981" strokeWidth="2" />
-                
-                <circle cx="350" cy="100" r="20" fill="white" stroke="#E5E7EB" strokeWidth="2" />
-                <path d="M345 100 L350 110 L355 100" stroke="#F59E0B" strokeWidth="2" fill="none" />
-                
-                <circle cx="180" cy="80" r="18" fill="white" stroke="#E5E7EB" strokeWidth="2" />
-                <circle cx="180" cy="80" r="10" fill="none" stroke="#3B82F6" strokeWidth="2" />
-                
-                <rect x="320" y="180" width="30" height="30" rx="4" fill="white" stroke="#E5E7EB" strokeWidth="2" />
+                <circle
+                  cx="80"
+                  cy="120"
+                  r="20"
+                  fill="white"
+                  stroke="#E5E7EB"
+                  strokeWidth="2"
+                />
+                <path
+                  d="M80 110 L80 130 M70 120 L90 120"
+                  stroke="#10B981"
+                  strokeWidth="2"
+                />
+
+                <circle
+                  cx="350"
+                  cy="100"
+                  r="20"
+                  fill="white"
+                  stroke="#E5E7EB"
+                  strokeWidth="2"
+                />
+                <path
+                  d="M345 100 L350 110 L355 100"
+                  stroke="#F59E0B"
+                  strokeWidth="2"
+                  fill="none"
+                />
+
+                <circle
+                  cx="180"
+                  cy="80"
+                  r="18"
+                  fill="white"
+                  stroke="#E5E7EB"
+                  strokeWidth="2"
+                />
+                <circle
+                  cx="180"
+                  cy="80"
+                  r="10"
+                  fill="none"
+                  stroke="#3B82F6"
+                  strokeWidth="2"
+                />
+
+                <rect
+                  x="320"
+                  y="180"
+                  width="30"
+                  height="30"
+                  rx="4"
+                  fill="white"
+                  stroke="#E5E7EB"
+                  strokeWidth="2"
+                />
                 <path d="M330 185 L330 200 L340 195 Z" fill="#10B981" />
               </g>
             </svg>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">NextClass Hub</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">
+            NextClass 
+          </h1>
           <p className="text-gray-600 text-lg">
-            Unleash Your Academic Success with NextClass's Course Excellence Platform
+            Unleash Your Academic Success with NextClass's Course Excellence
+            Platform
           </p>
         </div>
       </div>
@@ -128,8 +320,8 @@ export default function SignInPage() {
           <div className="lg:hidden mb-8 text-center">
             <h1 className="text-2xl font-bold">
               <span className="text-gray-900">NEXT</span>
-              <span className="text-green-600">CLASS</span>{' '}
-              <span className="text-gray-600">HUB</span>
+              <span className="text-green-600">CLASS</span>{" "}
+              <span className="text-gray-600"></span>
             </h1>
           </div>
 
@@ -137,8 +329,8 @@ export default function SignInPage() {
           <div className="text-center mb-8">
             <h1 className="text-2xl font-bold hidden lg:block">
               <span className="text-gray-900">NEXT</span>
-              <span className="text-green-600">CLASS</span>{' '}
-              <span className="text-gray-600">HUB</span>
+              <span className="text-green-600">CLASS</span>{" "}
+              <span className="text-gray-600"></span>
             </h1>
           </div>
 
@@ -153,36 +345,68 @@ export default function SignInPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Username/Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Username or email
               </label>
               <input
                 id="email"
-                type="email"
+                type="text"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="johnsmith007"
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
+                placeholder="Enter username or email"
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition text-gray-900 placeholder-gray-500"
                 disabled={isLoading}
               />
+              {formErrors.email && (
+                <p className="text-xs text-red-500 mt-1">{formErrors.email}</p>
+              )}
             </div>
 
             {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Password
               </label>
-              <input
-                id="password"
-                type="password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                placeholder="••••••••••"
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-                disabled={isLoading}
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                  placeholder="Enter password"
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition text-gray-900 placeholder-gray-500 pr-10"
+                  disabled={isLoading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  disabled={isLoading}
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
+              {formErrors.password && (
+                <p className="text-xs text-red-500 mt-1">
+                  {formErrors.password}
+                </p>
+              )}
             </div>
 
             {/* Forgot Password */}
@@ -198,10 +422,17 @@ export default function SignInPage() {
             {/* Sign In Button */}
             <button
               type="submit"
-              disabled={isLoading}
-              className="w-full bg-gray-800 text-white py-3 rounded-lg hover:bg-gray-900 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isLoading || !formData.email || !formData.password}
+              className="w-full bg-gray-800 text-white py-3 rounded-lg hover:bg-gray-900 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              {isLoading ? 'Signing in...' : 'Sign In'}
+              {isLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>Signing in...</span>
+                </>
+              ) : (
+                "Sign In"
+              )}
             </button>
 
             {/* Divider */}
@@ -239,14 +470,19 @@ export default function SignInPage() {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
-              <span className="text-gray-700 font-medium">Sign in with Google</span>
+              <span className="text-gray-700 font-medium">
+                Sign in with Google
+              </span>
             </button>
           </form>
 
           {/* Sign Up Link */}
           <p className="mt-8 text-center text-sm text-gray-600">
-            Are you new?{' '}
-            <Link href="/auth/signup" className="text-green-600 hover:text-green-700 font-medium">
+            Are you new?{" "}
+            <Link
+              href="/auth/signup"
+              className="text-green-600 hover:text-green-700 font-medium"
+            >
               Create an Account
             </Link>
           </p>

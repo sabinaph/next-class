@@ -1,8 +1,18 @@
-'use client';
+"use client";
 
-import { CourseWithInstructor } from '@/types';
-import Link from 'next/link';
-import Image from 'next/image';
+import { CourseWithInstructor } from "@/types";
+import Link from "next/link";
+import Image from "next/image";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Clock, Users, BookOpen } from "lucide-react";
 
 interface CourseCardProps {
   course: CourseWithInstructor;
@@ -23,137 +33,123 @@ export default function CourseCard({ course }: CourseCardProps) {
     _count,
   } = course;
 
-  // Get level color
-  const getLevelColor = (level: string) => {
+  // Get level badge variant/color
+  const getLevelBadgeVariant = (level: string) => {
     switch (level.toLowerCase()) {
-      case 'beginner':
-        return 'bg-green-100 text-green-800';
-      case 'intermediate':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'advanced':
-        return 'bg-red-100 text-red-800';
+      case "beginner":
+        return "secondary"; // or a custom class if badge supports it
+      case "intermediate":
+        return "default";
+      case "advanced":
+        return "destructive";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "outline";
     }
   };
 
   return (
     <Link href={`/courses/${id}`}>
-      <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 h-full flex flex-col cursor-pointer">
-        {/* Thumbnail */}
-        <div className="relative h-48 bg-linear-to-br from-blue-500 to-purple-600">
+      <Card className="h-full overflow-hidden hover:shadow-lg transition-all duration-300 group border-border/50 bg-card/50 hover:bg-card hover:-translate-y-1">
+        {/* Thumbnail Section */}
+        <div className="relative aspect-video w-full overflow-hidden bg-muted">
           {thumbnail ? (
             <Image
               src={thumbnail}
               alt={title}
               fill
-              className="object-cover"
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           ) : (
-            <div className="flex items-center justify-center h-full">
-              <svg
-                className="w-20 h-20 text-white opacity-50"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                />
-              </svg>
+            <div className="flex items-center justify-center h-full bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900">
+              <BookOpen className="w-12 h-12 text-muted-foreground/20" />
             </div>
           )}
+
+          <div className="absolute top-2 left-2 z-10">
+            <Badge
+              variant="secondary"
+              className="bg-white/90 dark:bg-black/90 backdrop-blur-sm shadow-sm font-semibold"
+            >
+              {category}
+            </Badge>
+          </div>
         </div>
 
-        {/* Content */}
-        <div className="p-5 flex flex-col grow">
-          {/* Category and Level */}
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">
-              {category}
-            </span>
-            <span className={`text-xs font-semibold px-2 py-1 rounded ${getLevelColor(level)}`}>
+        {/* Content Section */}
+        <CardHeader className="p-5 pb-2 space-y-2.5">
+          <div className="flex justify-between items-start gap-2">
+            <Badge
+              variant="outline"
+              className="text-[10px] px-2 py-0 h-5 font-medium uppercase tracking-wider text-muted-foreground border-border/60"
+            >
               {level}
-            </span>
+            </Badge>
+            <div className="flex items-center text-xs text-muted-foreground font-medium bg-muted/50 px-2 py-1 rounded-full">
+              <Clock className="w-3 h-3 mr-1" />
+              {duration}h
+            </div>
           </div>
 
-          {/* Title */}
-          <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">
+          <h3 className="text-lg font-bold leading-tight group-hover:text-primary transition-colors line-clamp-2 min-h-[3rem]">
             {title}
           </h3>
 
-          {/* Description */}
-          <p className="text-sm text-gray-600 mb-4 line-clamp-2 grow">
+          <p className="text-sm text-muted-foreground line-clamp-2 min-h-[2.5rem]">
             {shortDescription || description}
           </p>
+        </CardHeader>
 
-          {/* Instructor */}
-          <div className="flex items-center mb-4">
-            <div className="w-8 h-8 rounded-full bg-linear-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-sm font-semibold mr-2">
-              {instructor.firstName[0]}{instructor.lastName[0]}
-            </div>
-            <div className="text-sm">
-              <p className="text-gray-900 font-medium">
+        <CardContent className="p-5 py-3">
+          <div className="flex items-center gap-3">
+            <Avatar className="h-8 w-8 border border-border">
+              <AvatarImage
+                src={instructor.image || undefined}
+                alt={instructor.firstName}
+              />
+              <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                {instructor.firstName[0]}
+                {instructor.lastName[0]}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col">
+              <span className="text-sm font-medium leading-none">
                 {instructor.firstName} {instructor.lastName}
-              </p>
+              </span>
+              <span className="text-xs text-muted-foreground mt-0.5">
+                Instructor
+              </span>
             </div>
           </div>
+        </CardContent>
 
-          {/* Stats */}
-          <div className="flex items-center text-sm text-gray-500 mb-4 space-x-4">
-            <div className="flex items-center">
-              <svg
-                className="w-4 h-4 mr-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              {duration}h
-            </div>
+        <CardFooter className="p-5 pt-0 mt-auto flex items-center justify-between border-t border-border/50 bg-muted/5 pt-4">
+          <div className="flex flex-col">
+            {price > 0 ? (
+              <span className="text-lg font-bold text-primary">
+                ${price.toFixed(2)}
+              </span>
+            ) : (
+              <span className="text-lg font-bold text-green-600 dark:text-green-500">
+                Free
+              </span>
+            )}
             {_count && (
-              <div className="flex items-center">
-                <svg
-                  className="w-4 h-4 mr-1"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                  />
-                </svg>
-                {_count.bookings} enrolled
-              </div>
+              <span className="text-xs text-muted-foreground flex items-center mt-0.5">
+                <Users className="w-3 h-3 mr-1" />
+                {_count.bookings} students
+              </span>
             )}
           </div>
 
-          {/* Price and CTA */}
-          <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-            <div>
-              <span className="text-2xl font-bold text-gray-900">
-                ${price.toFixed(2)}
-              </span>
-            </div>
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-medium">
-              View Details
-            </button>
-          </div>
-        </div>
-      </div>
+          <Button
+            size="sm"
+            className="font-semibold shadow-sm group-hover:shadow-md transition-all"
+          >
+            View Course
+          </Button>
+        </CardFooter>
+      </Card>
     </Link>
   );
 }
