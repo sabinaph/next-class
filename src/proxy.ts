@@ -20,8 +20,6 @@ export default async function middleware(req: NextRequest) {
     pathname.startsWith("/courses") ||
     pathname.startsWith("/profile") ||
     pathname.startsWith("/dashboard") ||
-    pathname.startsWith("/bookings") ||
-    pathname.startsWith("/sessions") ||
     isAdminRoute ||
     isInstructorRoute;
 
@@ -59,7 +57,5 @@ export const config = {
     "/courses/:path*",
     "/profile/:path*",
     "/dashboard/:path*",
-    "/bookings/:path*",
-    "/sessions/:path*",
   ],
 };

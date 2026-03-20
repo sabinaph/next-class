@@ -367,6 +367,7 @@ export interface CourseFilters {
   minPrice?: number;
   maxPrice?: number;
   instructorId?: string;
+  resourceType?: LessonType;
   isPublished?: boolean;
 }
 

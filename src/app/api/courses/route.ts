@@ -6,6 +6,7 @@ import {
   ApiResponse,
   PaginatedResponse,
   CourseFilters,
+  LessonType,
   UserRole,
 } from "@/types";
 import { getServerSession } from "next-auth";
@@ -56,6 +57,9 @@ function buildCourseFilters(searchParams: URLSearchParams): CourseFilters {
   if (searchParams.get("instructorId")) {
     filters.instructorId = searchParams.get("instructorId")!;
   }
+  if (searchParams.get("resourceType")) {
+    filters.resourceType = searchParams.get("resourceType") as LessonType;
+  }
 
   return filters;
 }
@@ -94,6 +98,12 @@ export async function GET(request: NextRequest) {
         lte?: number;
       };
       instructorId?: string;
+      lessons?: {
+        some: {
+          type: LessonType;
+          isPublished: boolean;
+        };
+      };
     } = {
       deletedAt: null,
       isActive: true,
@@ -136,8 +146,17 @@ export async function GET(request: NextRequest) {
       where.instructorId = filters.instructorId;
     }
 
+    if (filters.resourceType) {
+      where.lessons = {
+        some: {
+          type: filters.resourceType,
+          isPublished: true,
+        },
+      };
+    }
+
     // Fetch courses and total count
-    const [courses, total] = await Promise.all([
+    const [courses, total, instructorOptions] = await Promise.all([
       prisma.course.findMany({
         where,
         include: {
@@ -170,6 +189,27 @@ export async function GET(request: NextRequest) {
         },
       }),
       prisma.course.count({ where }),
+      prisma.user.findMany({
+        where: {
+          role: UserRole.INSTRUCTOR,
+          isActive: true,
+          instructorCourses: {
+            some: {
+              isPublished: true,
+              isActive: true,
+              deletedAt: null,
+            },
+          },
+        },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+        },
+        orderBy: {
+          firstName: "asc",
+        },
+      }),
     ]);
 
     // Transform Decimal to number for JSON serialization
@@ -187,6 +227,13 @@ export async function GET(request: NextRequest) {
         total,
         totalPages: Math.ceil(total / limit),
       },
+      message: JSON.stringify({
+        instructors: instructorOptions.map((instructor) => ({
+          id: instructor.id,
+          name: `${instructor.firstName || ""} ${instructor.lastName || ""}`.trim() || "Instructor",
+        })),
+        resourceTypes: ["VIDEO", "TEXT", "PDF", "QUIZ", "ASSIGNMENT"],
+      }),
     };
 
     return NextResponse.json(response);
