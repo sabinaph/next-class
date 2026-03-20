@@ -12,17 +12,19 @@ import Link from "next/link";
 export default async function LessonIdPage({
   params,
 }: {
-  params: { courseId: string; lessonId: string };
+  params: Promise<{ courseId: string; lessonId: string }>;
 }) {
-  const lesson = await prisma.lesson.findUnique({
+  const { courseId, lessonId } = await params;
+
+  const lesson = await prisma.lesson.findFirst({
     where: {
-      id: params.lessonId,
-      courseId: params.courseId,
+      id: lessonId,
+      courseId,
     },
   });
 
   if (!lesson) {
-    return redirect(`/learn/${params.courseId}`);
+    return redirect(`/learn/${courseId}`);
   }
 
   return (

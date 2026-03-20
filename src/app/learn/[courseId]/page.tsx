@@ -4,11 +4,13 @@ import { prisma } from "@/app/lib/prisma";
 export default async function CourseLearnPage({
   params,
 }: {
-  params: { courseId: string };
+  params: Promise<{ courseId: string }>;
 }) {
+  const { courseId } = await params;
+
   const course = await prisma.course.findUnique({
     where: {
-      id: params.courseId,
+      id: courseId,
     },
     include: {
       lessons: {
