@@ -40,6 +40,7 @@ const formSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
   description: z.string().min(20, "Description must be at least 20 characters"),
   category: z.string().min(1, "Category is required"),
+  tags: z.string().optional(),
   level: z.string().min(1, "Level is required"),
   thumbnail: z.string().optional(),
   price: z.number().min(0, "Price must be positive"),
@@ -79,6 +80,7 @@ export function CreateCourseForm() {
       title: "",
       description: "",
       category: "",
+      tags: "",
       level: "",
       price: 0,
       duration: 1,
@@ -90,7 +92,14 @@ export function CreateCourseForm() {
     setIsLoading(true);
     setError(null);
     try {
-      const course = await createCourse(data);
+      const normalized = {
+        ...data,
+        tags: (data.tags || "")
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean),
+      };
+      const course = await createCourse(normalized as any);
       router.push(`/instructor/courses/${course.id}`);
     } catch (err) {
       setError("Failed to create course. Please try again.");
@@ -168,6 +177,20 @@ export function CreateCourseForm() {
                     {errors.description.message}
                   </p>
                 )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="tags" className="text-base">
+                  Tags
+                </Label>
+                <Input
+                  id="tags"
+                  placeholder="e.g. react, design, ui"
+                  {...register("tags")}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Enter comma-separated tags to improve search and filtering.
+                </p>
               </div>
 
               <div className="space-y-2">

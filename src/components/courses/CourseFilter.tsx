@@ -51,6 +51,7 @@ export default function CourseFilter({ onFilterChange, isLoading = false, instru
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All Categories');
   const [level, setLevel] = useState('All Levels');
+  const [tag, setTag] = useState('');
   const [instructorId, setInstructorId] = useState('All Instructors');
   const [resourceType, setResourceType] = useState('All Types');
   const [minPrice, setMinPrice] = useState('');
@@ -62,6 +63,7 @@ export default function CourseFilter({ onFilterChange, isLoading = false, instru
     
     if (search.trim()) filters.search = search.trim();
     if (category !== 'All Categories') filters.category = category;
+    if (tag.trim()) filters.tag = tag.trim();
     if (level !== 'All Levels') filters.level = level;
     if (instructorId !== 'All Instructors') filters.instructorId = instructorId;
     if (resourceType !== 'All Types') filters.resourceType = resourceType as CourseFilters['resourceType'];
@@ -75,6 +77,7 @@ export default function CourseFilter({ onFilterChange, isLoading = false, instru
   const resetFilters = () => {
     setSearch('');
     setCategory('All Categories');
+    setTag('');
     setLevel('All Levels');
     setInstructorId('All Instructors');
     setResourceType('All Types');
@@ -120,6 +123,17 @@ export default function CourseFilter({ onFilterChange, isLoading = false, instru
       </div>
 
       {/* Levels */}
+      <div className="space-y-2">
+        <Label htmlFor="tag">Tag</Label>
+        <Input
+          id="tag"
+          value={tag}
+          onChange={(e) => setTag(e.target.value)}
+          placeholder="e.g. react"
+          disabled={isLoading}
+        />
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="level">Level</Label>
         <select
