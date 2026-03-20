@@ -31,7 +31,7 @@ This checklist maps your requested features to the current codebase status.
 - [x] Profile management (settings + profile update/password)
 - [x] Upload resources (video/PDF lesson uploads via UploadThing)
 - [x] Edit/delete own resources (own course lessons editable/deletable)
-- [~] Add title/description/category/price/thumbnail (all except robust thumbnail upload/management in form)
+- [x] Add title/description/category/price/thumbnail
 - [~] View sales of own resources (booking-based revenue stats available)
 - [~] Track earnings (dashboard total revenue available; no payout/statement module)
 - [~] Manage downloadable content (content upload exists; no dedicated downloads manager)
@@ -42,7 +42,7 @@ This checklist maps your requested features to the current codebase status.
 - [x] Student registration and login
 - [x] Browse resources (courses list)
 - [x] Search resources
-- [~] Filter by category/price/instructor/type (category/level/price done; instructor/type filters not fully exposed in UI)
+- [x] Filter by category/price/instructor/type
 - [x] View resource details
 - [~] Buy resources (Stripe checkout starts, but full post-payment confirmation pipeline is incomplete)
 - [~] Download purchased files (learn access gated by confirmed booking, but complete digital-download flow is not finished)
@@ -69,12 +69,12 @@ This checklist maps your requested features to the current codebase status.
 
 These are still present and should be phased out for a pure digital marketplace:
 
-- [ ] Booking flows
-- [ ] Scheduling logic
-- [ ] Rescheduling/cancellation logic
-- [ ] Conflict detection logic
-- [ ] Class availability/session capacity logic
-- [ ] Session completion tracking as core purchase logic
+- [~] Booking flows (still in data model; removed from primary admin navigation and route matcher)
+- [~] Scheduling logic
+- [~] Rescheduling/cancellation logic
+- [~] Conflict detection logic
+- [~] Class availability/session capacity logic
+- [~] Session completion tracking as core purchase logic
 
 ## 6) Module Progress (Your Proposed Structure)
 

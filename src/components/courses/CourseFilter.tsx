@@ -5,7 +5,7 @@ import { CourseFilters } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Search, Filter, X } from 'lucide-react';
+import { Search, Filter } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -176,7 +176,7 @@ export default function CourseFilter({ onFilterChange, isLoading = false, instru
         <Label>Price Range</Label>
         <div className="flex gap-2">
           <div className="relative flex-1">
-             <span className="absolute left-3 top-2.5 text-xs text-muted-foreground">$</span>
+             <span className="absolute left-3 top-2.5 text-xs text-muted-foreground">NPR</span>
             <Input
               type="number"
               placeholder="Min"
@@ -188,7 +188,7 @@ export default function CourseFilter({ onFilterChange, isLoading = false, instru
             />
           </div>
           <div className="relative flex-1">
-            <span className="absolute left-3 top-2.5 text-xs text-muted-foreground">$</span>
+            <span className="absolute left-3 top-2.5 text-xs text-muted-foreground">NPR</span>
             <Input
               type="number"
               placeholder="Max"
