@@ -10,6 +10,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { CheckCircle } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   params: Promise<{
@@ -92,6 +94,15 @@ export default async function EnrollPage({ params }: Props) {
                 courseId={course.id}
                 isWaitlisted={course.isWaitlisted}
               />
+            </div>
+          ) : course.canReview ? (
+            <div className="w-full space-y-3">
+              <p className="text-sm text-green-700">You are already enrolled in this course.</p>
+              <Link href={`/learn/${course.id}`}>
+                <Button className="w-full" size="lg">
+                  Start Learning
+                </Button>
+              </Link>
             </div>
           ) : (
             <EnrollButton courseId={course.id} price={Number(course.price)} />

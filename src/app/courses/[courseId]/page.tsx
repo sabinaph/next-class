@@ -76,7 +76,13 @@ export default async function CourseSubPage({ params }: Props) {
             </div>
 
             <div className="flex items-center gap-4 pt-4">
-              {course.isFull ? (
+              {course.canReview ? (
+                <Link href={`/learn/${course.id}`}>
+                  <Button size="lg" className="text-lg px-8">
+                    Start Learning
+                  </Button>
+                </Link>
+              ) : course.isFull ? (
                 <div className="max-w-sm">
                   <p className="text-sm text-muted-foreground mb-2">
                     Course is full. Join the waitlist to be notified when a seat opens.
@@ -93,7 +99,7 @@ export default async function CourseSubPage({ params }: Props) {
                   </Button>
                 </Link>
               )}
-              <AddToCartButton courseId={course.id} />
+              {!course.canReview && <AddToCartButton courseId={course.id} />}
               <WishlistButton
                 courseId={course.id}
                 initialIsWishlisted={course.isWishlisted}
@@ -265,11 +271,19 @@ export default async function CourseSubPage({ params }: Props) {
         <div className="space-y-6">
           <div className="p-6 border rounded-xl bg-card sticky top-24 shadow-sm">
             <div className="text-3xl font-bold mb-2">{price}</div>
-            <Link href={`/courses/${course.id}/enroll`}>
-              <Button className="w-full mb-4" size="lg">
-                Enroll Now
-              </Button>
-            </Link>
+            {course.canReview ? (
+              <Link href={`/learn/${course.id}`}>
+                <Button className="w-full mb-4" size="lg">
+                  Start Learning
+                </Button>
+              </Link>
+            ) : (
+              <Link href={`/courses/${course.id}/enroll`}>
+                <Button className="w-full mb-4" size="lg">
+                  Enroll Now
+                </Button>
+              </Link>
+            )}
             <ul className="space-y-3 text-sm">
               <li className="flex items-center gap-2 text-muted-foreground">
                 <Video className="h-4 w-4" /> {course._count.lessons} Lessons
