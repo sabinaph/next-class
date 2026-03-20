@@ -122,17 +122,17 @@ These are still present and should be phased out for a pure digital marketplace:
 
 - [x] User registration and login
 - [x] Role-based access (admin, instructor, student)
-- [~] Instructor resource upload and management
+- [x] Instructor resource upload and management
 - [x] Student resource browsing and search
-- [~] Category and filter system
+- [x] Category and filter system
 - [x] Resource detail page
 - [ ] Shopping cart and full checkout pipeline
 - [~] Online payment integration
 - [ ] Receipt generation
-- [~] Secure digital download
-- [~] Purchase history
+- [x] Secure digital download
+- [x] Purchase history
 - [~] Sales dashboard
-- [~] Admin management panel
+- [x] Admin management panel
 - [x] Ratings and reviews (submission workflow)
 - [ ] Reports and analytics (advanced)
 

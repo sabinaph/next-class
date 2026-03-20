@@ -118,7 +118,7 @@ export async function createOrderFromCart() {
     0
   );
 
-  const order = await prisma.order.create({
+  await prisma.order.create({
     data: {
       userId,
       status: "PENDING",
@@ -138,6 +138,5 @@ export async function createOrderFromCart() {
 
   revalidatePath("/cart");
   revalidatePath("/profile");
-
-  return { orderId: order.id };
+  revalidatePath("/profile/orders");
 }
