@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { LogoutButton } from "@/components/LogoutButton";
 import {
   Users,
   LayoutDashboard,
@@ -100,11 +101,12 @@ export default async function AdminLayout({
             <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
               A
             </div>
-            <div>
+            <div className="flex-1">
               <p className="text-sm font-medium">{session.user.name}</p>
               <p className="text-xs text-muted-foreground">Administrator</p>
             </div>
           </div>
+          <LogoutButton />
         </div>
       </aside>
 
