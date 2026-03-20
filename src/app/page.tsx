@@ -1,267 +1,274 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, BookOpen, Users, Award, Shield } from "lucide-react";
+import {
+  ArrowRight,
+  BookOpen,
+  Users,
+  Award,
+  Shield,
+  PlayCircle,
+  Target,
+  Sparkles,
+  CheckCircle2,
+  GraduationCap,
+  Briefcase,
+  LineChart,
+} from "lucide-react";
 
 export default function Home() {
   return (
-    <>
-      <main>
-        {/* Hero Section */}
-        <section className="relative overflow-hidden bg-gradient-to-br from-green-50 via-white to-green-50/50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              {/* Text Content */}
-              <div className="space-y-8 animate-in slide-in-from-left-5 duration-700">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-sm font-semibold border border-green-200 dark:border-green-800">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                  </span>
-                  New Courses Available
-                </div>
-                <h1 className="text-4xl lg:text-6xl font-extrabold text-gray-900 dark:text-white tracking-tight leading-tight">
-                  Unleash Your <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600 dark:from-green-400 dark:to-emerald-400">
-                    Academic Success
-                  </span>
-                </h1>
-                <p className="text-lg text-gray-600 dark:text-gray-300 max-w-xl leading-relaxed">
-                  Join thousands of students on NextClass Hub. Master new
-                  skills, connect with expert mentors, and achieve your learning
-                  goals with our premium course platform.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <Link
-                    href="/courses"
-                    className="inline-flex justify-center items-center px-8 py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition shadow-xl shadow-gray-900/10 dark:shadow-white/10 hover:-translate-y-0.5"
-                  >
-                    Browse Courses
-                  </Link>
-                  <Link
-                    href="/auth/signup"
-                    className="inline-flex justify-center items-center px-8 py-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition hover:border-gray-300 dark:hover:border-gray-600"
-                  >
-                    Start for Free
-                    <ArrowRight className="ml-2 w-5 h-5 text-gray-500 dark:text-gray-400" />
-                  </Link>
-                </div>
-                <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 pt-4">
-                  <div className="flex -space-x-2">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div
-                        key={i}
-                        className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 border-2 border-white dark:border-gray-900 flex items-center justify-center text-xs font-bold text-gray-500 dark:text-gray-400"
-                      >
-                        ?
-                      </div>
-                    ))}
-                  </div>
-                  <p>Trusted by 2,000+ students</p>
-                </div>
+    <main>
+      <section className="relative overflow-hidden bg-linear-to-br from-green-50 via-white to-emerald-50/60 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-8 animate-in slide-in-from-left-5 duration-700">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-sm font-semibold border border-green-200 dark:border-green-800">
+                <Sparkles className="h-4 w-4" />
+                Updated Learning Experience
               </div>
 
-              {/* Illustration / Image */}
-              <div className="relative animate-in slide-in-from-right-5 duration-1000">
-                <div className="relative z-10 bg-white dark:bg-gray-900 p-4 rounded-3xl shadow-2xl border border-gray-100/50 dark:border-gray-800/50 transform rotate-2 hover:rotate-0 transition duration-500">
-                  <div className="bg-gradient-to-br from-green-100 to-green-50 dark:from-green-900/40 dark:to-green-950/40 rounded-2xl h-[400px] w-full flex items-center justify-center overflow-hidden">
-                    {/* SVG Illustration similar to sign in but adapted */}
-                    <svg
-                      className="w-full h-full p-8"
-                      viewBox="0 0 400 400"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      {/* Background Elements */}
-                      <circle
-                        cx="200"
-                        cy="200"
-                        r="150"
-                        fill="white"
-                        fillOpacity="0.5"
-                      />
-                      <circle
-                        cx="200"
-                        cy="200"
-                        r="100"
-                        fill="white"
-                        fillOpacity="0.7"
-                      />
+              <h1 className="text-4xl lg:text-6xl font-extrabold tracking-tight leading-tight text-gray-900 dark:text-white">
+                Build Skills That
+                <br />
+                <span className="text-transparent bg-clip-text bg-linear-to-r from-green-600 to-emerald-600 dark:from-green-400 dark:to-emerald-400">
+                  Move Your Career Forward
+                </span>
+              </h1>
 
-                      {/* Character/Focus */}
-                      <defs>
-                        <linearGradient
-                          id="screenGrad"
-                          x1="150"
-                          y1="150"
-                          x2="250"
-                          y2="250"
-                          gradientUnits="userSpaceOnUse"
-                        >
-                          <stop stopColor="#34D399" />
-                          <stop offset="1" stopColor="#059669" />
-                        </linearGradient>
-                      </defs>
-
-                      <rect
-                        x="100"
-                        y="100"
-                        width="200"
-                        height="150"
-                        rx="12"
-                        fill="white"
-                        stroke="#E5E7EB"
-                        strokeWidth="4"
-                      />
-                      <rect
-                        x="115"
-                        y="115"
-                        width="170"
-                        height="100"
-                        rx="4"
-                        fill="#F3F4F6"
-                      />
-
-                      {/* Graphs on screen */}
-                      <path
-                        d="M115 215 L115 115 L285 115 L285 215"
-                        stroke="none"
-                        fill="#F9FAFB"
-                      />
-                      <path
-                        d="M125 190 L160 160 L190 180 L230 140 L275 130"
-                        stroke="#10B981"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <circle cx="160" cy="160" r="4" fill="#10B981" />
-                      <circle cx="230" cy="140" r="4" fill="#10B981" />
-
-                      {/* Floating Person Head */}
-                      <circle cx="200" cy="300" r="40" fill="#FCA5A5" />
-                      <path d="M160 300 Q200 380 240 300" fill="#1F2937" />
-
-                      {/* Hands typing */}
-                      <ellipse
-                        cx="140"
-                        cy="280"
-                        rx="20"
-                        ry="15"
-                        fill="#FCA5A5"
-                      />
-                      <ellipse
-                        cx="260"
-                        cy="280"
-                        rx="20"
-                        ry="15"
-                        fill="#FCA5A5"
-                      />
-
-                      {/* Decoration */}
-                      <path
-                        d="M50 80 L70 60 M70 80 L50 60"
-                        stroke="#F59E0B"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <circle
-                        cx="340"
-                        cy="340"
-                        r="15"
-                        stroke="#6366F1"
-                        strokeWidth="4"
-                        fill="none"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                {/* Decorative Blobs */}
-                <div className="absolute top-10 -right-10 w-32 h-32 bg-yellow-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-                <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-                <div className="absolute -bottom-10 right-10 w-32 h-32 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Features Section */}
-        <section className="py-24 bg-white dark:bg-gray-950">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16 space-y-4">
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Why Choose NextClass Hub?
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                We provide the tools and resources you need to excel in your
-                studies and career.
+              <p className="text-lg text-gray-600 dark:text-gray-300 max-w-xl leading-relaxed">
+                Learn practical, in-demand skills with guided lessons, mentor support,
+                and real project outcomes. NextClass helps you go from beginner to
+                job-ready with clarity.
               </p>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link
+                  href="/courses"
+                  className="inline-flex justify-center items-center px-8 py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition shadow-xl shadow-gray-900/10 dark:shadow-white/10"
+                >
+                  Explore Courses
+                </Link>
+                <Link
+                  href="/auth/signup"
+                  className="inline-flex justify-center items-center px-8 py-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                >
+                  Start Learning
+                  <ArrowRight className="ml-2 w-5 h-5 text-gray-500 dark:text-gray-400" />
+                </Link>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4 pt-4">
+                {[
+                  { label: "Learners", value: "2,000+" },
+                  { label: "Courses", value: "120+" },
+                  { label: "Completion", value: "92%" },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white/70 dark:bg-gray-900/60 backdrop-blur p-3"
+                  >
+                    <p className="text-lg font-bold text-gray-900 dark:text-white">{item.value}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{item.label}</p>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {[
-                {
-                  icon: <BookOpen className="w-8 h-8 text-white" />,
-                  title: "Expert-Led Courses",
-                  desc: "Learn from industry professionals and experienced educators.",
-                  color: "bg-blue-600",
-                },
-                {
-                  icon: <Users className="w-8 h-8 text-white" />,
-                  title: "Interactive Community",
-                  desc: "Connect with peers, mentors, and build your network.",
-                  color: "bg-green-600",
-                },
-                {
-                  icon: <Award className="w-8 h-8 text-white" />,
-                  title: "Certified Learning",
-                  desc: "Earn certificates upon completion to showcase your skills.",
-                  color: "bg-purple-600",
-                },
-              ].map((feature, i) => (
-                <div
-                  key={i}
-                  className="p-8 rounded-2xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 hover:shadow-xl transition duration-300 hover:-translate-y-1 group"
-                >
-                  <div
-                    className={`w-14 h-14 rounded-xl flex items-center justify-center mb-6 shadow-lg ${feature.color} group-hover:scale-110 transition`}
-                  >
-                    {feature.icon}
+            <div className="relative animate-in slide-in-from-right-5 duration-1000">
+              <div className="rounded-3xl border border-green-100/70 dark:border-green-900/30 bg-white dark:bg-gray-900 shadow-2xl p-6">
+                <div className="rounded-2xl bg-linear-to-br from-emerald-100 to-green-50 dark:from-emerald-950/30 dark:to-green-950/30 p-6 space-y-5">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-xl bg-white dark:bg-gray-900 p-4 border border-gray-200 dark:border-gray-800">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Weekly Goal</p>
+                      <p className="text-2xl font-bold">8 hrs</p>
+                    </div>
+                    <div className="rounded-xl bg-white dark:bg-gray-900 p-4 border border-gray-200 dark:border-gray-800">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Progress</p>
+                      <p className="text-2xl font-bold">67%</p>
+                    </div>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-                    {feature.title}
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                    {feature.desc}
-                  </p>
+                  <div className="rounded-xl bg-gray-900 text-white p-4">
+                    <div className="flex items-center justify-between">
+                      <p className="font-semibold">Live Mentor Session</p>
+                      <PlayCircle className="h-5 w-5" />
+                    </div>
+                    <p className="text-sm text-gray-300 mt-1">Saturday, 8:00 PM</p>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-emerald-800 dark:text-emerald-300 font-medium">
+                    <CheckCircle2 className="h-4 w-4" />
+                    Structured path + project-based learning
+                  </div>
                 </div>
-              ))}
+              </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* CTA Section */}
-        <section className="py-24 bg-gray-900 text-white relative overflow-hidden">
-          <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-          <div className="relative max-w-4xl mx-auto px-4 text-center space-y-8">
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tight">
-              Ready to start your journey?
-            </h2>
-            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-              Join NextClass Hub today and get unlimited access to our top-rated
-              courses.
+      <section className="bg-white dark:bg-gray-950 border-y border-gray-100 dark:border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            {[
+              { icon: <Users className="h-5 w-5" />, label: "Active learners", value: "2,143" },
+              { icon: <GraduationCap className="h-5 w-5" />, label: "Certificates issued", value: "1,287" },
+              { icon: <LineChart className="h-5 w-5" />, label: "Avg. score increase", value: "38%" },
+              { icon: <Shield className="h-5 w-5" />, label: "Trusted mentors", value: "54" },
+            ].map((stat) => (
+              <div key={stat.label} className="rounded-xl bg-gray-50 dark:bg-gray-900 px-4 py-3 border border-gray-100 dark:border-gray-800">
+                <div className="flex items-center justify-center gap-2 text-green-600 dark:text-green-400 mb-1">
+                  {stat.icon}
+                  <span className="text-xl font-bold text-gray-900 dark:text-white">{stat.value}</span>
+                </div>
+                <p className="text-xs text-gray-600 dark:text-gray-400">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 bg-white dark:bg-gray-950">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Choose Your Learning Track</h2>
+            <p className="mt-3 text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+              Follow a focused path based on your goals, with courses curated by level and outcomes.
             </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                icon: <BookOpen className="h-6 w-6 text-white" />,
+                title: "Foundation Track",
+                desc: "Start from the basics with guided, beginner-friendly lessons.",
+                points: ["Core concepts", "Hands-on exercises", "Weekly checkpoints"],
+                color: "bg-slate-900",
+              },
+              {
+                icon: <Target className="h-6 w-6 text-white" />,
+                title: "Career Track",
+                desc: "Build job-ready portfolio projects and interview confidence.",
+                points: ["Capstone project", "Mentor feedback", "Career roadmap"],
+                color: "bg-emerald-600",
+              },
+              {
+                icon: <Briefcase className="h-6 w-6 text-white" />,
+                title: "Professional Track",
+                desc: "Upskill with advanced tools and practical case studies.",
+                points: ["Advanced modules", "Case-based learning", "Industry insights"],
+                color: "bg-indigo-600",
+              },
+            ].map((track) => (
+              <div key={track.title} className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 p-6">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${track.color}`}>
+                  {track.icon}
+                </div>
+                <h3 className="mt-4 text-xl font-bold text-gray-900 dark:text-white">{track.title}</h3>
+                <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{track.desc}</p>
+                <ul className="mt-4 space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                  {track.points.map((point) => (
+                    <li key={point} className="flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+                      {point}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 bg-linear-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">How NextClass Works</h2>
+            <p className="mt-3 text-gray-600 dark:text-gray-400">A simple learning system designed for progress and consistency.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {[
+              { step: "01", title: "Pick a path", desc: "Choose a track based on your level and goals." },
+              { step: "02", title: "Learn by doing", desc: "Complete practical lessons and mini assignments." },
+              { step: "03", title: "Get feedback", desc: "Receive guidance and mentor insights while learning." },
+              { step: "04", title: "Earn outcomes", desc: "Finish projects and collect verified certificates." },
+            ].map((item) => (
+              <div key={item.step} className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5">
+                <p className="text-xs font-bold tracking-widest text-green-600 dark:text-green-400">STEP {item.step}</p>
+                <h3 className="mt-2 text-lg font-bold text-gray-900 dark:text-white">{item.title}</h3>
+                <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 bg-white dark:bg-gray-950">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">What Learners Say</h2>
+            <p className="mt-3 text-gray-600 dark:text-gray-400">Real feedback from students using NextClass every week.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                name: "Aayush K.",
+                role: "BCA Student",
+                quote: "The step-by-step curriculum helped me finish my first project confidently.",
+              },
+              {
+                name: "Mina R.",
+                role: "Frontend Intern",
+                quote: "Mentor sessions were practical and straight to the point. Huge confidence boost.",
+              },
+              {
+                name: "Rohit P.",
+                role: "Job Switcher",
+                quote: "I moved from beginner to interview-ready in a few months with clear direction.",
+              },
+            ].map((item) => (
+              <div key={item.name} className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 p-6">
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">"{item.quote}"</p>
+                <div className="mt-5 border-t border-gray-200 dark:border-gray-800 pt-4">
+                  <p className="font-semibold text-gray-900 dark:text-white">{item.name}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{item.role}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-24 bg-gray-900 text-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+        <div className="relative max-w-4xl mx-auto px-4 text-center space-y-7">
+          <div className="inline-flex items-center gap-2 text-emerald-300 font-medium">
+            <Award className="h-5 w-5" />
+            Start building your learning momentum today
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight">Ready to level up your skills?</h2>
+          <p className="text-lg text-gray-300 max-w-2xl mx-auto">
+            Join NextClass and access a structured platform built for practical learning, mentorship, and measurable progress.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/auth/signup"
-              className="inline-block px-8 py-4 bg-green-500 hover:bg-green-600 text-white text-lg font-bold rounded-xl transition shadow-lg shadow-green-900/50 hover:shadow-green-500/50"
+              className="inline-block px-8 py-4 bg-green-500 hover:bg-green-600 text-white text-lg font-bold rounded-xl transition shadow-lg shadow-green-900/50"
             >
               Get Started for Free
             </Link>
+            <Link
+              href="/courses"
+              className="inline-flex items-center gap-2 px-8 py-4 border border-gray-600 hover:border-gray-500 rounded-xl font-semibold text-gray-100"
+            >
+              View All Courses
+              <ArrowRight className="h-5 w-5" />
+            </Link>
           </div>
-        </section>
-      </main>
-    </>
+        </div>
+      </section>
+    </main>
   );
 }

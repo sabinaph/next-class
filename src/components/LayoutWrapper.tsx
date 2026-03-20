@@ -14,6 +14,7 @@ export default function LayoutWrapper({
   const isAuthPage = pathname?.startsWith("/auth");
   const isAdminPage = pathname?.startsWith("/admin");
   const isInstructorPage = pathname?.startsWith("/instructor");
+  const isLearnPage = pathname?.startsWith("/learn");
 
   if (isAuthPage) {
     return <>{children}</>;
@@ -24,6 +25,10 @@ export default function LayoutWrapper({
   }
 
   if (isInstructorPage) {
+    return <>{children}</>;
+  }
+
+  if (isLearnPage) {
     return <>{children}</>;
   }
 

@@ -75,14 +75,12 @@ export default async function LearnLayout({
   const completedLessonIds = progress.map((p) => p.lessonId);
 
   return (
-    <div className="h-full">
-      <div className="h-20 md:pl-80 fixed inset-y-0 w-full z-50">
-        <Navbar />
-      </div>
-      <div className="hidden md:flex h-full w-80 flex-col fixed inset-y-0 z-50 mt-20">
+    <div className="min-h-screen bg-background">
+      <Navbar className="md:left-80" />
+      <div className="hidden md:flex fixed left-0 top-16 bottom-0 w-80 flex-col z-40">
         <CourseSidebar course={course} completedLessonIds={completedLessonIds} />
       </div>
-      <main className="md:pl-80 pt-20 h-full">{children}</main>
+      <main className="md:pl-80 pt-16 min-h-screen">{children}</main>
     </div>
   );
 }
