@@ -6,13 +6,12 @@ import { signOut, useSession } from "next-auth/react";
 import {
   LayoutDashboard,
   BookOpen,
-  Star,
   MessageSquare,
   Menu,
   GraduationCap,
   LogOut,
   Settings,
-  User,
+  FolderDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -27,6 +26,11 @@ const sidebarItems = [
     label: "Communication",
     href: "/instructor/announcements",
   }, // Renamed App to Communication
+  {
+    icon: FolderDown,
+    label: "Downloads",
+    href: "/instructor/downloads",
+  },
   { icon: Settings, label: "Settings", href: "/instructor/settings" },
 ];
 

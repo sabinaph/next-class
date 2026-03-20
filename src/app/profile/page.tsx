@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/app/lib/prisma";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import ProfileDashboard from "@/components/profile/ProfileDashboard";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions);
@@ -88,9 +90,14 @@ export default async function ProfilePage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
-          My Profile
-        </h1>
+        <div className="mb-8 flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            My Profile
+          </h1>
+          <Link href="/profile/downloads">
+            <Button variant="outline">View Download History</Button>
+          </Link>
+        </div>
         <ProfileDashboard initialData={userData} />
       </div>
     </div>
