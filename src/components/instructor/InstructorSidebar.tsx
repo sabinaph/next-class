@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOut, useSession } from "next-auth/react";
 import {
   LayoutDashboard,
   BookOpen,
@@ -32,6 +33,16 @@ const sidebarItems = [
 export function InstructorSidebar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const { data: session } = useSession();
+
+  const userName = session?.user?.name || "Instructor Account";
+  const userEmail = session?.user?.email || "instructor@nextclass.com";
+  const initials = (userName || "IN")
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
     <>
@@ -100,19 +111,20 @@ export function InstructorSidebar() {
           <div className="flex items-center gap-3 p-3 rounded-lg bg-background border shadow-sm mb-3">
             <Avatar className="h-9 w-9 border-2 border-background">
               <AvatarFallback className="bg-primary/10 text-primary">
-                IN
+                {initials}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">Instructor Account</p>
+              <p className="text-sm font-medium truncate">{userName}</p>
               <p className="text-xs text-muted-foreground truncate">
-                instructor@nextclass.com
+                {userEmail}
               </p>
             </div>
           </div>
           <Button
             variant="outline"
             className="w-full justify-start gap-2 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
+            onClick={() => signOut({ callbackUrl: "/auth/signin" })}
           >
             <LogOut className="h-4 w-4" />
             <span>Sign Out</span>
