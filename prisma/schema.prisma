@@ -61,6 +61,12 @@ enum WaitlistStatus {
   EXPIRED
 }
 
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
 enum AuditAction {
   CREATE
   UPDATE
@@ -116,6 +122,8 @@ model User {
   wishlist          Wishlist[]
   announcements     Announcement[]
   downloadLogs      DownloadLog[]
+  cartItems         CartItem[]
+  orders            Order[]
 
   @@index([email])
   @@index([role])
@@ -206,6 +214,8 @@ model Course {
   wishlist      Wishlist[]
   announcements Announcement[]
   downloadLogs  DownloadLog[]
+  cartItems     CartItem[]
+  orderItems    OrderItem[]
 
   @@index([instructorId])
   @@index([category])
@@ -512,6 +522,57 @@ model DownloadLog {
   @@index([courseId])
   @@index([lessonId])
   @@map("download_logs")
+}
+
+model CartItem {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@map("cart_items")
+}
+
+model Order {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  totalAmount Decimal @db.Decimal(10, 2)
+  status      OrderStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items OrderItem[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("orders")
+}
+
+model OrderItem {
+  id String @id @default(cuid())
+
+  orderId String
+  order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  priceAtPurchase Decimal @db.Decimal(10, 2)
+
+  @@index([orderId])
+  @@index([courseId])
+  @@map("order_items")
 }
 
 model Wishlist {
