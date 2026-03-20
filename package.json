@@ -39,6 +39,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-hook-form": "^7.69.0",
+    "recharts": "^3.8.0",
     "stripe": "^20.1.0",
     "tailwind-merge": "^3.4.0",
     "ts-node": "^10.9.2",
