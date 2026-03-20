@@ -14,6 +14,8 @@ import {
   Calendar,
   BookOpen,
   Clock,
+  Award,
+  Download,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -29,6 +31,7 @@ interface UserData {
   username: string;
   bookings: any[]; // We'll type this properly or use 'any' for now to avoid complexity in this file
   wishlist: any[];
+  certificates: any[];
 }
 
 export default function ProfileDashboard({
@@ -205,7 +208,7 @@ export default function ProfileDashboard({
                       key={booking.id}
                       className="flex flex-col sm:flex-row gap-4 p-4 border rounded-xl hover:shadow-md transition-shadow bg-card"
                     >
-                      <div className="w-full sm:w-48 aspect-video bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                      <div className="w-full sm:w-48 aspect-video bg-gray-100 rounded-lg overflow-hidden shrink-0">
                         {booking.course.thumbnail ? (
                           <img
                             src={booking.course.thumbnail}
@@ -255,6 +258,44 @@ export default function ProfileDashboard({
                     </div>
                   ))
                 )}
+
+                <div className="mt-4 rounded-xl border p-4 bg-gray-50 dark:bg-gray-800/40">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Award className="w-5 h-5 text-emerald-600" />
+                    <h4 className="font-semibold text-base">My Certificates</h4>
+                  </div>
+
+                  {initialData.certificates?.length === 0 ? (
+                    <p className="text-sm text-gray-500">
+                      Complete all lessons in a course to unlock certificates.
+                    </p>
+                  ) : (
+                    <div className="space-y-3">
+                      {initialData.certificates.map((certificate: any) => (
+                        <div
+                          key={certificate.id}
+                          className="rounded-lg border bg-white dark:bg-gray-900 p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+                        >
+                          <div>
+                            <p className="font-medium">{certificate.course.title}</p>
+                            <p className="text-xs text-gray-500">
+                              Instructor: {certificate.course.instructor?.name || certificate.course.instructor?.firstName || "N/A"}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              Issued: {new Date(certificate.issueDate).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <a href={certificate.certificateUrl}>
+                            <Button size="sm" variant="outline" className="gap-2">
+                              <Download className="w-4 h-4" />
+                              Download Certificate
+                            </Button>
+                          </a>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}
