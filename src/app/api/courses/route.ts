@@ -45,6 +45,9 @@ function buildCourseFilters(searchParams: URLSearchParams): CourseFilters {
   if (searchParams.get("category")) {
     filters.category = searchParams.get("category")!;
   }
+  if (searchParams.get("tag")) {
+    filters.tag = searchParams.get("tag")!;
+  }
   if (searchParams.get("level")) {
     filters.level = searchParams.get("level")!;
   }
@@ -92,6 +95,9 @@ export async function GET(request: NextRequest) {
         shortDescription?: { contains: string; mode: "insensitive" };
       }>;
       category?: string;
+      tags?: {
+        has: string;
+      };
       level?: string;
       price?: {
         gte?: number;
@@ -126,6 +132,12 @@ export async function GET(request: NextRequest) {
 
     if (filters.category) {
       where.category = filters.category;
+    }
+
+    if (filters.tag) {
+      where.tags = {
+        has: filters.tag,
+      };
     }
 
     if (filters.level) {
@@ -365,6 +377,7 @@ export async function POST(request: NextRequest) {
         description: body.description,
         shortDescription: body.shortDescription,
         category: body.category,
+        tags: body.tags || [],
         level: body.level,
         thumbnail: body.thumbnail,
         price: body.price,

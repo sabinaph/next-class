@@ -71,6 +71,7 @@ export interface Course {
   description: string;
   shortDescription?: string | null;
   category: string;
+  tags?: string[];
   level: string;
   thumbnail?: string | null;
   price: number;
@@ -108,6 +109,7 @@ export interface CreateCourseInput {
   description: string;
   shortDescription?: string;
   category: string;
+  tags?: string[];
   level: string;
   thumbnail?: string;
   price: number;
@@ -375,6 +377,7 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
 export interface CourseFilters {
   search?: string;
   category?: string;
+  tag?: string;
   level?: string;
   minPrice?: number;
   maxPrice?: number;
