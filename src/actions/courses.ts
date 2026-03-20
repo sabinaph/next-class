@@ -50,6 +50,15 @@ export async function getPublicCourse(id: string) {
           studentId: true,
         },
       },
+      announcements: {
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          title: true,
+          content: true,
+          createdAt: true,
+        },
+      },
       _count: {
         select: {
           reviews: true,
@@ -85,8 +94,17 @@ export async function getPublicCourse(id: string) {
   }
 
   const isFull = course._count.bookings >= course.maxStudents;
+  const canViewAnnouncements = !!session?.user?.id;
+  const visibleAnnouncements = canViewAnnouncements ? course.announcements : [];
 
-  return { ...course, isWishlisted, isWaitlisted, isFull };
+  return {
+    ...course,
+    announcements: visibleAnnouncements,
+    canViewAnnouncements,
+    isWishlisted,
+    isWaitlisted,
+    isFull,
+  };
 }
 
 export async function toggleWishlist(courseId: string) {

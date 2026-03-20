@@ -8,6 +8,7 @@ import {
   Clock,
   Star,
   User,
+  Megaphone,
   Video,
   FileText,
   CheckCircle,
@@ -169,6 +170,37 @@ export default async function CourseSubPage({ params }: Props) {
                 </p>
               </div>
             </div>
+          </section>
+
+          {/* Announcements */}
+          <section>
+            <h2 className="text-2xl font-bold mb-6">Published Announcements</h2>
+            {!course.canViewAnnouncements ? (
+              <div className="rounded-xl border bg-card p-6 text-sm text-muted-foreground">
+                Sign in to view instructor announcements for this course.
+              </div>
+            ) : course.announcements.length === 0 ? (
+              <div className="rounded-xl border bg-card p-6 text-sm text-muted-foreground">
+                No announcements published yet.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {course.announcements.map((announcement) => (
+                  <div key={announcement.id} className="rounded-xl border bg-card p-5">
+                    <div className="mb-2 flex items-center gap-2 text-muted-foreground">
+                      <Megaphone className="h-4 w-4" />
+                      <span className="text-xs">
+                        {new Date(announcement.createdAt).toLocaleString()}
+                      </span>
+                    </div>
+                    <h3 className="text-base font-semibold mb-2">{announcement.title}</h3>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                      {announcement.content}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
 
           {/* Reviews */}
