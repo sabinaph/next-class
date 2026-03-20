@@ -3,8 +3,6 @@
 import { usePathname } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import AdminNavbar from "@/components/AdminNavbar";
-import InstructorNavbar from "@/components/InstructorNavbar";
 
 export default function LayoutWrapper({
   children,
@@ -22,21 +20,11 @@ export default function LayoutWrapper({
   }
 
   if (isAdminPage) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-        <AdminNavbar />
-        <main className="grow pt-16">{children}</main>
-      </div>
-    );
+    return <>{children}</>;
   }
 
   if (isInstructorPage) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-        <InstructorNavbar />
-        <main className="grow pt-16">{children}</main>
-      </div>
-    );
+    return <>{children}</>;
   }
 
   return (
