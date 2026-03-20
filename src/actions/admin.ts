@@ -180,3 +180,28 @@ export async function toggleCertificateValidity(certificateId: string, isValid: 
 
   revalidatePath("/admin/certificates");
 }
+
+export async function setUserActiveState(userId: string, isActive: boolean) {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== "ADMIN") {
+    throw new Error("Unauthorized");
+  }
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { isActive },
+  });
+
+  await prisma.audit.create({
+    data: {
+      userId: session.user.id,
+      action: "UPDATE",
+      entityType: "User",
+      entityId: userId,
+      metadata: { isActive },
+    },
+  });
+
+  revalidatePath("/admin/students");
+  revalidatePath("/admin/instructors");
+}

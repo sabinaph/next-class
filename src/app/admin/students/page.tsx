@@ -1,6 +1,7 @@
 import { prisma } from "@/app/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { setUserActiveState } from "@/actions/admin";
 
 export default async function AdminStudentsPage() {
   const students = await prisma.user.findMany({
@@ -79,9 +80,17 @@ export default async function AdminStudentsPage() {
                       {new Date(student.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4">
-                      <Button variant="ghost" size="sm">
-                        Manage
-                      </Button>
+                      <form
+                        action={setUserActiveState.bind(
+                          null,
+                          student.id,
+                          !student.isActive
+                        )}
+                      >
+                        <Button variant="outline" size="sm" type="submit">
+                          {student.isActive ? "Deactivate" : "Activate"}
+                        </Button>
+                      </form>
                     </td>
                   </tr>
                 ))}
