@@ -34,6 +34,7 @@ export default async function LessonIdPage({
             {/* Basic iframe support for now; in production use a robust player */}
             <iframe
               src={lesson.content}
+              title={`${lesson.title} video`}
               className="absolute top-0 left-0 w-full h-full"
               allowFullScreen
             />
@@ -51,7 +52,7 @@ export default async function LessonIdPage({
         {lesson.type === "PDF" && lesson.content && (
           <div className="space-y-3 mt-4">
             <div className="h-[80vh] w-full border rounded-xl">
-              <iframe src={lesson.content} className="w-full h-full" />
+              <iframe src={lesson.content} title={`${lesson.title} PDF`} className="w-full h-full" />
             </div>
             <Link href={`/api/resources/download?lessonId=${lesson.id}`}>
               <Button variant="outline" className="gap-2">
