@@ -34,6 +34,8 @@ import {
   CircleDashed,
   X,
   Loader2,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 
 interface CourseLessonManagerProps {
@@ -87,6 +89,18 @@ export function CourseLessonManager({
       window.location.reload();
     } catch (error) {
       console.error(error);
+    }
+  };
+
+  const handleTogglePublish = async (lesson: Lesson) => {
+    try {
+      await updateLesson(lesson.id, {
+        isPublished: !lesson.isPublished,
+      });
+      window.location.reload();
+    } catch (error) {
+      console.error(error);
+      alert("Failed to update lesson publish status");
     }
   };
 
@@ -376,6 +390,20 @@ export function CourseLessonManager({
               </div>
 
               <div className="flex items-center gap-1 self-end sm:self-auto">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                  onClick={() => handleTogglePublish(lesson)}
+                  title={lesson.isPublished ? "Unpublish lesson" : "Publish lesson"}
+                >
+                  {lesson.isPublished ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </Button>
+                <div className="w-px h-4 bg-border mx-1" />
                 <Button
                   variant="ghost"
                   size="sm"

@@ -209,11 +209,12 @@ export async function createLesson(
       content,
       courseId,
       order: newOrder,
-      isPublished: false,
+      isPublished: true,
     },
   });
 
   revalidatePath(`/instructor/courses/${courseId}`);
+  revalidatePath(`/learn/${courseId}`);
   return lesson;
 }
 
@@ -249,6 +250,7 @@ export async function updateLesson(
   });
 
   revalidatePath(`/instructor/courses/${lesson.courseId}`);
+  revalidatePath(`/learn/${lesson.courseId}`);
   return updatedLesson;
 }
 
@@ -273,6 +275,7 @@ export async function deleteLesson(id: string) {
   });
 
   revalidatePath(`/instructor/courses/${lesson.courseId}`);
+  revalidatePath(`/learn/${lesson.courseId}`);
 }
 
 export async function toggleCoursePublish(id: string, isPublished: boolean) {
