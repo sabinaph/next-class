@@ -1,7 +1,7 @@
 import { prisma } from "@/app/lib/prisma";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Plus, MoreHorizontal, Pencil, Trash } from "lucide-react";
+import { Plus } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -10,14 +10,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { setUserActiveState } from "@/actions/admin";
 
 export default async function InstructorsPage() {
   const instructors = await prisma.user.findMany({
@@ -135,36 +128,17 @@ export default async function InstructorsPage() {
                       )}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 p-0"
-                          >
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem>
-                            <Pencil className="mr-2 h-4 w-4" /> Edit Details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Link
-                              href={`/admin/instructors/${instructor.id}`}
-                              className="flex items-center w-full"
-                            >
-                              View Profile
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-red-600 focus:text-red-600">
-                            <Trash className="mr-2 h-4 w-4" /> Deactivate
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <form
+                        action={setUserActiveState.bind(
+                          null,
+                          instructor.id,
+                          !instructor.isActive
+                        )}
+                      >
+                        <Button variant="outline" size="sm" type="submit">
+                          {instructor.isActive ? "Deactivate" : "Activate"}
+                        </Button>
+                      </form>
                     </td>
                   </tr>
                 ))}

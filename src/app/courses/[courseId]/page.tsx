@@ -221,7 +221,7 @@ export default async function CourseSubPage({ params }: Props) {
                 <div key={review.id} className="p-6 border rounded-xl bg-card">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 bg-muted rounded-full flex-shrink-0" />
+                      <div className="h-8 w-8 bg-muted rounded-full shrink-0" />
                       <div>
                         <div className="font-medium text-sm">
                           {review.student.firstName} {review.student.lastName}
