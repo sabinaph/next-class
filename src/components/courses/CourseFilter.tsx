@@ -24,6 +24,7 @@ import {
 interface CourseFilterProps {
   onFilterChange: (filters: CourseFilters) => void;
   isLoading?: boolean;
+  instructors?: Array<{ id: string; name: string }>;
 }
 
 const categories = [
@@ -46,10 +47,12 @@ const levels = [
   'Advanced',
 ];
 
-export default function CourseFilter({ onFilterChange, isLoading = false }: CourseFilterProps) {
+export default function CourseFilter({ onFilterChange, isLoading = false, instructors = [] }: CourseFilterProps) {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All Categories');
   const [level, setLevel] = useState('All Levels');
+  const [instructorId, setInstructorId] = useState('All Instructors');
+  const [resourceType, setResourceType] = useState('All Types');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -60,6 +63,8 @@ export default function CourseFilter({ onFilterChange, isLoading = false }: Cour
     if (search.trim()) filters.search = search.trim();
     if (category !== 'All Categories') filters.category = category;
     if (level !== 'All Levels') filters.level = level;
+    if (instructorId !== 'All Instructors') filters.instructorId = instructorId;
+    if (resourceType !== 'All Types') filters.resourceType = resourceType as CourseFilters['resourceType'];
     if (minPrice) filters.minPrice = parseFloat(minPrice);
     if (maxPrice) filters.maxPrice = parseFloat(maxPrice);
     
@@ -71,6 +76,8 @@ export default function CourseFilter({ onFilterChange, isLoading = false }: Cour
     setSearch('');
     setCategory('All Categories');
     setLevel('All Levels');
+    setInstructorId('All Instructors');
+    setResourceType('All Types');
     setMinPrice('');
     setMaxPrice('');
     onFilterChange({});
@@ -129,6 +136,42 @@ export default function CourseFilter({ onFilterChange, isLoading = false }: Cour
       </div>
 
       {/* Price Range */}
+      <div className="space-y-2">
+        <Label htmlFor="resourceType">Resource Type</Label>
+        <select
+          id="resourceType"
+          value={resourceType}
+          onChange={(e) => setResourceType(e.target.value)}
+          disabled={isLoading}
+          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <option value="All Types">All Types</option>
+          <option value="VIDEO">Video</option>
+          <option value="TEXT">Text</option>
+          <option value="PDF">PDF</option>
+          <option value="QUIZ">Quiz</option>
+          <option value="ASSIGNMENT">Assignment</option>
+        </select>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="instructorId">Instructor</Label>
+        <select
+          id="instructorId"
+          value={instructorId}
+          onChange={(e) => setInstructorId(e.target.value)}
+          disabled={isLoading}
+          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <option value="All Instructors">All Instructors</option>
+          {instructors.map((instructor) => (
+            <option key={instructor.id} value={instructor.id}>
+              {instructor.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
       <div className="space-y-2">
         <Label>Price Range</Label>
         <div className="flex gap-2">
