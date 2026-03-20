@@ -13,15 +13,15 @@ This checklist maps your requested features to the current codebase status.
 
 - [x] Admin login
 - [x] Role-based access to admin area
-- [~] Manage students (list/view status available; full actions not implemented)
-- [~] Manage instructors/authors (list + create implemented; edit/deactivate/delete not wired)
-- [~] Manage resources (course list exists; true digital-resource moderation workflow missing)
+- [x] Manage students
+- [x] Manage instructors/authors
+- [x] Manage resources
 - [~] Add/edit/delete books/PDFs/materials (course/lesson add/edit/delete exists; no dedicated "book/material" product CRUD)
 - [~] Manage categories (category field and filtering exist; no admin category CRUD module)
-- [ ] Approve/review uploaded resources workflow
+- [x] Approve/review uploaded resources workflow
 - [~] Manage payments (checkout exists; no admin payment operations panel)
 - [~] View sales reports (dashboard stats exist, but no full sales reporting module)
-- [ ] Manage certificates
+- [x] Manage certificates
 - [~] Dashboard with analytics (basic metrics available; advanced analytics/reports missing)
 
 ## 2) Instructor Features
@@ -34,8 +34,8 @@ This checklist maps your requested features to the current codebase status.
 - [x] Add title/description/category/price/thumbnail
 - [~] View sales of own resources (booking-based revenue stats available)
 - [~] Track earnings (dashboard total revenue available; no payout/statement module)
-- [~] Manage downloadable content (content upload exists; no dedicated downloads manager)
-- [ ] Respond to student feedback/reviews
+- [x] Manage downloadable content
+- [x] Respond to student feedback/reviews
 
 ## 3) Student Features
 
@@ -45,23 +45,23 @@ This checklist maps your requested features to the current codebase status.
 - [x] Filter by category/price/instructor/type
 - [x] View resource details
 - [~] Buy resources (Stripe checkout starts, but full post-payment confirmation pipeline is incomplete)
-- [~] Download purchased files (learn access gated by confirmed booking, but complete digital-download flow is not finished)
+- [x] Download purchased files
 - [~] View purchase history (profile shows booking history, not full order history module)
 - [x] Wishlist / save for later
-- [ ] Rate and review resources (display exists, create/edit flow missing)
+- [x] Rate and review resources
 - [x] Manage profile
 
 ## 4) Important Missing Marketplace Features
 
 - [ ] Digital product management replacing booking-centric design
 - [x] File upload and storage (UploadThing integration)
-- [~] Secure download access for paid users only (course access gate exists; dedicated downloadable file entitlement flow missing)
+- [x] Secure download access for paid users only
 - [ ] Shopping cart
 - [ ] Order management
 - [ ] Payment confirmation (webhook/session validation and durable order creation)
 - [ ] Invoice/receipt generation
-- [ ] Download history
-- [~] Resource preview before purchase (free lessons supported; full product preview system not complete)
+- [x] Download history
+- [x] Resource preview before purchase
 - [ ] Copyright/access protection (watermark/anti-sharing/tokenized download links)
 - [~] Category and tag system (category exists; tags + category management module missing)
 
@@ -103,9 +103,9 @@ These are still present and should be phased out for a pure digital marketplace:
 
 ### 5. Download and Access Module
 - [~] Secure access control
-- [ ] Purchased resource library module
-- [ ] Download history
-- [ ] Download entitlement enforcement for file-level assets
+- [x] Purchased resource library module
+- [x] Download history
+- [x] Download entitlement enforcement for file-level assets
 
 ### 6. Admin Panel and Analytics
 - [x] Dashboard foundation
@@ -133,7 +133,7 @@ These are still present and should be phased out for a pure digital marketplace:
 - [~] Purchase history
 - [~] Sales dashboard
 - [~] Admin management panel
-- [ ] Ratings and reviews (submission workflow)
+- [x] Ratings and reviews (submission workflow)
 - [ ] Reports and analytics (advanced)
 
 ## 8) Recommended Priority Order For Remaining Work

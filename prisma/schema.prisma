@@ -169,6 +169,7 @@ model Course {
   description      String  @db.Text
   shortDescription String? @db.VarChar(500)
   category         String
+  tags             String[] @default([])
   level            String // Beginner, Intermediate, Advanced
   thumbnail        String?
   price            Decimal @db.Decimal(10, 2)
