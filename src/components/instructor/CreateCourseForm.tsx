@@ -218,8 +218,10 @@ export function CreateCourseForm() {
                         const imageFile = res?.find((file) =>
                           file.type?.startsWith("image/")
                         );
-                        if (imageFile?.url) {
-                          setValue("thumbnail", imageFile.url, {
+                        const localUrl = (imageFile as { serverData?: { localUrl?: string } } | undefined)?.serverData?.localUrl;
+                        const selectedUrl = localUrl || imageFile?.url;
+                        if (selectedUrl) {
+                          setValue("thumbnail", selectedUrl, {
                             shouldValidate: true,
                           });
                         }

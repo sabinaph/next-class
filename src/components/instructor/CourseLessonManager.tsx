@@ -248,7 +248,8 @@ export function CourseLessonManager({
                             endpoint={type === "VIDEO" ? "video" : "pdf"}
                             onClientUploadComplete={(res) => {
                               if (res && res[0]) {
-                                setContent(res[0].url);
+                                const localUrl = (res[0] as { serverData?: { localUrl?: string } }).serverData?.localUrl;
+                                setContent(localUrl || res[0].url);
                               }
                             }}
                             onUploadError={(error) => {
@@ -435,7 +436,8 @@ export function CourseLessonManager({
                             endpoint={type === "VIDEO" ? "video" : "pdf"}
                             onClientUploadComplete={(res) => {
                               if (res && res[0]) {
-                                setContent(res[0].url);
+                                const localUrl = (res[0] as { serverData?: { localUrl?: string } }).serverData?.localUrl;
+                                setContent(localUrl || res[0].url);
                               }
                             }}
                             onUploadError={(error) => {
