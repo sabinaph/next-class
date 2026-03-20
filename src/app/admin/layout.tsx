@@ -8,6 +8,7 @@ import {
   Settings,
   GraduationCap,
   BookOpen,
+  ShieldCheck,
 } from "lucide-react";
 
 export default async function AdminLayout({
@@ -59,6 +60,13 @@ export default async function AdminLayout({
           >
             <BookOpen className="w-5 h-5" />
             Courses
+          </Link>
+          <Link
+            href="/admin/certificates"
+            className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            <ShieldCheck className="w-5 h-5" />
+            Certificates
           </Link>
           <div className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
             <Link
