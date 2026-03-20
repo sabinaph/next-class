@@ -41,7 +41,7 @@ export async function POST(req: Request) {
       line_items: [
         {
           price_data: {
-            currency: "usd",
+            currency: "npr",
             product_data: {
               name: course.title,
               description: course.description?.substring(0, 100), // Truncate details
