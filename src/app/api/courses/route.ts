@@ -227,13 +227,13 @@ export async function GET(request: NextRequest) {
         total,
         totalPages: Math.ceil(total / limit),
       },
-      message: JSON.stringify({
+      meta: {
         instructors: instructorOptions.map((instructor) => ({
           id: instructor.id,
           name: `${instructor.firstName || ""} ${instructor.lastName || ""}`.trim() || "Instructor",
         })),
         resourceTypes: ["VIDEO", "TEXT", "PDF", "QUIZ", "ASSIGNMENT"],
-      }),
+      },
     };
 
     return NextResponse.json(response);

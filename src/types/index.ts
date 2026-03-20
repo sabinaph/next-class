@@ -354,6 +354,7 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
     total: number;
     totalPages: number;
   };
+  meta?: Record<string, unknown>;
 }
 
 // ============================================
