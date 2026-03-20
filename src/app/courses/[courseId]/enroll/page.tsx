@@ -20,7 +20,11 @@ interface Props {
 export default async function EnrollPage({ params }: Props) {
   const { courseId } = await params;
   const course = await getPublicCourse(courseId);
-  const price = Number(course?.price ?? 0).toFixed(2);
+  const price = new Intl.NumberFormat("en-NP", {
+    style: "currency",
+    currency: "NPR",
+    maximumFractionDigits: 2,
+  }).format(Number(course?.price ?? 0));
 
   if (!course) {
     notFound();
@@ -59,7 +63,7 @@ export default async function EnrollPage({ params }: Props) {
           {!course.isFull && (
             <div className="flex justify-between items-center py-4 border-t border-b">
               <span className="font-medium">Total</span>
-              <span className="text-2xl font-bold">${price}</span>
+              <span className="text-2xl font-bold">{price}</span>
             </div>
           )}
 

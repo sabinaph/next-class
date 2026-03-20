@@ -6,6 +6,12 @@ import Link from "next/link";
 
 export default async function CoursesPage() {
   const courses = await getInstructorCourses();
+  const formatNPR = (amount: number) =>
+    new Intl.NumberFormat("en-NP", {
+      style: "currency",
+      currency: "NPR",
+      maximumFractionDigits: 2,
+    }).format(amount);
 
   return (
     <div className="space-y-8">
@@ -84,7 +90,7 @@ export default async function CoursesPage() {
                 </div>
                 <div>
                   <span className="font-medium text-foreground">
-                    ${course.price}
+                    {formatNPR(Number(course.price))}
                   </span>
                 </div>
               </div>
