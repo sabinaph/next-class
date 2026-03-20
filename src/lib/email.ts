@@ -145,3 +145,42 @@ export const sendContactEmail = async (data: {
     return false;
   }
 };
+
+export const sendInvoiceEmail = async (data: {
+  to: string;
+  invoiceNumber: string;
+  totalAmount: string;
+  invoiceUrl: string;
+}) => {
+  if (!emailUser || !emailPass) {
+    console.error("Missing email credentials.");
+    return false;
+  }
+
+  const mailOptions = {
+    from: process.env.EMAIL_FROM || emailUser,
+    to: data.to,
+    subject: `NextClass Invoice ${data.invoiceNumber}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #111827;">Your Invoice is Ready</h2>
+        <p>Thank you for your purchase on NextClass.</p>
+        <p><strong>Invoice Number:</strong> ${data.invoiceNumber}</p>
+        <p><strong>Total:</strong> ${data.totalAmount}</p>
+        <p>
+          <a href="${data.invoiceUrl}" style="display: inline-block; padding: 10px 16px; background: #059669; color: #fff; text-decoration: none; border-radius: 6px;">
+            View Invoice
+          </a>
+        </p>
+      </div>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    return true;
+  } catch (error) {
+    console.error("Error sending invoice email:", error);
+    return false;
+  }
+};
