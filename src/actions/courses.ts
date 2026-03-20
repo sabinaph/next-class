@@ -42,7 +42,6 @@ export async function getPublicCourse(id: string) {
           },
         },
         orderBy: { createdAt: "desc" },
-        take: 5,
       },
       waitlists: {
         select: {
@@ -74,6 +73,12 @@ export async function getPublicCourse(id: string) {
   // Check if current user has wishlisted
   let isWishlisted = false;
   let isWaitlisted = false;
+  let canReview = false;
+  let userReview: {
+    id: string;
+    rating: number;
+    comment: string | null;
+  } | null = null;
   const session = await getServerSession(authOptions);
   if (session?.user?.id) {
     const count = await prisma.wishlist.count({
@@ -91,6 +96,31 @@ export async function getPublicCourse(id: string) {
       },
     });
     isWaitlisted = waitCount > 0;
+
+    if (session.user.role === "STUDENT") {
+      const confirmed = await prisma.booking.count({
+        where: {
+          studentId: session.user.id,
+          courseId: id,
+          status: "CONFIRMED",
+        },
+      });
+      canReview = confirmed > 0;
+
+      userReview = await prisma.review.findUnique({
+        where: {
+          studentId_courseId: {
+            studentId: session.user.id,
+            courseId: id,
+          },
+        },
+        select: {
+          id: true,
+          rating: true,
+          comment: true,
+        },
+      });
+    }
   }
 
   const isFull = course._count.bookings >= course.maxStudents;
@@ -101,6 +131,8 @@ export async function getPublicCourse(id: string) {
     ...course,
     announcements: visibleAnnouncements,
     canViewAnnouncements,
+    canReview,
+    userReview,
     isWishlisted,
     isWaitlisted,
     isFull,

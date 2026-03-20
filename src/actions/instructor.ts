@@ -144,6 +144,17 @@ export async function getCourse(id: string) {
       lessons: {
         orderBy: { order: "asc" },
       },
+      reviews: {
+        include: {
+          student: {
+            select: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      },
       _count: {
         select: {
           reviews: true,

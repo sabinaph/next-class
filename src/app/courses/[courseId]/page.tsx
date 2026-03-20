@@ -14,6 +14,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 import Link from "next/link";
+import { ReviewForm } from "@/components/courses/ReviewForm";
 
 interface Props {
   params: Promise<{
@@ -206,6 +207,15 @@ export default async function CourseSubPage({ params }: Props) {
           {/* Reviews */}
           <section>
             <h2 className="text-2xl font-bold mb-6">Student Feedback</h2>
+            {course.canReview && (
+              <div className="mb-6">
+                <ReviewForm
+                  courseId={course.id}
+                  initialRating={course.userReview?.rating || 5}
+                  initialComment={course.userReview?.comment || ""}
+                />
+              </div>
+            )}
             <div className="grid gap-6">
               {course.reviews.map((review) => (
                 <div key={review.id} className="p-6 border rounded-xl bg-card">
@@ -232,6 +242,14 @@ export default async function CourseSubPage({ params }: Props) {
                     </div>
                   </div>
                   <p className="text-muted-foreground">{review.comment}</p>
+                  {review.instructorReply && (
+                    <div className="mt-4 rounded-lg border bg-muted/30 p-3">
+                      <p className="text-xs font-medium text-muted-foreground mb-1">
+                        Instructor response
+                      </p>
+                      <p className="text-sm whitespace-pre-wrap">{review.instructorReply}</p>
+                    </div>
+                  )}
                 </div>
               ))}
               {course.reviews.length === 0 && (
