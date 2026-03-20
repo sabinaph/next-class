@@ -34,7 +34,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { UploadButton } from "@/lib/uploadthing";
 
 const formSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
@@ -66,6 +65,7 @@ const LEVELS = ["Beginner", "Intermediate", "Advanced"];
 export function CreateCourseForm() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const {
@@ -106,6 +106,50 @@ export function CreateCourseForm() {
       console.error(err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleThumbnailUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setError(null);
+    setIsUploadingThumbnail(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("kind", "thumbnail");
+
+      const response = await fetch("/api/local-upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as
+          | { error?: string }
+          | null;
+        throw new Error(payload?.error || "Thumbnail upload failed.");
+      }
+
+      const payload = (await response.json()) as { url?: string };
+      if (!payload.url) {
+        throw new Error("Upload did not return a file URL.");
+      }
+
+      setValue("thumbnail", payload.url, { shouldValidate: true });
+    } catch (uploadError) {
+      const message =
+        uploadError instanceof Error
+          ? uploadError.message
+          : "Thumbnail upload failed.";
+      setError(message);
+    } finally {
+      setIsUploadingThumbnail(false);
+      event.target.value = "";
     }
   };
 
@@ -212,32 +256,20 @@ export function CreateCourseForm() {
                   </div>
                 ) : (
                   <div className="rounded-xl border-2 border-dashed p-6 bg-muted/20">
-                    <UploadButton
-                      endpoint="courseAttachment"
-                      onClientUploadComplete={(res) => {
-                        const imageFile = res?.find((file) =>
-                          file.type?.startsWith("image/")
-                        );
-                        const localUrl = (imageFile as { serverData?: { localUrl?: string } } | undefined)?.serverData?.localUrl;
-                        const selectedUrl = localUrl || imageFile?.url;
-                        if (selectedUrl) {
-                          setValue("thumbnail", selectedUrl, {
-                            shouldValidate: true,
-                          });
-                        }
-                      }}
-                      onUploadError={(uploadError) => {
-                        setError(uploadError.message || "Thumbnail upload failed.");
-                      }}
-                      appearance={{
-                        button:
-                          "bg-primary text-primary-foreground hover:bg-primary/90",
-                        allowedContent: "text-xs text-muted-foreground",
-                      }}
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleThumbnailUpload}
+                      disabled={isUploadingThumbnail}
                     />
                     <p className="mt-3 text-xs text-muted-foreground">
-                      Upload a course cover image (up to 4MB).
+                      Upload a course cover image (up to 8MB).
                     </p>
+                    {isUploadingThumbnail && (
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Uploading thumbnail...
+                      </p>
+                    )}
                   </div>
                 )}
               </div>

@@ -35,7 +35,6 @@ import {
   X,
   Loader2,
 } from "lucide-react";
-import { UploadButton } from "@/lib/uploadthing";
 
 interface CourseLessonManagerProps {
   courseId: string;
@@ -55,6 +54,7 @@ export function CourseLessonManager({
   const [type, setType] = useState<LessonType>("VIDEO");
   const [content, setContent] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploadingFile, setIsUploadingFile] = useState(false);
 
   // Reset form helper
   const resetForm = () => {
@@ -115,6 +115,46 @@ export function CourseLessonManager({
     } finally {
       setIsLoading(false);
       resetForm();
+    }
+  };
+
+  const uploadLessonFile = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+    lessonType: LessonType
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingFile(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("kind", lessonType === "VIDEO" ? "video" : "pdf");
+
+      const response = await fetch("/api/local-upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as
+          | { error?: string }
+          | null;
+        throw new Error(payload?.error || "Upload failed.");
+      }
+
+      const payload = (await response.json()) as { url?: string };
+      if (!payload.url) {
+        throw new Error("Upload did not return a file URL.");
+      }
+
+      setContent(payload.url);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Upload failed.";
+      alert(`ERROR! ${message}`);
+    } finally {
+      setIsUploadingFile(false);
+      event.target.value = "";
     }
   };
 
@@ -244,23 +284,17 @@ export function CourseLessonManager({
                         </div>
                       ) : (
                         <div className="w-full flex flex-col items-center">
-                          <UploadButton
-                            endpoint={type === "VIDEO" ? "video" : "pdf"}
-                            onClientUploadComplete={(res) => {
-                              if (res && res[0]) {
-                                const localUrl = (res[0] as { serverData?: { localUrl?: string } }).serverData?.localUrl;
-                                setContent(localUrl || res[0].url);
-                              }
-                            }}
-                            onUploadError={(error) => {
-                              alert(`ERROR! ${error.message}`);
-                            }}
-                            appearance={{
-                              button:
-                                "bg-primary text-primary-foreground hover:bg-primary/90",
-                              allowedContent: "text-xs text-muted-foreground",
-                            }}
+                          <Input
+                            type="file"
+                            accept={type === "VIDEO" ? "video/*" : "application/pdf"}
+                            onChange={(event) => uploadLessonFile(event, type)}
+                            disabled={isUploadingFile}
                           />
+                          {isUploadingFile && (
+                            <p className="text-xs text-muted-foreground mt-2">
+                              Uploading file...
+                            </p>
+                          )}
                           <p className="text-xs text-muted-foreground mt-4 text-center">
                             Upload your{" "}
                             {type === "VIDEO" ? "lesson video" : "PDF document"}{" "}
@@ -432,21 +466,17 @@ export function CourseLessonManager({
                         </div>
                       ) : (
                          <div className="w-full flex flex-col items-center">
-                          <UploadButton
-                            endpoint={type === "VIDEO" ? "video" : "pdf"}
-                            onClientUploadComplete={(res) => {
-                              if (res && res[0]) {
-                                const localUrl = (res[0] as { serverData?: { localUrl?: string } }).serverData?.localUrl;
-                                setContent(localUrl || res[0].url);
-                              }
-                            }}
-                            onUploadError={(error) => {
-                              alert(`ERROR! ${error.message}`);
-                            }}
-                            appearance={{
-                                button: "bg-primary text-primary-foreground h-9 text-xs",
-                            }}
+                          <Input
+                            type="file"
+                            accept={type === "VIDEO" ? "video/*" : "application/pdf"}
+                            onChange={(event) => uploadLessonFile(event, type)}
+                            disabled={isUploadingFile}
                           />
+                          {isUploadingFile && (
+                            <p className="text-xs text-muted-foreground mt-2">
+                              Uploading file...
+                            </p>
+                          )}
                         </div>
                       )}
                     </div>
