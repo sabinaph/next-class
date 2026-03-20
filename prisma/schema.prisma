@@ -115,6 +115,7 @@ model User {
   reviews           Review[]
   wishlist          Wishlist[]
   announcements     Announcement[]
+  downloadLogs      DownloadLog[]
 
   @@index([email])
   @@index([role])
@@ -203,6 +204,7 @@ model Course {
   reviews       Review[]
   wishlist      Wishlist[]
   announcements Announcement[]
+  downloadLogs  DownloadLog[]
 
   @@index([instructorId])
   @@index([category])
@@ -449,6 +451,7 @@ model Lesson {
   @@index([courseId])
   @@map("lessons")
   lessonProgresses LessonProgress[]
+  downloadLogs     DownloadLog[]
 }
 
 model LessonProgress {
@@ -472,6 +475,8 @@ model Review {
   id      String  @id @default(cuid())
   rating  Int     @default(5) // 1-5
   comment String? @db.Text
+  instructorReply String? @db.Text
+  repliedAt       DateTime?
 
   studentId String
   student   User   @relation(fields: [studentId], references: [id])
@@ -485,6 +490,27 @@ model Review {
   @@unique([studentId, courseId]) // One review per student per course
   @@index([courseId])
   @@map("reviews")
+}
+
+model DownloadLog {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  lessonId String
+  lesson   Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  downloadedAt DateTime @default(now())
+  fileUrl      String
+
+  @@index([userId])
+  @@index([courseId])
+  @@index([lessonId])
+  @@map("download_logs")
 }
 
 model Wishlist {

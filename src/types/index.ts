@@ -313,10 +313,21 @@ export interface Review {
   id: string;
   rating: number;
   comment?: string | null;
+  instructorReply?: string | null;
+  repliedAt?: Date | null;
   studentId: string;
   courseId: string;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface DownloadLog {
+  id: string;
+  userId: string;
+  courseId: string;
+  lessonId: string;
+  downloadedAt: Date;
+  fileUrl: string;
 }
 
 export interface Wishlist {
