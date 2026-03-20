@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   Loader2,
-  DollarSign,
+  Wallet,
   Clock,
   Layout,
   BookOpen,
@@ -225,7 +225,7 @@ export function CreateCourseForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-muted/20 rounded-xl border border-dashed">
               <div className="space-y-2">
-                <Label htmlFor="price">Price (USD)</Label>
+                <Label htmlFor="price">Price (NPR)</Label>
                 <div className="relative">
                   <Input
                     id="price"
@@ -236,7 +236,7 @@ export function CreateCourseForm() {
                     placeholder="0.00"
                     {...register("price", { valueAsNumber: true })}
                   />
-                  <DollarSign className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+                  <Wallet className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                 </div>
                 {errors.price && (
                   <p className="text-sm text-red-500 font-medium">

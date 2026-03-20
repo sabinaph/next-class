@@ -347,7 +347,11 @@ export default function ProfileDashboard({
                           {item.course.title}
                         </h4>
                         <p className="text-lg font-bold text-green-600 mb-3">
-                          ${item.course.price}
+                          {new Intl.NumberFormat("en-NP", {
+                            style: "currency",
+                            currency: "NPR",
+                            maximumFractionDigits: 2,
+                          }).format(Number(item.course.price))}
                         </p>
                         <Link href={`/courses/${item.courseId}`}>
                           <Button className="w-full">View Course</Button>

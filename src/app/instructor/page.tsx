@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 
 // Helper for currency formatting
 const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat("en-NP", {
     style: "currency",
-    currency: "USD",
+    currency: "NPR",
   }).format(amount);
 };
 
