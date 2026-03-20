@@ -1,5 +1,11 @@
 import * as z from "zod";
-import { Gender } from "@prisma/client"; // Importing directly from prisma/client as usually types/index.ts re-exports it
+
+// Define Gender enum locally to avoid importing Prisma Client in client components
+export enum Gender {
+  MALE = "MALE",
+  FEMALE = "FEMALE",
+  OTHER = "OTHER",
+}
 
 export const signUpSchema = z
   .object({

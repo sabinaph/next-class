@@ -184,7 +184,7 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Transform Decimal to number for JSON serialization
-    const coursesWithNumbers = courses.map((course) => ({
+    const coursesWithNumbers = courses.map((course: { price: { toNumber: () => any; }; }) => ({
       ...course,
       price: course.price.toNumber(),
     }));

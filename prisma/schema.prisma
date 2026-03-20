@@ -295,7 +295,7 @@ model Waitlist {
   student   User   @relation(fields: [studentId], references: [id])
 
   // Course
-  courseId String
+  courseId String0
   course   Course @relation(fields: [courseId], references: [id])
 
   status     WaitlistStatus @default(ACTIVE)
