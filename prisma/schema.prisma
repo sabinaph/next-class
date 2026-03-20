@@ -548,6 +548,9 @@ model Order {
 
   totalAmount Decimal @db.Decimal(10, 2)
   status      OrderStatus @default(PENDING)
+  khaltiPidx  String?
+  paidAt      DateTime?
+  paymentGateway String? @default("KHALTI")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
