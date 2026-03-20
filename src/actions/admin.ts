@@ -76,3 +76,107 @@ export async function createInstructor(data: CreateInstructorInput) {
     throw error;
   }
 }
+
+export async function setCoursePublishState(courseId: string, isPublished: boolean) {
+  const session = await getServerSession(authOptions);
+
+  if (!session || session.user.role !== "ADMIN") {
+    throw new Error("Unauthorized");
+  }
+
+  await prisma.course.update({
+    where: { id: courseId },
+    data: { isPublished },
+  });
+
+  await prisma.audit.create({
+    data: {
+      userId: session.user.id,
+      action: "UPDATE",
+      entityType: "Course",
+      entityId: courseId,
+      metadata: { isPublished },
+    },
+  });
+
+  revalidatePath("/admin/courses");
+  revalidatePath("/courses");
+}
+
+function makeCertificateNumber() {
+  return `CERT-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+}
+
+function makeVerificationCode() {
+  return `${Math.random().toString(36).slice(2, 8)}${Date.now().toString(36).slice(-6)}`.toUpperCase();
+}
+
+export async function generateMissingCertificates() {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== "ADMIN") {
+    throw new Error("Unauthorized");
+  }
+
+  const confirmedBookings = await prisma.booking.findMany({
+    where: {
+      status: "CONFIRMED",
+    },
+    select: {
+      studentId: true,
+      courseId: true,
+    },
+  });
+
+  let generated = 0;
+
+  for (const booking of confirmedBookings) {
+    const existing = await prisma.certificate.findUnique({
+      where: {
+        studentId_courseId: {
+          studentId: booking.studentId,
+          courseId: booking.courseId,
+        },
+      },
+    });
+
+    if (!existing) {
+      await prisma.certificate.create({
+        data: {
+          studentId: booking.studentId,
+          courseId: booking.courseId,
+          certificateNumber: makeCertificateNumber(),
+          verificationCode: makeVerificationCode(),
+          isValid: true,
+        },
+      });
+      generated += 1;
+    }
+  }
+
+  revalidatePath("/admin/certificates");
+  return { generated };
+}
+
+export async function toggleCertificateValidity(certificateId: string, isValid: boolean) {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== "ADMIN") {
+    throw new Error("Unauthorized");
+  }
+
+  await prisma.certificate.update({
+    where: { id: certificateId },
+    data: { isValid },
+  });
+
+  await prisma.audit.create({
+    data: {
+      userId: session.user.id,
+      action: "UPDATE",
+      entityType: "Certificate",
+      entityId: certificateId,
+      metadata: { isValid },
+    },
+  });
+
+  revalidatePath("/admin/certificates");
+}

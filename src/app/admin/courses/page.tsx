@@ -1,6 +1,7 @@
 import { prisma } from "@/app/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { setCoursePublishState } from "@/actions/admin";
 
 export default async function AdminCoursesPage() {
   const courses = await prisma.course.findMany({
@@ -80,9 +81,19 @@ export default async function AdminCoursesPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <Button variant="ghost" size="sm">
-                        Edit
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <form
+                          action={setCoursePublishState.bind(
+                            null,
+                            course.id,
+                            !course.isPublished
+                          )}
+                        >
+                          <Button variant="outline" size="sm" type="submit">
+                            {course.isPublished ? "Unpublish" : "Approve & Publish"}
+                          </Button>
+                        </form>
+                      </div>
                     </td>
                   </tr>
                 ))}
