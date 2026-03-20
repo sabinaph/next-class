@@ -20,6 +20,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CoursesPage() {
   const [courses, setCourses] = useState<CourseWithInstructor[]>([]);
+  const [instructors, setInstructors] = useState<Array<{ id: string; name: string }>>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pagination, setPagination] = useState({
@@ -48,6 +49,10 @@ export default function CoursesPage() {
       if (currentFilters.category)
         params.append("category", currentFilters.category);
       if (currentFilters.level) params.append("level", currentFilters.level);
+      if (currentFilters.instructorId)
+        params.append("instructorId", currentFilters.instructorId);
+      if (currentFilters.resourceType)
+        params.append("resourceType", currentFilters.resourceType);
       if (currentFilters.minPrice !== undefined)
         params.append("minPrice", currentFilters.minPrice.toString());
       if (currentFilters.maxPrice !== undefined)
@@ -63,6 +68,10 @@ export default function CoursesPage() {
       if (data.success && data.data) {
         setCourses(data.data);
         if (data.pagination) setPagination(data.pagination);
+        const instructorOptions = (data.meta?.instructors as
+          | Array<{ id: string; name: string }>
+          | undefined) || [];
+        setInstructors(instructorOptions);
       } else {
         throw new Error(data.error || "Failed to fetch courses");
       }
@@ -114,6 +123,7 @@ export default function CoursesPage() {
             <CourseFilter
               onFilterChange={handleFilterChange}
               isLoading={isLoading}
+              instructors={instructors}
             />
           </aside>
 

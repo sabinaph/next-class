@@ -34,12 +34,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { UploadButton } from "@/lib/uploadthing";
 
 const formSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
   description: z.string().min(20, "Description must be at least 20 characters"),
   category: z.string().min(1, "Category is required"),
   level: z.string().min(1, "Level is required"),
+  thumbnail: z.string().optional(),
   price: z.number().min(0, "Price must be positive"),
   duration: z.number().int().min(1, "Duration must be at least 1 hour"),
 });
@@ -80,6 +82,7 @@ export function CreateCourseForm() {
       level: "",
       price: 0,
       duration: 1,
+      thumbnail: "",
     },
   });
 
@@ -164,6 +167,53 @@ export function CreateCourseForm() {
                   <p className="text-sm text-red-500 font-medium">
                     {errors.description.message}
                   </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-base">Thumbnail</Label>
+                {watch("thumbnail") ? (
+                  <div className="rounded-xl border p-3 space-y-3">
+                    <img
+                      src={watch("thumbnail")}
+                      alt="Course thumbnail"
+                      className="h-40 w-full object-cover rounded-lg"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setValue("thumbnail", "")}
+                    >
+                      Remove Thumbnail
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="rounded-xl border-2 border-dashed p-6 bg-muted/20">
+                    <UploadButton
+                      endpoint="courseAttachment"
+                      onClientUploadComplete={(res) => {
+                        const imageFile = res?.find((file) =>
+                          file.type?.startsWith("image/")
+                        );
+                        if (imageFile?.url) {
+                          setValue("thumbnail", imageFile.url, {
+                            shouldValidate: true,
+                          });
+                        }
+                      }}
+                      onUploadError={(uploadError) => {
+                        setError(uploadError.message || "Thumbnail upload failed.");
+                      }}
+                      appearance={{
+                        button:
+                          "bg-primary text-primary-foreground hover:bg-primary/90",
+                        allowedContent: "text-xs text-muted-foreground",
+                      }}
+                    />
+                    <p className="mt-3 text-xs text-muted-foreground">
+                      Upload a course cover image (up to 4MB).
+                    </p>
+                  </div>
                 )}
               </div>
             </div>
