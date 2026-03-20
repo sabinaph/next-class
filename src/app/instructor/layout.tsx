@@ -1,10 +1,20 @@
 import { InstructorSidebar } from "@/components/instructor/InstructorSidebar";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { redirect } from "next/navigation";
 
-export default function InstructorLayout({
+export default async function InstructorLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await getServerSession(authOptions);
+
+  // Require authenticated instructors
+  if (!session || session.user.role !== "INSTRUCTOR") {
+    redirect("/");
+  }
+
   return (
     <div className="flex min-h-screen bg-background">
       <InstructorSidebar />

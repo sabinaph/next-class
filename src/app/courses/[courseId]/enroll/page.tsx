@@ -1,6 +1,7 @@
 import { getPublicCourse } from "@/actions/courses";
 import { notFound } from "next/navigation";
 import { EnrollButton } from "@/components/courses/EnrollButton";
+import { WaitlistButton } from "@/components/courses/WaitlistButton";
 import {
   Card,
   CardContent,
@@ -53,10 +54,12 @@ export default async function EnrollPage({ params }: Props) {
             </p>
           </div>
 
-          <div className="flex justify-between items-center py-4 border-t border-b">
-            <span className="font-medium">Total</span>
-            <span className="text-2xl font-bold">${course.price}</span>
-          </div>
+          {!course.isFull && (
+            <div className="flex justify-between items-center py-4 border-t border-b">
+              <span className="font-medium">Total</span>
+              <span className="text-2xl font-bold">${course.price}</span>
+            </div>
+          )}
 
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li className="flex items-center gap-2">
@@ -74,7 +77,19 @@ export default async function EnrollPage({ params }: Props) {
           </ul>
         </CardContent>
         <CardFooter>
-          <EnrollButton courseId={course.id} price={Number(course.price)} />
+          {course.isFull ? (
+            <div className="w-full">
+              <p className="text-sm text-muted-foreground mb-2">
+                Course is full. Join the waitlist to be notified when a seat opens.
+              </p>
+              <WaitlistButton
+                courseId={course.id}
+                isWaitlisted={course.isWaitlisted}
+              />
+            </div>
+          ) : (
+            <EnrollButton courseId={course.id} price={Number(course.price)} />
+          )}
         </CardFooter>
       </Card>
     </div>

@@ -119,6 +119,7 @@ model User {
   @@index([email])
   @@index([role])
   @@map("users")
+  lessonProgresses LessonProgress[]
 }
 
 // NextAuth models
@@ -207,6 +208,7 @@ model Course {
   @@index([category])
   @@index([isPublished])
   @@map("courses")
+  lessonProgresses LessonProgress[]
 }
 
 model CourseSession {
@@ -295,7 +297,7 @@ model Waitlist {
   student   User   @relation(fields: [studentId], references: [id])
 
   // Course
-  courseId String0
+  courseId String
   course   Course @relation(fields: [courseId], references: [id])
 
   status     WaitlistStatus @default(ACTIVE)
@@ -446,6 +448,24 @@ model Lesson {
 
   @@index([courseId])
   @@map("lessons")
+  lessonProgresses LessonProgress[]
+}
+
+model LessonProgress {
+  id         String   @id @default(cuid())
+  userId     String
+  courseId   String
+  lessonId   String
+  completedAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+  @@index([courseId])
+  @@index([lessonId])
+  @@map("lesson_progress")
 }
 
 model Review {

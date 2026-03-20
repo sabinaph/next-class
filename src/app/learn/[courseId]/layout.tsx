@@ -61,13 +61,22 @@ export default async function LearnLayout({
     price: courseRaw.price.toNumber(),
   };
 
+  const progress = await prisma.lessonProgress.findMany({
+    where: {
+      courseId,
+      userId: session.user.id,
+    },
+    select: { lessonId: true },
+  });
+  const completedLessonIds = progress.map((p) => p.lessonId);
+
   return (
     <div className="h-full">
       <div className="h-[80px] md:pl-80 fixed inset-y-0 w-full z-50">
         <Navbar />
       </div>
       <div className="hidden md:flex h-full w-80 flex-col fixed inset-y-0 z-50 mt-[80px]">
-        <CourseSidebar course={course} />
+        <CourseSidebar course={course} completedLessonIds={completedLessonIds} />
       </div>
       <main className="md:pl-80 pt-[80px] h-full">{children}</main>
     </div>

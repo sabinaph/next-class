@@ -44,6 +44,12 @@ export async function getPublicCourse(id: string) {
         orderBy: { createdAt: "desc" },
         take: 5,
       },
+      waitlists: {
+        select: {
+          id: true,
+          userId: true,
+        },
+      },
       _count: {
         select: {
           reviews: true,
@@ -58,6 +64,7 @@ export async function getPublicCourse(id: string) {
 
   // Check if current user has wishlisted
   let isWishlisted = false;
+  let isWaitlisted = false;
   const session = await getServerSession(authOptions);
   if (session?.user?.id) {
     const count = await prisma.wishlist.count({
@@ -67,9 +74,19 @@ export async function getPublicCourse(id: string) {
       },
     });
     isWishlisted = count > 0;
+
+    const waitCount = await prisma.waitlist.count({
+      where: {
+        userId: session.user.id,
+        courseId: id,
+      },
+    });
+    isWaitlisted = waitCount > 0;
   }
 
-  return { ...course, isWishlisted };
+  const isFull = course._count.bookings >= course.maxStudents;
+
+  return { ...course, isWishlisted, isWaitlisted, isFull };
 }
 
 export async function toggleWishlist(courseId: string) {

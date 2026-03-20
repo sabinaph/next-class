@@ -20,8 +20,16 @@ async function main() {
   await prisma.payment.deleteMany();
   await prisma.booking.deleteMany();
   await prisma.waitlist.deleteMany();
-  await prisma.session.deleteMany();
+  await prisma.lessonProgress.deleteMany();
+  await prisma.review.deleteMany();
+  await prisma.wishlist.deleteMany();
+  await prisma.announcement.deleteMany();
+  await prisma.lesson.deleteMany();
+  await prisma.courseSession.deleteMany();
   await prisma.course.deleteMany();
+  await prisma.account.deleteMany();
+  await prisma.verificationToken.deleteMany();
+  await prisma.session.deleteMany();
   await prisma.user.deleteMany();
 
   // Create Users
@@ -36,55 +44,55 @@ async function main() {
       firstName: 'Admin',
       lastName: 'User',
       role: UserRole.ADMIN,
-      emailVerified: true,
+      emailVerified: new Date(),
       phoneNumber: '+1234567890',
     },
   });
 
   const instructor1 = await prisma.user.create({
     data: {
-      email: 'john.doe@nextclass.com',
+      email: 'instructor1@nextclass.com',
       passwordHash: hashedPassword,
       firstName: 'John',
       lastName: 'Doe',
       role: UserRole.INSTRUCTOR,
-      emailVerified: true,
+      emailVerified: new Date(),
       phoneNumber: '+1234567891',
     },
   });
 
   const instructor2 = await prisma.user.create({
     data: {
-      email: 'jane.smith@nextclass.com',
+      email: 'instructor2@nextclass.com',
       passwordHash: hashedPassword,
       firstName: 'Jane',
       lastName: 'Smith',
       role: UserRole.INSTRUCTOR,
-      emailVerified: true,
+      emailVerified: new Date(),
       phoneNumber: '+1234567892',
     },
   });
 
   const student1 = await prisma.user.create({
     data: {
-      email: 'student1@example.com',
+      email: 'student1@nextclass.com',
       passwordHash: hashedPassword,
       firstName: 'Alice',
       lastName: 'Johnson',
       role: UserRole.STUDENT,
-      emailVerified: true,
+      emailVerified: new Date(),
       phoneNumber: '+1234567893',
     },
   });
 
   const student2 = await prisma.user.create({
     data: {
-      email: 'student2@example.com',
+      email: 'student2@nextclass.com',
       passwordHash: hashedPassword,
       firstName: 'Bob',
       lastName: 'Williams',
       role: UserRole.STUDENT,
-      emailVerified: true,
+      emailVerified: new Date(),
       phoneNumber: '+1234567894',
     },
   });
@@ -239,7 +247,7 @@ async function main() {
   const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
   const twoWeeks = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
 
-  await prisma.session.createMany({
+  await prisma.courseSession.createMany({
     data: [
       {
         courseId: course1.id,
@@ -296,13 +304,15 @@ async function main() {
   // Create sample bookings
   console.log('🎫 Creating bookings...');
 
-  const sessions = await prisma.session.findMany();
+  const sessions = await prisma.courseSession.findMany({
+    orderBy: { sessionDate: 'asc' },
+  });
 
   const booking1 = await prisma.booking.create({
     data: {
       studentId: student1.id,
       courseId: course1.id,
-      sessionId: sessions[0].id,
+      sessionId: sessions.find((s) => s.courseId === course1.id)!.id,
       status: 'CONFIRMED',
       numberOfSeats: 1,
       totalAmount: 299.99,
@@ -313,7 +323,7 @@ async function main() {
     data: {
       studentId: student2.id,
       courseId: course2.id,
-      sessionId: sessions[2].id,
+      sessionId: sessions.find((s) => s.courseId === course2.id)!.id,
       status: 'CONFIRMED',
       numberOfSeats: 1,
       totalAmount: 249.99,

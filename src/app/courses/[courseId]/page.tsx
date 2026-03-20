@@ -2,6 +2,7 @@ import { getPublicCourse } from "@/actions/courses";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { WishlistButton } from "@/components/courses/WishlistButton";
+import { WaitlistButton } from "@/components/courses/WaitlistButton";
 import {
   BookOpen,
   Clock,
@@ -66,11 +67,23 @@ export default async function CourseSubPage({ params }: Props) {
             </div>
 
             <div className="flex items-center gap-4 pt-4">
-              <Link href={`/courses/${course.id}/enroll`}>
-                <Button size="lg" className="text-lg px-8">
-                  Enroll Now - ${course.price}
-                </Button>
-              </Link>
+              {course.isFull ? (
+                <div className="max-w-sm">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Course is full. Join the waitlist to be notified when a seat opens.
+                  </p>
+                  <WaitlistButton
+                    courseId={course.id}
+                    isWaitlisted={course.isWaitlisted}
+                  />
+                </div>
+              ) : (
+                <Link href={`/courses/${course.id}/enroll`}>
+                  <Button size="lg" className="text-lg px-8">
+                    Enroll Now - ${course.price}
+                  </Button>
+                </Link>
+              )}
               <WishlistButton
                 courseId={course.id}
                 initialIsWishlisted={course.isWishlisted}

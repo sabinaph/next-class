@@ -17,31 +17,37 @@ interface CourseSidebarProps {
       duration: number | null;
     }[];
   };
-  progressCount?: number; // TODO: Implement progress
+  completedLessonIds?: string[];
 }
 
 export const CourseSidebar = ({
   course,
-  progressCount = 0,
+  completedLessonIds = [],
 }: CourseSidebarProps) => {
   const pathname = usePathname();
+
+  const total = course.lessons.length || 1;
+  const completed = completedLessonIds.length;
+  const percent = Math.min(100, Math.round((completed / total) * 100));
 
   return (
     <div className="h-full border-r flex flex-col overflow-y-auto bg-white dark:bg-gray-950 w-80">
       <div className="p-8 flex flex-col border-b">
         <h1 className="font-semibold mb-2">{course.title}</h1>
-        {/* Progress Bar Placeholder */}
         <div className="mt-4">
           <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
-            <div className="h-full bg-green-500 w-[10%]" />
+            <div
+              className="h-full bg-green-500"
+              style={{ width: `${percent}%` }}
+            />
           </div>
-          <p className="text-xs text-gray-500 mt-2">10% Completed</p>
+          <p className="text-xs text-gray-500 mt-2">{percent}% Completed</p>
         </div>
       </div>
       <div className="flex flex-col w-full">
         {course.lessons.map((lesson) => {
           const isActive = pathname?.includes(lesson.id);
-          const isCompleted = false; // TODO: Check real completion
+          const isCompleted = completedLessonIds.includes(lesson.id);
           const isLocked = false; // In this view, if enrolled, nothing is locked usually
 
           const Icon = lesson.type === "VIDEO" ? Video : FileText;

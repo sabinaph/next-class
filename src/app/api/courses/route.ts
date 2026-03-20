@@ -8,31 +8,20 @@ import {
   CourseFilters,
   UserRole,
 } from "@/types";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 // ============================================
 // Helper Functions
 // ============================================
 
-/**
- * Get user from session (Placeholder for NextAuth)
- * TODO: Replace with actual NextAuth session handling
- */
-async function getCurrentUser(request: NextRequest) {
-  // Placeholder: In production, use NextAuth's getServerSession()
-  // Example:
-  // const session = await getServerSession(authOptions);
-  // if (!session?.user) return null;
-  // return session.user;
-
-  // For now, return mock user based on header (development only)
-  const userId = request.headers.get("x-user-id");
-  const userRole = request.headers.get("x-user-role") as UserRole;
-
-  if (!userId) return null;
-
+// Resolve user from NextAuth session
+async function getCurrentUser() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) return null;
   return {
-    id: userId,
-    role: userRole || UserRole.STUDENT,
+    id: session.user.id,
+    role: session.user.role,
   };
 }
 
@@ -111,7 +100,7 @@ export async function GET(request: NextRequest) {
     };
 
     // Only show published courses to non-instructors/admins
-    const user = await getCurrentUser(request);
+    const user = await getCurrentUser();
     if (!user || user.role === UserRole.STUDENT) {
       where.isPublished = true;
     }
@@ -222,7 +211,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // RBAC: Check authentication and authorization
-    const user = await getCurrentUser(request);
+    const user = await getCurrentUser();
 
     if (!user) {
       const response: ApiResponse = {
@@ -385,7 +374,7 @@ export async function POST(request: NextRequest) {
 
     const response: ApiResponse<CourseWithInstructor> = {
       success: true,
-      data: courseWithNumber as CourseWithInstructor,
+      data: courseWithNumber as unknown as CourseWithInstructor,
       message: "Course created successfully",
     };
 
