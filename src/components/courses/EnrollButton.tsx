@@ -14,6 +14,12 @@ export function EnrollButton({ courseId, price }: EnrollButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
+  const formattedPrice = new Intl.NumberFormat("en-NP", {
+    style: "currency",
+    currency: "NPR",
+    maximumFractionDigits: 2,
+  }).format(price);
+
   const handleEnroll = async () => {
     setIsLoading(true);
     try {
@@ -49,7 +55,7 @@ export function EnrollButton({ courseId, price }: EnrollButtonProps) {
       disabled={isLoading}
     >
       {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-      Checkout - ${price}
+      Checkout - {formattedPrice}
     </Button>
   );
 }

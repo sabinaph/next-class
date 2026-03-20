@@ -33,6 +33,13 @@ export default function CourseCard({ course }: CourseCardProps) {
     _count,
   } = course;
 
+  const formatNPR = (amount: number) =>
+    new Intl.NumberFormat("en-NP", {
+      style: "currency",
+      currency: "NPR",
+      maximumFractionDigits: 2,
+    }).format(amount);
+
   // Get level badge variant/color
   const getLevelBadgeVariant = (level: string) => {
     switch (level.toLowerCase()) {
@@ -127,7 +134,7 @@ export default function CourseCard({ course }: CourseCardProps) {
           <div className="flex flex-col">
             {price > 0 ? (
               <span className="text-lg font-bold text-primary">
-                ${price.toFixed(2)}
+                {formatNPR(Number(price))}
               </span>
             ) : (
               <span className="text-lg font-bold text-green-600 dark:text-green-500">

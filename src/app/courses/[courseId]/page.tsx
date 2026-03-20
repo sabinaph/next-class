@@ -23,7 +23,11 @@ interface Props {
 export default async function CourseSubPage({ params }: Props) {
   const { courseId } = await params;
   const course = await getPublicCourse(courseId);
-  const price = Number(course?.price ?? 0).toFixed(2);
+  const price = new Intl.NumberFormat("en-NP", {
+    style: "currency",
+    currency: "NPR",
+    maximumFractionDigits: 2,
+  }).format(Number(course?.price ?? 0));
 
   if (!course) {
     notFound();
@@ -82,7 +86,7 @@ export default async function CourseSubPage({ params }: Props) {
               ) : (
                 <Link href={`/courses/${course.id}/enroll`}>
                   <Button size="lg" className="text-lg px-8">
-                    Enroll Now - ${price}
+                    Enroll Now - {price}
                   </Button>
                 </Link>
               )}
@@ -208,7 +212,7 @@ export default async function CourseSubPage({ params }: Props) {
         {/* Sidebar */}
         <div className="space-y-6">
           <div className="p-6 border rounded-xl bg-card sticky top-24 shadow-sm">
-            <div className="text-3xl font-bold mb-2">${price}</div>
+            <div className="text-3xl font-bold mb-2">{price}</div>
             <Link href={`/courses/${course.id}/enroll`}>
               <Button className="w-full mb-4" size="lg">
                 Enroll Now
