@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="bg-white dark:bg-gray-950 text-gray-600 dark:text-gray-300 py-12 border-t border-gray-100 dark:border-gray-800 transition-colors duration-300">
+    <footer className="bg-card/70 text-gray-600 dark:text-gray-300 py-12 border-t border-border transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
@@ -140,7 +140,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-gray-100 dark:border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+        <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row justify-between items-center bg-background/60 rounded-lg p-4">
           <p className="text-sm text-gray-500 dark:text-gray-400">
             &copy; {new Date().getFullYear()} NextClass Hub. All rights
             reserved.

@@ -55,7 +55,7 @@ export default function Navbar({ className }: NavbarProps) {
   return (
     <nav
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 transition-colors duration-300",
+        "fixed top-0 left-0 right-0 z-50 bg-background/85 backdrop-blur-md border-b border-border transition-colors duration-300",
         className
       )}
     >
@@ -245,7 +245,7 @@ export default function Navbar({ className }: NavbarProps) {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 animate-in slide-in-from-top-5">
+        <div className="md:hidden bg-background border-b border-border animate-in slide-in-from-top-5">
           <div className="px-4 pt-2 pb-4 space-y-2">
             <Link
               href="/"
