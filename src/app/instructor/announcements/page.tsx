@@ -1,7 +1,9 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { prisma } from "@/app/lib/prisma";
+import { getInstructorAnnouncements } from "@/actions/instructor-announcements";
+import AnnouncementManager from "@/components/instructor/AnnouncementManager";
 
 export default async function InstructorCommunicationPage() {
   const session = await getServerSession(authOptions);
@@ -10,20 +12,38 @@ export default async function InstructorCommunicationPage() {
     redirect("/");
   }
 
+  const [courses, announcements] = await Promise.all([
+    prisma.course.findMany({
+      where: {
+        instructorId: session.user.id,
+      },
+      select: {
+        id: true,
+        title: true,
+      },
+      orderBy: {
+        title: "asc",
+      },
+    }),
+    getInstructorAnnouncements(),
+  ]);
+
+  const preparedAnnouncements = announcements.map((item) => ({
+    id: item.id,
+    title: item.title,
+    content: item.content,
+    courseId: item.courseId,
+    courseTitle: item.course.title,
+    createdAt: item.createdAt.toISOString(),
+  }));
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold tracking-tight">Communication</h1>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Announcements</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Create announcements for your students here. This section is ready for your next content update workflow.
-          </p>
-        </CardContent>
-      </Card>
+      <AnnouncementManager
+        courses={courses}
+        initialAnnouncements={preparedAnnouncements}
+      />
     </div>
   );
 }
