@@ -33,36 +33,36 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <a
+                <Link
                   href="/courses"
                   className="hover:text-green-600 dark:hover:text-green-400 transition"
                 >
                   Browse Courses
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/mentorship"
                   className="hover:text-green-600 dark:hover:text-green-400 transition"
                 >
                   Mentorship
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/pricing"
                   className="hover:text-green-600 dark:hover:text-green-400 transition"
                 >
                   Pricing
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/for-instructors"
                   className="hover:text-green-600 dark:hover:text-green-400 transition"
                 >
                   For Instructors
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -73,36 +73,36 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/blog"
                   className="hover:text-green-600 dark:hover:text-green-400 transition"
                 >
                   Blog
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/help-center"
                   className="hover:text-green-600 dark:hover:text-green-400 transition"
                 >
                   Help Center
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/community"
                   className="hover:text-green-600 dark:hover:text-green-400 transition"
                 >
                   Community
-                </a>
+                </Link>
               </li>
               <li>
-                <a
+                <Link
                   href="/contact"
                   className="hover:text-green-600 dark:hover:text-green-400 transition"
                 >
                   Contact Us
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -113,28 +113,28 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/privacy-policy"
                   className="hover:text-green-600 dark:hover:text-green-400 transition"
                 >
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/terms-of-service"
                   className="hover:text-green-600 dark:hover:text-green-400 transition"
                 >
                   Terms of Service
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/cookie-policy"
                   className="hover:text-green-600 dark:hover:text-green-400 transition"
                 >
                   Cookie Policy
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
