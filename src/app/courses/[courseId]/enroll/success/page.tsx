@@ -2,11 +2,12 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
 
-export default function EnrollSuccessPage({
+export default async function EnrollSuccessPage({
   params,
 }: {
-  params: { courseId: string };
+  params: Promise<{ courseId: string }>;
 }) {
+  const { courseId } = await params;
   // In a real app, you might verify the session_id here server-side before showing success
 
   return (
@@ -21,7 +22,7 @@ export default function EnrollSuccessPage({
       </p>
 
       <div className="flex gap-4">
-        <Link href={`/courses/${params.courseId}`}>
+        <Link href={`/courses/${courseId}`}>
           <Button size="lg">Start Learning</Button>
         </Link>
         <Link href="/profile">

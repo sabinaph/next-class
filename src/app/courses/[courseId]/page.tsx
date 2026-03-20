@@ -15,13 +15,15 @@ import {
 import Link from "next/link";
 
 interface Props {
-  params: {
+  params: Promise<{
     courseId: string;
-  };
+  }>;
 }
 
 export default async function CourseSubPage({ params }: Props) {
-  const course = await getPublicCourse(params.courseId);
+  const { courseId } = await params;
+  const course = await getPublicCourse(courseId);
+  const price = Number(course?.price ?? 0).toFixed(2);
 
   if (!course) {
     notFound();
@@ -80,7 +82,7 @@ export default async function CourseSubPage({ params }: Props) {
               ) : (
                 <Link href={`/courses/${course.id}/enroll`}>
                   <Button size="lg" className="text-lg px-8">
-                    Enroll Now - ${course.price}
+                    Enroll Now - ${price}
                   </Button>
                 </Link>
               )}
@@ -206,7 +208,7 @@ export default async function CourseSubPage({ params }: Props) {
         {/* Sidebar */}
         <div className="space-y-6">
           <div className="p-6 border rounded-xl bg-card sticky top-24 shadow-sm">
-            <div className="text-3xl font-bold mb-2">${course.price}</div>
+            <div className="text-3xl font-bold mb-2">${price}</div>
             <Link href={`/courses/${course.id}/enroll`}>
               <Button className="w-full mb-4" size="lg">
                 Enroll Now

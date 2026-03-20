@@ -3,8 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbo",
-    "build": "next build --turbo",
+    "dev": "next dev --webpack --disable-source-maps",
+    "dev:webpack": "next dev --webpack",
+    "dev:turbo": "next dev --turbo",
+    "build": "next build",
+    "build:turbo": "next build --turbo",
     "start": "next start",
     "lint": "next lint"
   },

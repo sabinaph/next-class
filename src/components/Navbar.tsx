@@ -149,8 +149,7 @@ export default function Navbar() {
                     </DropdownMenuGroup>
 
                     {/* Role Based Links */}
-                    {(session.user?.role === "INSTRUCTOR" ||
-                      session.user?.role === "ADMIN") && (
+                    {session.user?.role === "INSTRUCTOR" && (
                       <>
                         <DropdownMenuSeparator />
                         <DropdownMenuGroup>
@@ -286,8 +285,7 @@ export default function Navbar() {
                     My Learning
                   </Link>
 
-                  {(session.user?.role === "INSTRUCTOR" ||
-                    session.user?.role === "ADMIN") && (
+                  {session.user?.role === "INSTRUCTOR" && (
                     <Link
                       href="/instructor"
                       className="flex items-center gap-2 px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"

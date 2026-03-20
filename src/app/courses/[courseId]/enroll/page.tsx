@@ -12,13 +12,15 @@ import {
 import { CheckCircle } from "lucide-react";
 
 interface Props {
-  params: {
+  params: Promise<{
     courseId: string;
-  };
+  }>;
 }
 
 export default async function EnrollPage({ params }: Props) {
-  const course = await getPublicCourse(params.courseId);
+  const { courseId } = await params;
+  const course = await getPublicCourse(courseId);
+  const price = Number(course?.price ?? 0).toFixed(2);
 
   if (!course) {
     notFound();
@@ -57,7 +59,7 @@ export default async function EnrollPage({ params }: Props) {
           {!course.isFull && (
             <div className="flex justify-between items-center py-4 border-t border-b">
               <span className="font-medium">Total</span>
-              <span className="text-2xl font-bold">${course.price}</span>
+              <span className="text-2xl font-bold">${price}</span>
             </div>
           )}
 

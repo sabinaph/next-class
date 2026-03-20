@@ -47,7 +47,7 @@ export async function getPublicCourse(id: string) {
       waitlists: {
         select: {
           id: true,
-          userId: true,
+          studentId: true,
         },
       },
       _count: {
@@ -77,7 +77,7 @@ export async function getPublicCourse(id: string) {
 
     const waitCount = await prisma.waitlist.count({
       where: {
-        userId: session.user.id,
+        studentId: session.user.id,
         courseId: id,
       },
     });

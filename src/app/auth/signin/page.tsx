@@ -1,6 +1,7 @@
 "use client";
 
 import { signIn } from "next-auth/react";
+import { getSession } from "next-auth/react";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -11,6 +12,12 @@ export default function SignInPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
+
+  const getRoleHome = (role?: string | null) => {
+    if (role === "ADMIN") return "/admin";
+    if (role === "INSTRUCTOR") return "/instructor";
+    return "/";
+  };
 
   const [formData, setFormData] = useState({
     email: "",
@@ -52,7 +59,12 @@ export default function SignInPage() {
       if (result?.error) {
         setError(result.error);
       } else {
-        router.push(callbackUrl);
+        const session = await getSession();
+        const target =
+          callbackUrl && callbackUrl !== "/"
+            ? callbackUrl
+            : getRoleHome(session?.user?.role);
+        router.push(target);
         router.refresh();
       }
     } catch (err) {
@@ -63,7 +75,9 @@ export default function SignInPage() {
   };
 
   const handleGoogleSignIn = () => {
-    signIn("google", { callbackUrl });
+    signIn("google", {
+      callbackUrl: callbackUrl && callbackUrl !== "/" ? callbackUrl : "/auth/post-signin",
+    });
   };
 
   return (
