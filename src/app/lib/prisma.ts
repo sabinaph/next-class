@@ -11,12 +11,23 @@ const globalForPrisma = global as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-export const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({
+function createPrismaClient() {
+  return new PrismaClient({
     adapter,
     log: ["query"], // Optional: Logs the database queries to the console for debugging
   });
+}
+
+const hasRequiredDelegates = (client: PrismaClient | undefined) => {
+  if (!client) return false;
+  const typed = client as unknown as Record<string, unknown>;
+  // Guard against stale dev singleton after schema changes (e.g., newly added models)
+  return Boolean(typed.order && typed.invoice && typed.category);
+};
+
+export const prisma = hasRequiredDelegates(globalForPrisma.prisma)
+  ? globalForPrisma.prisma!
+  : createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
