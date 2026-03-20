@@ -12,6 +12,7 @@ interface Props {
 }
 
 import { CoursePublishButton } from "@/components/instructor/CoursePublishButton";
+import { CourseReviewManager } from "@/components/instructor/CourseReviewManager";
 
 // ... existing imports
 
@@ -64,6 +65,10 @@ export default async function CourseManagePage({
               courseId={course.id}
               initialLessons={course.lessons as any[]}
             />
+          </section>
+          <section>
+            <h2 className="text-xl font-semibold mb-4">Student Reviews</h2>
+            <CourseReviewManager reviews={course.reviews as any[]} />
           </section>
         </div>
 
