@@ -48,6 +48,7 @@ export default function CoursesPage() {
       if (currentFilters.search) params.append("search", currentFilters.search);
       if (currentFilters.category)
         params.append("category", currentFilters.category);
+      if (currentFilters.tag) params.append("tag", currentFilters.tag);
       if (currentFilters.level) params.append("level", currentFilters.level);
       if (currentFilters.instructorId)
         params.append("instructorId", currentFilters.instructorId);
@@ -105,7 +106,7 @@ export default function CoursesPage() {
         <div className="absolute inset-0 bg-grid-black/[0.02] dark:bg-grid-white/[0.02]" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
           <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent animate-in slide-in-from-bottom-2">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 bg-linear-to-r from-primary to-blue-600 bg-clip-text text-transparent animate-in slide-in-from-bottom-2">
               Expand Your Knowledge
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed animate-in slide-in-from-bottom-3 fade-in duration-500">
@@ -180,7 +181,7 @@ export default function CoursesPage() {
                         <Skeleton className="h-8 w-8 rounded-full" />
                         <div className="space-y-1">
                           <Skeleton className="h-3 w-[100px]" />
-                          <Skeleton className="h-3 w-[80px]" />
+                          <Skeleton className="h-3 w-20" />
                         </div>
                       </div>
                     </div>

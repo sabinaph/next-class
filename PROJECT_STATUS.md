@@ -17,7 +17,7 @@ This checklist maps your requested features to the current codebase status.
 - [x] Manage instructors/authors
 - [x] Manage resources
 - [~] Add/edit/delete books/PDFs/materials (course/lesson add/edit/delete exists; no dedicated "book/material" product CRUD)
-- [~] Manage categories (category field and filtering exist; no admin category CRUD module)
+- [~] Manage categories (category and tag filtering exist; dedicated admin category CRUD still pending)
 - [x] Approve/review uploaded resources workflow
 - [~] Manage payments (checkout exists; no admin payment operations panel)
 - [~] View sales reports (dashboard stats exist, but no full sales reporting module)
@@ -63,7 +63,7 @@ This checklist maps your requested features to the current codebase status.
 - [x] Download history
 - [x] Resource preview before purchase
 - [ ] Copyright/access protection (watermark/anti-sharing/tokenized download links)
-- [~] Category and tag system (category exists; tags + category management module missing)
+- [x] Category and tag system
 
 ## 5) Features To Remove From Old Booking System
 
