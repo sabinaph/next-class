@@ -42,6 +42,22 @@ export default async function ProfilePage() {
           course: true,
         },
       },
+      certificates: {
+        include: {
+          course: {
+            include: {
+              instructor: {
+                select: {
+                  name: true,
+                  firstName: true,
+                  lastName: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: { issueDate: "desc" },
+      },
     },
   });
 
@@ -83,6 +99,24 @@ export default async function ProfilePage() {
         price: item.course.price.toString(), // Decimal to string
         createdAt: item.course.createdAt.toISOString(),
         updatedAt: item.course.updatedAt.toISOString(),
+      },
+    })),
+    certificates: user.certificates.map((certificate) => ({
+      ...certificate,
+      issueDate: certificate.issueDate.toISOString(),
+      expiryDate: certificate.expiryDate
+        ? certificate.expiryDate.toISOString()
+        : null,
+      createdAt: certificate.createdAt.toISOString(),
+      updatedAt: certificate.updatedAt.toISOString(),
+      certificateUrl:
+        certificate.certificateUrl ||
+        `/api/certificates/${certificate.id}/download`,
+      course: {
+        ...certificate.course,
+        price: certificate.course.price.toString(),
+        createdAt: certificate.course.createdAt.toISOString(),
+        updatedAt: certificate.course.updatedAt.toISOString(),
       },
     })),
   };

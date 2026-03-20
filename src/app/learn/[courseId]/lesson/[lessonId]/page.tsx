@@ -2,8 +2,11 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/app/lib/prisma";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Download } from "lucide-react";
+import { Download } from "lucide-react";
 import Link from "next/link";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { CompleteLessonButton } from "@/components/learn/CompleteLessonButton";
 // Note: ReactMarkdown handling might need a client component, but let's try a simple server render or client wrapper if needed.
 // Actually, I'll stick to simple text display if no markdown renderer is installed.
 // The user hasn't asked for Markdown specifically, but "Text" implies it.
@@ -15,6 +18,11 @@ export default async function LessonIdPage({
   params: Promise<{ courseId: string; lessonId: string }>;
 }) {
   const { courseId, lessonId } = await params;
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.id) {
+    return redirect("/auth/signin");
+  }
 
   const lesson = await prisma.lesson.findFirst({
     where: {
@@ -26,6 +34,20 @@ export default async function LessonIdPage({
   if (!lesson) {
     return redirect(`/learn/${courseId}`);
   }
+
+  const progress = await prisma.lessonProgress.findUnique({
+    where: {
+      userId_lessonId: {
+        userId: session.user.id,
+        lessonId: lesson.id,
+      },
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  const isCompleted = Boolean(progress);
 
   return (
     <div className="flex flex-col max-w-4xl mx-auto pb-20">
@@ -71,10 +93,11 @@ export default async function LessonIdPage({
           <h2 className="text-2xl font-bold mb-2">{lesson.title}</h2>
           {/* Description or others if available */}
         </div>
-        <Button size="lg" className="w-full md:w-auto gap-2">
-          <CheckCircle className="w-4 h-4" />
-          Mark as Complete
-        </Button>
+        <CompleteLessonButton
+          courseId={courseId}
+          lessonId={lesson.id}
+          initialCompleted={isCompleted}
+        />
       </div>
       <Separator />
     </div>
