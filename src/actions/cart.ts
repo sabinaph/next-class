@@ -145,5 +145,5 @@ export async function createOrderFromCart() {
   revalidatePath("/profile");
   revalidatePath("/profile/orders");
 
-  redirect(`/khalti-payment?orderId=${order.id}`);
+  redirect(`/checkout?orderId=${order.id}`);
 }

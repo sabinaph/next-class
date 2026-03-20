@@ -11,18 +11,36 @@ export default function SuccessPage() {
 
   useEffect(() => {
     const verifyPayment = async () => {
+      const method = searchParams.get("method") || "khalti";
       const pidx = searchParams.get("pidx");
       const paymentId = searchParams.get("paymentId");
+      const stripeSessionId = searchParams.get("session_id");
 
-      if (!pidx || !paymentId) {
+      if (!paymentId) {
         setMessage("Missing payment details");
         return;
       }
 
       try {
-        const response = await fetch(
-          `/api/verify-khalti?pidx=${encodeURIComponent(pidx)}&paymentId=${encodeURIComponent(paymentId)}`
-        );
+        let response: Response;
+
+        if (method === "stripe") {
+          if (!stripeSessionId) {
+            setMessage("Missing Stripe session details");
+            return;
+          }
+          response = await fetch(
+            `/api/verify-stripe?paymentId=${encodeURIComponent(paymentId)}&session_id=${encodeURIComponent(stripeSessionId)}`
+          );
+        } else {
+          if (!pidx) {
+            setMessage("Missing Khalti payment token");
+            return;
+          }
+          response = await fetch(
+            `/api/verify-khalti?pidx=${encodeURIComponent(pidx)}&paymentId=${encodeURIComponent(paymentId)}`
+          );
+        }
 
         const data = await response.json();
 
