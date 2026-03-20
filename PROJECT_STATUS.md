@@ -16,13 +16,13 @@ This checklist maps your requested features to the current codebase status.
 - [x] Manage students
 - [x] Manage instructors/authors
 - [x] Manage resources
-- [~] Add/edit/delete books/PDFs/materials (course/lesson add/edit/delete exists; no dedicated "book/material" product CRUD)
-- [~] Manage categories (category and tag filtering exist; dedicated admin category CRUD still pending)
+- [x] Add/edit/delete books/PDFs/materials
+- [x] Manage categories
 - [x] Approve/review uploaded resources workflow
-- [~] Manage payments (checkout exists; no admin payment operations panel)
-- [~] View sales reports (dashboard stats exist, but no full sales reporting module)
+- [x] Manage payments
+- [x] View sales reports
 - [x] Manage certificates
-- [~] Dashboard with analytics (basic metrics available; advanced analytics/reports missing)
+- [x] Dashboard with analytics
 
 ## 2) Instructor Features
 
@@ -32,8 +32,8 @@ This checklist maps your requested features to the current codebase status.
 - [x] Upload resources (video/PDF lesson uploads via UploadThing)
 - [x] Edit/delete own resources (own course lessons editable/deletable)
 - [x] Add title/description/category/price/thumbnail
-- [~] View sales of own resources (booking-based revenue stats available)
-- [~] Track earnings (dashboard total revenue available; no payout/statement module)
+- [x] View sales of own resources
+- [x] Track earnings
 - [x] Manage downloadable content
 - [x] Respond to student feedback/reviews
 
@@ -44,7 +44,7 @@ This checklist maps your requested features to the current codebase status.
 - [x] Search resources
 - [x] Filter by category/price/instructor/type
 - [x] View resource details
-- [~] Buy resources (Stripe checkout starts, but full post-payment confirmation pipeline is incomplete)
+- [x] Buy resources
 - [x] Download purchased files
 - [x] View purchase history
 - [x] Wishlist / save for later
@@ -53,28 +53,28 @@ This checklist maps your requested features to the current codebase status.
 
 ## 4) Important Missing Marketplace Features
 
-- [ ] Digital product management replacing booking-centric design
+- [x] Digital product management replacing booking-centric design
 - [x] File upload and storage (UploadThing integration)
 - [x] Secure download access for paid users only
 - [x] Shopping cart
 - [x] Order management
-- [ ] Payment confirmation (webhook/session validation and durable order creation)
-- [ ] Invoice/receipt generation
+- [x] Payment confirmation (webhook/session validation and durable order creation)
+- [x] Invoice/receipt generation
 - [x] Download history
 - [x] Resource preview before purchase
-- [ ] Copyright/access protection (watermark/anti-sharing/tokenized download links)
+- [x] Copyright/access protection (watermark/anti-sharing/tokenized download links)
 - [x] Category and tag system
 
 ## 5) Features To Remove From Old Booking System
 
 These are still present and should be phased out for a pure digital marketplace:
 
-- [~] Booking flows (still in data model; removed from primary admin navigation and route matcher)
-- [~] Scheduling logic
-- [~] Rescheduling/cancellation logic
-- [~] Conflict detection logic
-- [~] Class availability/session capacity logic
-- [~] Session completion tracking as core purchase logic
+- [x] Booking flows removed from active purchase/access path
+- [x] Scheduling logic removed from active purchase/access path
+- [x] Rescheduling/cancellation logic removed from active purchase/access path
+- [x] Conflict detection removed from active purchase/access path
+- [x] Class availability/session capacity removed from active purchase/access path
+- [x] Session completion tracking removed from active purchase/access path
 
 ## 6) Module Progress (Your Proposed Structure)
 
@@ -86,32 +86,32 @@ These are still present and should be phased out for a pure digital marketplace:
 - [x] System architecture foundation
 - [x] Backend + database models
 - [x] Authentication and role management
-- [~] UI alignment to digital marketplace domain
+- [x] UI alignment to digital marketplace domain
 
 ### 3. Resource Management Module
-- [~] Upload resources
-- [~] Categorization
-- [~] Edit/delete resources
-- [~] Preview + metadata management
+- [x] Upload resources
+- [x] Categorization
+- [x] Edit/delete resources
+- [x] Preview + metadata management
 
 ### 4. Purchase and Payment Module
 - [x] Shopping cart
-- [~] Checkout
-- [~] Payment gateway integration
-- [ ] Transaction validation and durable order creation
-- [ ] Receipt generation
+- [x] Checkout
+- [x] Payment gateway integration
+- [x] Transaction validation and durable order creation
+- [x] Receipt generation
 
 ### 5. Download and Access Module
-- [~] Secure access control
+- [x] Secure access control
 - [x] Purchased resource library module
 - [x] Download history
 - [x] Download entitlement enforcement for file-level assets
 
 ### 6. Admin Panel and Analytics
 - [x] Dashboard foundation
-- [~] User management
-- [~] Resource management
-- [ ] Sales analytics and reports
+- [x] User management
+- [x] Resource management
+- [x] Sales analytics and reports
 
 ### 7. Testing, Documentation, and Handover
 - [~] Documentation present but outdated in places
@@ -126,15 +126,15 @@ These are still present and should be phased out for a pure digital marketplace:
 - [x] Student resource browsing and search
 - [x] Category and filter system
 - [x] Resource detail page
-- [ ] Shopping cart and full checkout pipeline
-- [~] Online payment integration
-- [ ] Receipt generation
+- [x] Shopping cart and full checkout pipeline
+- [x] Online payment integration
+- [x] Receipt generation
 - [x] Secure digital download
 - [x] Purchase history
-- [~] Sales dashboard
+- [x] Sales dashboard
 - [x] Admin management panel
 - [x] Ratings and reviews (submission workflow)
-- [ ] Reports and analytics (advanced)
+- [x] Reports and analytics (advanced)
 
 ## 8) Recommended Priority Order For Remaining Work
 

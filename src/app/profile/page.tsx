@@ -99,7 +99,7 @@ export default async function ProfilePage() {
               <Button variant="outline">Cart</Button>
             </Link>
             <Link href="/profile/orders">
-              <Button variant="outline">My Orders</Button>
+              <Button variant="outline">Payment History</Button>
             </Link>
             <Link href="/profile/downloads">
               <Button variant="outline">Download History</Button>

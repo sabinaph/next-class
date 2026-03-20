@@ -19,11 +19,15 @@ export async function createOrUpdateReview(
     throw new Error("Rating must be between 1 and 5");
   }
 
-  const hasEnrollment = await prisma.booking.findFirst({
+  const hasEnrollment = await prisma.order.findFirst({
     where: {
-      studentId: session.user.id,
-      courseId,
-      status: "CONFIRMED",
+      userId: session.user.id,
+      status: "COMPLETED",
+      items: {
+        some: {
+          courseId,
+        },
+      },
     },
     select: { id: true },
   });

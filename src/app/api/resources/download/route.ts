@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/app/lib/prisma";
+import { signDownloadToken } from "@/lib/download-token";
 
 export async function GET(req: Request) {
   try {
@@ -39,11 +40,15 @@ export async function GET(req: Request) {
     let hasAccess = isOwnerInstructor || isAdmin;
 
     if (!hasAccess) {
-      const enrollment = await prisma.booking.findFirst({
+      const enrollment = await prisma.order.findFirst({
         where: {
-          courseId: lesson.course.id,
-          studentId: session.user.id,
-          status: "CONFIRMED",
+          userId: session.user.id,
+          status: "COMPLETED",
+          items: {
+            some: {
+              courseId: lesson.course.id,
+            },
+          },
         },
         select: { id: true },
       });
@@ -64,7 +69,15 @@ export async function GET(req: Request) {
       },
     });
 
-    return NextResponse.redirect(lesson.content);
+    const token = signDownloadToken({
+      userId: session.user.id,
+      lessonId: lesson.id,
+      fileUrl: lesson.content,
+      exp: Date.now() + 1000 * 60 * 5,
+    });
+
+    const serveUrl = new URL(`/api/resources/serve?token=${encodeURIComponent(token)}`, req.url);
+    return NextResponse.redirect(serveUrl);
   } catch (error) {
     console.error("[RESOURCE_DOWNLOAD_ERROR]", error);
     return new NextResponse("Internal Error", { status: 500 });

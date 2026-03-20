@@ -84,7 +84,7 @@ export default async function CartPage() {
         </div>
         <form action={createOrderFromCart}>
           <Button type="submit" disabled={items.length === 0}>
-            Create Order
+            Proceed to Khalti
           </Button>
         </form>
       </div>

@@ -98,11 +98,15 @@ export async function getPublicCourse(id: string) {
     isWaitlisted = waitCount > 0;
 
     if (session.user.role === "STUDENT") {
-      const confirmed = await prisma.booking.count({
+      const confirmed = await prisma.order.count({
         where: {
-          studentId: session.user.id,
-          courseId: id,
-          status: "CONFIRMED",
+          userId: session.user.id,
+          status: "COMPLETED",
+          items: {
+            some: {
+              courseId: id,
+            },
+          },
         },
       });
       canReview = confirmed > 0;

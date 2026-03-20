@@ -17,6 +17,13 @@ export default async function OrdersPage() {
       userId: session.user.id,
     },
     include: {
+      invoice: {
+        select: {
+          id: true,
+          invoiceNumber: true,
+          sentAt: true,
+        },
+      },
       items: {
         include: {
           course: {
@@ -36,8 +43,8 @@ export default async function OrdersPage() {
     <div className="max-w-5xl mx-auto py-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">My Orders</h1>
-          <p className="text-muted-foreground">Track your resource orders.</p>
+          <h1 className="text-3xl font-bold tracking-tight">Payment History</h1>
+          <p className="text-muted-foreground">Track orders, payment status, and invoices.</p>
         </div>
         <Link href="/profile">
           <Button variant="outline">Back to Profile</Button>
@@ -51,6 +58,9 @@ export default async function OrdersPage() {
               <div>
                 <p className="text-sm text-muted-foreground">Order ID</p>
                 <p className="font-medium">{order.id}</p>
+                <p className="text-xs text-muted-foreground">
+                  Gateway: {order.paymentGateway || "KHALTI"}
+                </p>
               </div>
               <div className="text-right">
                 <p className="text-sm text-muted-foreground">Status</p>
@@ -82,6 +92,20 @@ export default async function OrdersPage() {
                   maximumFractionDigits: 2,
                 }).format(order.totalAmount.toNumber())}
               </span>
+            </div>
+            <div className="mt-3 flex items-center gap-3 text-sm">
+              {order.invoice ? (
+                <>
+                  <Link href={`/invoices/${order.invoice.id}`} className="underline">
+                    View Invoice ({order.invoice.invoiceNumber})
+                  </Link>
+                  <span className="text-xs text-muted-foreground">
+                    {order.invoice.sentAt ? "Invoice sent by email" : "Invoice email pending"}
+                  </span>
+                </>
+              ) : (
+                <span className="text-xs text-muted-foreground">Invoice will be available after payment verification.</span>
+              )}
             </div>
           </div>
         ))}

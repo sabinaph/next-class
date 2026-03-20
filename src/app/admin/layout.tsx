@@ -9,6 +9,8 @@ import {
   GraduationCap,
   BookOpen,
   ShieldCheck,
+  FolderTree,
+  BarChart3,
 } from "lucide-react";
 
 export default async function AdminLayout({
@@ -27,7 +29,7 @@ export default async function AdminLayout({
       {/* Sidebar */}
       <aside className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 hidden md:flex flex-col">
         <div className="p-6">
-          <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+          <h1 className="text-xl font-bold bg-linear-to-r from-primary to-purple-600 bg-clip-text text-transparent">
             Admin Panel
           </h1>
         </div>
@@ -67,6 +69,20 @@ export default async function AdminLayout({
           >
             <ShieldCheck className="w-5 h-5" />
             Certificates
+          </Link>
+          <Link
+            href="/admin/categories"
+            className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            <FolderTree className="w-5 h-5" />
+            Categories
+          </Link>
+          <Link
+            href="/admin/reports"
+            className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            <BarChart3 className="w-5 h-5" />
+            Reports
           </Link>
           <div className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
             <Link

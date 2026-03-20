@@ -19,12 +19,16 @@ export default async function LearnLayout({
     return redirect("/auth/signin");
   }
 
-  // Check unique booking
-  const booking = await prisma.booking.findFirst({
+  // Check completed order ownership
+  const purchasedOrder = await prisma.order.findFirst({
     where: {
-      courseId: courseId,
-      studentId: session.user.id,
-      status: "CONFIRMED",
+      userId: session.user.id,
+      status: "COMPLETED",
+      items: {
+        some: {
+          courseId,
+        },
+      },
     },
   });
 
@@ -51,7 +55,7 @@ export default async function LearnLayout({
   // Allow access if user is the instructor
   const isInstructor = courseRaw.instructorId === session.user.id;
 
-  if (!booking && !isInstructor) {
+  if (!purchasedOrder && !isInstructor) {
     return redirect(`/courses/${courseId}`);
   }
 
@@ -72,13 +76,13 @@ export default async function LearnLayout({
 
   return (
     <div className="h-full">
-      <div className="h-[80px] md:pl-80 fixed inset-y-0 w-full z-50">
+      <div className="h-20 md:pl-80 fixed inset-y-0 w-full z-50">
         <Navbar />
       </div>
-      <div className="hidden md:flex h-full w-80 flex-col fixed inset-y-0 z-50 mt-[80px]">
+      <div className="hidden md:flex h-full w-80 flex-col fixed inset-y-0 z-50 mt-20">
         <CourseSidebar course={course} completedLessonIds={completedLessonIds} />
       </div>
-      <main className="md:pl-80 pt-[80px] h-full">{children}</main>
+      <main className="md:pl-80 pt-20 h-full">{children}</main>
     </div>
   );
 }

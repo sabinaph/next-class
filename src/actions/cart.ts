@@ -4,6 +4,7 @@ import { prisma } from "@/app/lib/prisma";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 async function requireStudent() {
   const session = await getServerSession(authOptions);
@@ -16,16 +17,20 @@ async function requireStudent() {
 export async function addToCart(courseId: string) {
   const userId = await requireStudent();
 
-  const existingBooking = await prisma.booking.findFirst({
+  const existingOrder = await prisma.order.findFirst({
     where: {
-      studentId: userId,
-      courseId,
-      status: "CONFIRMED",
+      userId,
+      status: "COMPLETED",
+      items: {
+        some: {
+          courseId,
+        },
+      },
     },
     select: { id: true },
   });
 
-  if (existingBooking) {
+  if (existingOrder) {
     throw new Error("Resource already purchased");
   }
 
@@ -118,7 +123,7 @@ export async function createOrderFromCart() {
     0
   );
 
-  await prisma.order.create({
+  const order = await prisma.order.create({
     data: {
       userId,
       status: "PENDING",
@@ -139,4 +144,6 @@ export async function createOrderFromCart() {
   revalidatePath("/cart");
   revalidatePath("/profile");
   revalidatePath("/profile/orders");
+
+  redirect(`/khalti-payment?orderId=${order.id}`);
 }
