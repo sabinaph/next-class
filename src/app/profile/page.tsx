@@ -94,9 +94,17 @@ export default async function ProfilePage() {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             My Profile
           </h1>
-          <Link href="/profile/downloads">
-            <Button variant="outline">View Download History</Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link href="/cart">
+              <Button variant="outline">Cart</Button>
+            </Link>
+            <Link href="/profile/orders">
+              <Button variant="outline">My Orders</Button>
+            </Link>
+            <Link href="/profile/downloads">
+              <Button variant="outline">Download History</Button>
+            </Link>
+          </div>
         </div>
         <ProfileDashboard initialData={userData} />
       </div>

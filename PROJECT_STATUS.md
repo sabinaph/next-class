@@ -46,7 +46,7 @@ This checklist maps your requested features to the current codebase status.
 - [x] View resource details
 - [~] Buy resources (Stripe checkout starts, but full post-payment confirmation pipeline is incomplete)
 - [x] Download purchased files
-- [~] View purchase history (profile shows booking history, not full order history module)
+- [x] View purchase history
 - [x] Wishlist / save for later
 - [x] Rate and review resources
 - [x] Manage profile
@@ -56,8 +56,8 @@ This checklist maps your requested features to the current codebase status.
 - [ ] Digital product management replacing booking-centric design
 - [x] File upload and storage (UploadThing integration)
 - [x] Secure download access for paid users only
-- [ ] Shopping cart
-- [ ] Order management
+- [x] Shopping cart
+- [x] Order management
 - [ ] Payment confirmation (webhook/session validation and durable order creation)
 - [ ] Invoice/receipt generation
 - [x] Download history
@@ -95,7 +95,7 @@ These are still present and should be phased out for a pure digital marketplace:
 - [~] Preview + metadata management
 
 ### 4. Purchase and Payment Module
-- [ ] Shopping cart
+- [x] Shopping cart
 - [~] Checkout
 - [~] Payment gateway integration
 - [ ] Transaction validation and durable order creation

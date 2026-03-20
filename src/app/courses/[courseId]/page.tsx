@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { ReviewForm } from "@/components/courses/ReviewForm";
+import { AddToCartButton } from "@/components/courses/AddToCartButton";
 
 interface Props {
   params: Promise<{
@@ -92,6 +93,7 @@ export default async function CourseSubPage({ params }: Props) {
                   </Button>
                 </Link>
               )}
+              <AddToCartButton courseId={course.id} />
               <WishlistButton
                 courseId={course.id}
                 initialIsWishlisted={course.isWishlisted}
