@@ -94,7 +94,9 @@ export async function DELETE(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id || ![UserRole.ADMIN, UserRole.INSTRUCTOR].includes(session.user.role)) {
+    const role = session?.user?.role;
+    const canPromote = role === UserRole.ADMIN || role === UserRole.INSTRUCTOR;
+    if (!session?.user?.id || !canPromote) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

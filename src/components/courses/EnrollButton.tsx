@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 interface EnrollButtonProps {
   courseId: string;
@@ -11,8 +10,8 @@ interface EnrollButtonProps {
 }
 
 export function EnrollButton({ courseId, price }: EnrollButtonProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+  const [loadingGateway, setLoadingGateway] = useState<"khalti" | "stripe" | null>(null);
+  const [error, setError] = useState("");
 
   const formattedPrice = new Intl.NumberFormat("en-NP", {
     style: "currency",
@@ -20,10 +19,12 @@ export function EnrollButton({ courseId, price }: EnrollButtonProps) {
     maximumFractionDigits: 2,
   }).format(price);
 
-  const handleEnroll = async () => {
-    setIsLoading(true);
+  const handleCheckout = async (gateway: "khalti" | "stripe") => {
+    setLoadingGateway(gateway);
+    setError("");
+
     try {
-      const response = await fetch("/api/checkout", {
+      const orderResponse = await fetch("/api/checkout/create-order", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -33,29 +34,65 @@ export function EnrollButton({ courseId, price }: EnrollButtonProps) {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error("Something went wrong");
+      const orderData = await orderResponse.json();
+
+      if (!orderResponse.ok || !orderData.orderId) {
+        throw new Error(orderData.error || "Unable to create order");
       }
 
-      const { url } = await response.json();
-      window.location.href = url; // Redirect to Stripe
+      const sessionEndpoint =
+        gateway === "stripe"
+          ? "/api/checkout-session/stripe"
+          : "/api/checkout-session";
+
+      const paymentResponse = await fetch(sessionEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          orderId: orderData.orderId,
+        }),
+      });
+
+      const paymentData = await paymentResponse.json();
+
+      if (!paymentResponse.ok || !paymentData.payment_url) {
+        throw new Error(paymentData.error || `Unable to start ${gateway} payment`);
+      }
+
+      window.location.href = paymentData.payment_url;
     } catch (error) {
-      console.error(error);
-      alert("Something went wrong");
+      setError(error instanceof Error ? error.message : "Something went wrong");
     } finally {
-      setIsLoading(false);
+      setLoadingGateway(null);
     }
   };
 
   return (
-    <Button
-      className="w-full text-lg"
-      size="lg"
-      onClick={handleEnroll}
-      disabled={isLoading}
-    >
-      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-      Checkout - {formattedPrice}
-    </Button>
+    <div className="w-full space-y-3">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <Button
+          className="w-full text-base"
+          size="lg"
+          onClick={() => handleCheckout("khalti")}
+          disabled={loadingGateway !== null}
+        >
+          {loadingGateway === "khalti" && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Khalti - {formattedPrice}
+        </Button>
+        <Button
+          className="w-full text-base"
+          size="lg"
+          variant="outline"
+          onClick={() => handleCheckout("stripe")}
+          disabled={loadingGateway !== null}
+        >
+          {loadingGateway === "stripe" && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Stripe - {formattedPrice}
+        </Button>
+      </div>
+      {error && <p className="text-sm text-red-600">{error}</p>}
+    </div>
   );
 }
