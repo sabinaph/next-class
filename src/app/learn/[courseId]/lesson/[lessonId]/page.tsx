@@ -2,7 +2,8 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/app/lib/prisma";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Play } from "lucide-react";
+import { CheckCircle, Download } from "lucide-react";
+import Link from "next/link";
 // Note: ReactMarkdown handling might need a client component, but let's try a simple server render or client wrapper if needed.
 // Actually, I'll stick to simple text display if no markdown renderer is installed.
 // The user hasn't asked for Markdown specifically, but "Text" implies it.
@@ -48,8 +49,16 @@ export default async function LessonIdPage({
         )}
 
         {lesson.type === "PDF" && lesson.content && (
-          <div className="h-[80vh] w-full border rounded-xl mt-4">
-            <iframe src={lesson.content} className="w-full h-full" />
+          <div className="space-y-3 mt-4">
+            <div className="h-[80vh] w-full border rounded-xl">
+              <iframe src={lesson.content} className="w-full h-full" />
+            </div>
+            <Link href={`/api/resources/download?lessonId=${lesson.id}`}>
+              <Button variant="outline" className="gap-2">
+                <Download className="h-4 w-4" />
+                Download Resource
+              </Button>
+            </Link>
           </div>
         )}
       </div>
