@@ -6,6 +6,12 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { revalidatePath } from "next/cache";
 
 export async function getPublicCourse(id: string) {
+  const prismaAny = prisma as unknown as {
+    order?: {
+      count: (args: unknown) => Promise<number>;
+    };
+  };
+
   const course = await prisma.course.findUnique({
     where: {
       id,
@@ -98,17 +104,25 @@ export async function getPublicCourse(id: string) {
     isWaitlisted = waitCount > 0;
 
     if (session.user.role === "STUDENT") {
-      const confirmed = await prisma.order.count({
-        where: {
-          userId: session.user.id,
-          status: "COMPLETED",
-          items: {
-            some: {
-              courseId: id,
+      const confirmed = prismaAny.order?.count
+        ? await prismaAny.order.count({
+            where: {
+              userId: session.user.id,
+              status: "COMPLETED",
+              items: {
+                some: {
+                  courseId: id,
+                },
+              },
             },
-          },
-        },
-      });
+          })
+        : await prisma.booking.count({
+            where: {
+              studentId: session.user.id,
+              courseId: id,
+              status: "CONFIRMED",
+            },
+          });
       canReview = confirmed > 0;
 
       userReview = await prisma.review.findUnique({
