@@ -90,6 +90,14 @@ export default function Navbar({ className }: NavbarProps) {
             >
               Courses
             </Link>
+            {session && (
+              <Link
+                href="/my-courses"
+                className="text-gray-600 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 transition font-medium"
+              >
+                My Courses
+              </Link>
+            )}
             <Link
               href="/about"
               className="text-gray-600 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 transition font-medium"
@@ -140,11 +148,11 @@ export default function Navbar({ className }: NavbarProps) {
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link
-                          href="/profile?tab=learning"
+                          href="/my-courses"
                           className="cursor-pointer"
                         >
                           <BookOpen className="mr-2 h-4 w-4" />
-                          <span>My Learning</span>
+                          <span>My Courses</span>
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
@@ -253,6 +261,15 @@ export default function Navbar({ className }: NavbarProps) {
             >
               Courses
             </Link>
+            {session && (
+              <Link
+                href="/my-courses"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/10"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                My Courses
+              </Link>
+            )}
             <Link
               href="/about"
               className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/10"
@@ -287,12 +304,12 @@ export default function Navbar({ className }: NavbarProps) {
                     My Profile
                   </Link>
                   <Link
-                    href="/profile?tab=learning"
+                    href="/my-courses"
                     className="flex items-center gap-2 px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <BookOpen size={18} />
-                    My Learning
+                    My Courses
                   </Link>
 
                   {session.user?.role === "INSTRUCTOR" && (
