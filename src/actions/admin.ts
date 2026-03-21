@@ -6,6 +6,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import { randomBytes, randomInt } from "crypto";
 import {
   sendInstructorApplicationApprovedEmail,
   sendInstructorApplicationRejectedEmail,
@@ -220,10 +221,6 @@ export async function setUserActiveState(userId: string, isActive: boolean) {
 
 const approveApplicationSchema = z.object({
   applicationId: z.string().min(1),
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
   adminNotes: z.string().optional(),
 });
 
@@ -240,10 +237,6 @@ export async function approveInstructorApplication(formData: FormData) {
 
   const validated = approveApplicationSchema.parse({
     applicationId: formData.get("applicationId"),
-    firstName: formData.get("firstName"),
-    lastName: formData.get("lastName"),
-    username: formData.get("username"),
-    password: formData.get("password"),
     adminNotes: formData.get("adminNotes") || undefined,
   });
 
@@ -261,25 +254,47 @@ export async function approveInstructorApplication(formData: FormData) {
 
   const existingUser = await prisma.user.findFirst({
     where: {
-      OR: [{ email: application.email }, { username: validated.username }],
+      email: application.email,
     },
     select: { id: true },
   });
 
   if (existingUser) {
-    throw new Error("A user with this email or username already exists");
+    throw new Error("A user with this email already exists");
   }
 
-  const passwordHash = await bcrypt.hash(validated.password, 12);
-  const fullName = `${validated.firstName} ${validated.lastName}`.trim();
+  const fullName = application.fullName.trim();
+  const nameParts = fullName.split(/\s+/).filter(Boolean);
+  const firstName = nameParts[0] || "Instructor";
+  const lastName = nameParts.slice(1).join(" ") || "User";
+
+  const emailPrefix = application.email.split("@")[0] || "instructor";
+  const baseUsername = emailPrefix.toLowerCase().replace(/[^a-z0-9._]/g, "").slice(0, 14) || "instructor";
+
+  let generatedUsername = `${baseUsername}${randomInt(1000, 9999)}`;
+  let usernameExists = await prisma.user.findUnique({
+    where: { username: generatedUsername },
+    select: { id: true },
+  });
+
+  while (usernameExists) {
+    generatedUsername = `${baseUsername}${randomInt(1000, 9999)}`;
+    usernameExists = await prisma.user.findUnique({
+      where: { username: generatedUsername },
+      select: { id: true },
+    });
+  }
+
+  const generatedPassword = `${randomBytes(4).toString("hex")}${randomInt(10, 99)}@Nc`;
+  const passwordHash = await bcrypt.hash(generatedPassword, 12);
 
   const createdUser = await prisma.user.create({
     data: {
-      username: validated.username,
+      username: generatedUsername,
       email: application.email,
       passwordHash,
-      firstName: validated.firstName,
-      lastName: validated.lastName,
+      firstName,
+      lastName,
       name: fullName,
       role: "INSTRUCTOR",
       emailVerified: new Date(),
@@ -312,6 +327,7 @@ export async function approveInstructorApplication(formData: FormData) {
         status: "APPROVED",
         email: application.email,
         createdInstructorId: createdUser.id,
+        generatedUsername,
       },
     },
   });
@@ -324,8 +340,8 @@ export async function approveInstructorApplication(formData: FormData) {
   await sendInstructorApplicationApprovedEmail({
     to: application.email,
     name: application.fullName,
-    username: validated.username,
-    password: validated.password,
+    username: generatedUsername,
+    password: generatedPassword,
     signInUrl: `${appUrl}/auth/signin`,
   });
 

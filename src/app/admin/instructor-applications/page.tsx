@@ -1,7 +1,6 @@
 import { prisma } from "@/app/lib/prisma";
 import { approveInstructorApplication, rejectInstructorApplication } from "@/actions/admin";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 export default async function InstructorApplicationsPage() {
@@ -180,14 +179,12 @@ export default async function InstructorApplicationsPage() {
 
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                   <form action={approveInstructorApplication} className="space-y-3 rounded-lg border p-4">
-                    <h3 className="font-semibold">Approve and Create Instructor Login</h3>
+                    <h3 className="font-semibold">Approve and Auto Generate Credentials</h3>
                     <input type="hidden" name="applicationId" value={application.id} />
-                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                      <Input name="firstName" required placeholder="First name" />
-                      <Input name="lastName" required placeholder="Last name" />
-                    </div>
-                    <Input name="username" required placeholder="Username" />
-                    <Input name="password" type="text" minLength={8} required placeholder="Temporary password" />
+                    <p className="text-xs text-muted-foreground">
+                      Username and temporary password will be generated automatically.
+                      Credentials will be emailed to the applicant.
+                    </p>
                     <Textarea name="adminNotes" placeholder="Optional note" rows={2} />
                     <Button type="submit" className="w-full">Approve Application</Button>
                   </form>

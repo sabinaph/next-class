@@ -346,11 +346,15 @@ export const sendInstructorApplicationApprovedEmail = async (data: {
         </p>
         <p style="color: #111827; font-weight: 600; margin-bottom: 8px;">Your login credentials:</p>
         <div style="padding: 14px 16px; border: 1px solid #e5e7eb; border-radius: 10px; background: #f9fafb;">
+          <p style="margin: 0 0 8px; font-size: 14px;"><strong>Email:</strong> ${data.to}</p>
           <p style="margin: 0 0 8px; font-size: 14px;"><strong>Username:</strong> ${data.username}</p>
           <p style="margin: 0; font-size: 14px;"><strong>Password:</strong> ${data.password}</p>
         </div>
-        <p style="margin-top: 16px; color: #6b7280; font-size: 13px;">
-          Please sign in and change your password immediately for security.
+        <p style="margin-top: 16px; color: #b91c1c; font-size: 13px; font-weight: 700;">
+          Security Notice: After first login, change your password immediately.
+        </p>
+        <p style="margin-top: 8px; color: #6b7280; font-size: 13px;">
+          For your security purpose, do not share these credentials with anyone.
         </p>
         <p style="margin-top: 18px;">
           <a href="${data.signInUrl}" style="display: inline-block; padding: 10px 16px; background: #059669; color: #fff; text-decoration: none; border-radius: 6px; font-size: 14px;">
