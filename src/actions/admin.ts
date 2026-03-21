@@ -272,14 +272,14 @@ export async function approveInstructorApplication(formData: FormData) {
   const baseUsername = emailPrefix.toLowerCase().replace(/[^a-z0-9._]/g, "").slice(0, 14) || "instructor";
 
   let generatedUsername = `${baseUsername}${randomInt(1000, 9999)}`;
-  let usernameExists = await prisma.user.findUnique({
+  let usernameExists = await prisma.user.findFirst({
     where: { username: generatedUsername },
     select: { id: true },
   });
 
   while (usernameExists) {
     generatedUsername = `${baseUsername}${randomInt(1000, 9999)}`;
-    usernameExists = await prisma.user.findUnique({
+    usernameExists = await prisma.user.findFirst({
       where: { username: generatedUsername },
       select: { id: true },
     });
