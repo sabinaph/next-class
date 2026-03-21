@@ -3,9 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "prisma generate",
     "dev": "next dev --webpack --disable-source-maps",
     "dev:webpack": "next dev --webpack",
     "dev:turbo": "next dev --turbo",
+    "prebuild": "prisma generate",
     "build": "next build",
     "build:turbo": "next build --turbo",
     "start": "next start",
