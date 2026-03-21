@@ -6,6 +6,10 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import {
+  sendInstructorApplicationApprovedEmail,
+  sendInstructorApplicationRejectedEmail,
+} from "@/lib/email";
 
 const createInstructorSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
@@ -212,4 +216,174 @@ export async function setUserActiveState(userId: string, isActive: boolean) {
 
   revalidatePath("/admin/students");
   revalidatePath("/admin/instructors");
+}
+
+const approveApplicationSchema = z.object({
+  applicationId: z.string().min(1),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  adminNotes: z.string().optional(),
+});
+
+const rejectApplicationSchema = z.object({
+  applicationId: z.string().min(1),
+  adminNotes: z.string().min(2, "Reason is required"),
+});
+
+export async function approveInstructorApplication(formData: FormData) {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== "ADMIN") {
+    throw new Error("Unauthorized");
+  }
+
+  const validated = approveApplicationSchema.parse({
+    applicationId: formData.get("applicationId"),
+    firstName: formData.get("firstName"),
+    lastName: formData.get("lastName"),
+    username: formData.get("username"),
+    password: formData.get("password"),
+    adminNotes: formData.get("adminNotes") || undefined,
+  });
+
+  const application = await prisma.instructorApplication.findUnique({
+    where: { id: validated.applicationId },
+  });
+
+  if (!application) {
+    throw new Error("Application not found");
+  }
+
+  if (application.status !== "PENDING") {
+    throw new Error("This application has already been reviewed");
+  }
+
+  const existingUser = await prisma.user.findFirst({
+    where: {
+      OR: [{ email: application.email }, { username: validated.username }],
+    },
+    select: { id: true },
+  });
+
+  if (existingUser) {
+    throw new Error("A user with this email or username already exists");
+  }
+
+  const passwordHash = await bcrypt.hash(validated.password, 12);
+  const fullName = `${validated.firstName} ${validated.lastName}`.trim();
+
+  const createdUser = await prisma.user.create({
+    data: {
+      username: validated.username,
+      email: application.email,
+      passwordHash,
+      firstName: validated.firstName,
+      lastName: validated.lastName,
+      name: fullName,
+      role: "INSTRUCTOR",
+      emailVerified: new Date(),
+      isActive: true,
+      createdBy: session.user.id,
+    },
+    select: {
+      id: true,
+      email: true,
+    },
+  });
+
+  await prisma.instructorApplication.update({
+    where: { id: application.id },
+    data: {
+      status: "APPROVED",
+      reviewedAt: new Date(),
+      reviewedById: session.user.id,
+      adminNotes: validated.adminNotes || null,
+    },
+  });
+
+  await prisma.audit.create({
+    data: {
+      userId: session.user.id,
+      action: "CREATE",
+      entityType: "InstructorApplication",
+      entityId: application.id,
+      metadata: {
+        status: "APPROVED",
+        email: application.email,
+        createdInstructorId: createdUser.id,
+      },
+    },
+  });
+
+  const appUrl =
+    process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.NEXTAUTH_URL ||
+    "http://localhost:3000";
+
+  await sendInstructorApplicationApprovedEmail({
+    to: application.email,
+    name: application.fullName,
+    username: validated.username,
+    password: validated.password,
+    signInUrl: `${appUrl}/auth/signin`,
+  });
+
+  revalidatePath("/admin/instructor-applications");
+  revalidatePath("/admin/instructors");
+}
+
+export async function rejectInstructorApplication(formData: FormData) {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== "ADMIN") {
+    throw new Error("Unauthorized");
+  }
+
+  const validated = rejectApplicationSchema.parse({
+    applicationId: formData.get("applicationId"),
+    adminNotes: formData.get("adminNotes"),
+  });
+
+  const application = await prisma.instructorApplication.findUnique({
+    where: { id: validated.applicationId },
+  });
+
+  if (!application) {
+    throw new Error("Application not found");
+  }
+
+  if (application.status !== "PENDING") {
+    throw new Error("This application has already been reviewed");
+  }
+
+  await prisma.instructorApplication.update({
+    where: { id: application.id },
+    data: {
+      status: "REJECTED",
+      reviewedAt: new Date(),
+      reviewedById: session.user.id,
+      adminNotes: validated.adminNotes,
+    },
+  });
+
+  await prisma.audit.create({
+    data: {
+      userId: session.user.id,
+      action: "UPDATE",
+      entityType: "InstructorApplication",
+      entityId: application.id,
+      metadata: {
+        status: "REJECTED",
+        email: application.email,
+      },
+    },
+  });
+
+  await sendInstructorApplicationRejectedEmail({
+    to: application.email,
+    name: application.fullName,
+    reason: validated.adminNotes,
+  });
+
+  revalidatePath("/admin/instructor-applications");
 }
