@@ -286,10 +286,10 @@ export default function Navbar({ className }: NavbarProps) {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="relative h-10 w-10 rounded-full border border-border/70 bg-background/70 p-0"
+                      className="relative h-9 w-9 rounded-full border border-border/70 bg-background/70 p-0"
                       aria-label="Notifications"
                     >
-                      <Bell className="h-[22px] w-[22px]" />
+                      <Bell className="h-5 w-5" />
                       {notifications.length > 0 && (
                         <span className="absolute -right-1 -top-1 inline-flex min-h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white">
                           {notifications.length > 9 ? "9+" : notifications.length}
