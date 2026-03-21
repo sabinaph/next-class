@@ -153,8 +153,16 @@ export async function generateMissingCertificates() {
     }
   }
 
+  await prisma.audit.create({
+    data: {
+      userId: session.user.id,
+      action: "CREATE",
+      entityType: "Certificate",
+      metadata: { generated },
+    },
+  });
+
   revalidatePath("/admin/certificates");
-  return { generated };
 }
 
 export async function toggleCertificateValidity(certificateId: string, isValid: boolean) {

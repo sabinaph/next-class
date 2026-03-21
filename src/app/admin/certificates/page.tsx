@@ -4,6 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { generateMissingCertificates, toggleCertificateValidity } from "@/actions/admin";
 
 export default async function AdminCertificatesPage() {
+  async function handleGenerateMissingCertificates(_formData: FormData) {
+    "use server";
+    await generateMissingCertificates();
+  }
+
   const certificates = await prisma.certificate.findMany({
     include: {
       student: {
@@ -31,7 +36,7 @@ export default async function AdminCertificatesPage() {
           <h1 className="text-3xl font-bold tracking-tight">Certificates</h1>
           <p className="text-muted-foreground">Issue and validate learner certificates.</p>
         </div>
-        <form action={generateMissingCertificates}>
+        <form action={handleGenerateMissingCertificates}>
           <Button type="submit">Generate Missing Certificates</Button>
         </form>
       </div>
