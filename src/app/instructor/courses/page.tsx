@@ -6,6 +6,7 @@ import Link from "next/link";
 
 export default async function CoursesPage() {
   const courses = await getInstructorCourses();
+  const fallbackThumbnail = "/default-coures.jpg";
   const formatNPR = (amount: number) =>
     new Intl.NumberFormat("en-NP", {
       style: "currency",
@@ -37,18 +38,11 @@ export default async function CoursesPage() {
             className="flex flex-col md:flex-row items-start md:items-center p-6 gap-6 hover:shadow-md transition-shadow"
           >
             <div className="h-32 w-full md:w-48 bg-muted rounded-lg shrink-0 relative overflow-hidden">
-              {/* Placeholder for thumbnail if not present */}
-              {course.thumbnail ? (
-                <img
-                  src={course.thumbnail}
-                  alt={course.title}
-                  className="object-cover w-full h-full"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-muted-foreground bg-secondary">
-                  No Image
-                </div>
-              )}
+              <img
+                src={course.thumbnail || fallbackThumbnail}
+                alt={course.title}
+                className="object-cover w-full h-full"
+              />
             </div>
 
             <div className="flex-1 space-y-2">

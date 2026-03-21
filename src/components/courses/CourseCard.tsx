@@ -12,7 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Clock, Users, BookOpen } from "lucide-react";
+import { Clock, Users } from "lucide-react";
 
 interface CourseCardProps {
   course: CourseWithInstructor;
@@ -40,6 +40,8 @@ export default function CourseCard({ course }: CourseCardProps) {
       maximumFractionDigits: 2,
     }).format(amount);
 
+  const fallbackThumbnail = "/default-coures.jpg";
+
   // Get level badge variant/color
   const getLevelBadgeVariant = (level: string) => {
     switch (level.toLowerCase()) {
@@ -59,19 +61,13 @@ export default function CourseCard({ course }: CourseCardProps) {
       <Card className="h-full overflow-hidden hover:shadow-lg transition-all duration-300 group border-border/50 bg-card/50 hover:bg-card hover:-translate-y-1">
         {/* Thumbnail Section */}
         <div className="relative aspect-video w-full overflow-hidden bg-muted">
-          {thumbnail ? (
-            <Image
-              src={thumbnail}
-              alt={title}
-              fill
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900">
-              <BookOpen className="w-12 h-12 text-muted-foreground/20" />
-            </div>
-          )}
+          <Image
+            src={thumbnail || fallbackThumbnail}
+            alt={title}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          />
 
           <div className="absolute top-2 left-2 z-10">
             <Badge

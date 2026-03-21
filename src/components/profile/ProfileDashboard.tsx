@@ -223,17 +223,11 @@ export default function ProfileDashboard({
                       className="flex flex-col sm:flex-row gap-4 p-4 border rounded-xl hover:shadow-md transition-shadow bg-card"
                     >
                       <div className="w-full sm:w-48 aspect-video bg-gray-100 rounded-lg overflow-hidden shrink-0">
-                        {booking.course.thumbnail ? (
-                          <img
-                            src={booking.course.thumbnail}
-                            alt={booking.course.title}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-400">
-                            <BookOpen size={24} />
-                          </div>
-                        )}
+                        <img
+                          src={booking.course.thumbnail || "/default-coures.jpg"}
+                          alt={booking.course.title}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                       <div className="flex-1 flex flex-col justify-between">
                         <div>
@@ -454,13 +448,11 @@ export default function ProfileDashboard({
                       className="border rounded-xl overflow-hidden hover:shadow-lg transition-all"
                     >
                       <div className="aspect-video bg-gray-100 relative">
-                        {item.course.thumbnail && (
-                          <img
-                            src={item.course.thumbnail}
-                            alt={item.course.title}
-                            className="w-full h-full object-cover"
-                          />
-                        )}
+                        <img
+                          src={item.course.thumbnail || "/default-coures.jpg"}
+                          alt={item.course.title}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                       <div className="p-4">
                         <h4 className="font-semibold line-clamp-1 mb-1">

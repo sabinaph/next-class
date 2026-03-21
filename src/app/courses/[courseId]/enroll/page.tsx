@@ -32,6 +32,8 @@ export default async function EnrollPage({ params }: Props) {
     notFound();
   }
 
+  const fallbackThumbnail = "/default-coures.jpg";
+
   return (
     <div className="container max-w-lg mx-auto py-20 px-4">
       <Card>
@@ -42,17 +44,11 @@ export default async function EnrollPage({ params }: Props) {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="aspect-video relative bg-muted rounded-lg overflow-hidden">
-            {course.thumbnail ? (
-              <img
-                src={course.thumbnail}
-                alt={course.title}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                No Image
-              </div>
-            )}
+            <img
+              src={course.thumbnail || fallbackThumbnail}
+              alt={course.title}
+              className="w-full h-full object-cover"
+            />
           </div>
 
           <div>

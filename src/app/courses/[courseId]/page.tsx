@@ -36,6 +36,8 @@ export default async function CourseSubPage({ params }: Props) {
     notFound();
   }
 
+  const fallbackThumbnail = "/default-coures.jpg";
+
   return (
     <div className="min-h-screen bg-background pb-20">
       <div className="border-b bg-linear-to-b from-primary/8 via-background to-background">
@@ -118,17 +120,11 @@ export default async function CourseSubPage({ params }: Props) {
 
             <div className="rounded-2xl border bg-card p-3 shadow-md">
               <div className="aspect-video overflow-hidden rounded-xl bg-muted">
-                {course.thumbnail ? (
-                  <img
-                    src={course.thumbnail}
-                    alt={course.title}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="h-full w-full flex items-center justify-center text-muted-foreground">
-                    <BookOpen className="h-8 w-8" />
-                  </div>
-                )}
+                <img
+                  src={course.thumbnail || fallbackThumbnail}
+                  alt={course.title}
+                  className="h-full w-full object-cover"
+                />
               </div>
               <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
                 <div className="rounded-lg border p-3 bg-background/70">

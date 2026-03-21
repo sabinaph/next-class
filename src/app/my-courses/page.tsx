@@ -52,6 +52,8 @@ export default async function MyCoursesPage() {
       return true;
     });
 
+  const fallbackThumbnail = "/default-coures.jpg";
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
@@ -94,17 +96,11 @@ export default async function MyCoursesPage() {
                   className="rounded-xl border bg-white dark:bg-gray-900 overflow-hidden"
                 >
                   <div className="aspect-video bg-muted">
-                    {course.thumbnail ? (
-                      <img
-                        src={course.thumbnail}
-                        alt={course.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-sm text-muted-foreground">
-                        No Thumbnail
-                      </div>
-                    )}
+                    <img
+                      src={course.thumbnail || fallbackThumbnail}
+                      alt={course.title}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div className="p-4 space-y-3">
                     <div>
