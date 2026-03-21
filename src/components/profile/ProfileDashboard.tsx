@@ -23,6 +23,12 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 // Define the shape of user data passed from the server
 interface UserData {
@@ -65,6 +71,11 @@ export default function ProfileDashboard({
     type: "",
     text: "",
   });
+  const [previewCertificateUrl, setPreviewCertificateUrl] = useState<string | null>(null);
+  const [previewCertificateTitle, setPreviewCertificateTitle] = useState("");
+
+  const getPreviewUrl = (certificateUrl: string) =>
+    `${certificateUrl}${certificateUrl.includes("?") ? "&" : "?"}preview=1`;
 
   // Handlers
   const handleProfileUpdate = async (e: React.FormEvent) => {
@@ -287,16 +298,18 @@ export default function ProfileDashboard({
                             </p>
                           </div>
                           <div className="flex items-center gap-2">
-                            <a
-                              href={`${certificate.certificateUrl}?preview=1`}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              className="gap-2"
+                              onClick={() => {
+                                setPreviewCertificateTitle(certificate.course.title);
+                                setPreviewCertificateUrl(getPreviewUrl(certificate.certificateUrl));
+                              }}
                             >
-                              <Button size="sm" variant="secondary" className="gap-2">
-                                <Eye className="w-4 h-4" />
-                                Preview
-                              </Button>
-                            </a>
+                              <Eye className="w-4 h-4" />
+                              Preview
+                            </Button>
                             <a href={certificate.certificateUrl}>
                               <Button size="sm" variant="outline" className="gap-2">
                                 <Download className="w-4 h-4" />
@@ -370,6 +383,32 @@ export default function ProfileDashboard({
               </div>
             </div>
           )}
+
+          <Dialog
+            open={Boolean(previewCertificateUrl)}
+            onOpenChange={(open) => {
+              if (!open) {
+                setPreviewCertificateUrl(null);
+                setPreviewCertificateTitle("");
+              }
+            }}
+          >
+            <DialogContent className="w-[95vw] max-w-5xl h-[85vh] p-0 overflow-hidden">
+              <DialogHeader className="px-6 py-4 border-b">
+                <DialogTitle className="truncate">
+                  Certificate Preview: {previewCertificateTitle}
+                </DialogTitle>
+              </DialogHeader>
+
+              {previewCertificateUrl ? (
+                <iframe
+                  src={previewCertificateUrl}
+                  title="Certificate Preview"
+                  className="w-full h-full border-0"
+                />
+              ) : null}
+            </DialogContent>
+          </Dialog>
 
           {activeTab === "wishlist" && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
