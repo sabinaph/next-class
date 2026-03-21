@@ -35,7 +35,7 @@ export default function LayoutWrapper({
   return (
     <div className="min-h-screen bg-background/70 flex flex-col font-sans">
       <Navbar />
-      <main className="grow pt-16">{children}</main>
+      <main className="grow pt-20">{children}</main>
       <Footer />
     </div>
   );
