@@ -17,6 +17,7 @@ import {
   Award,
   Download,
   Eye,
+  ExternalLink,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -73,6 +74,7 @@ export default function ProfileDashboard({
   });
   const [previewCertificateUrl, setPreviewCertificateUrl] = useState<string | null>(null);
   const [previewCertificateTitle, setPreviewCertificateTitle] = useState("");
+  const [previewDownloadUrl, setPreviewDownloadUrl] = useState<string | null>(null);
 
   const getPreviewUrl = (certificateUrl: string) =>
     `${certificateUrl}${certificateUrl.includes("?") ? "&" : "?"}preview=1`;
@@ -305,6 +307,7 @@ export default function ProfileDashboard({
                               onClick={() => {
                                 setPreviewCertificateTitle(certificate.course.title);
                                 setPreviewCertificateUrl(getPreviewUrl(certificate.certificateUrl));
+                                setPreviewDownloadUrl(certificate.certificateUrl);
                               }}
                             >
                               <Eye className="w-4 h-4" />
@@ -390,21 +393,45 @@ export default function ProfileDashboard({
               if (!open) {
                 setPreviewCertificateUrl(null);
                 setPreviewCertificateTitle("");
+                setPreviewDownloadUrl(null);
               }
             }}
           >
-            <DialogContent className="w-[95vw] max-w-5xl h-[85vh] p-0 overflow-hidden">
-              <DialogHeader className="px-6 py-4 border-b">
-                <DialogTitle className="truncate">
+            <DialogContent className="w-[96vw] max-w-6xl h-[90vh] p-0 overflow-hidden flex flex-col gap-0">
+              <DialogHeader className="px-6 py-4 border-b bg-slate-50 dark:bg-slate-900/70">
+                <DialogTitle className="truncate pr-10 text-lg">
                   Certificate Preview: {previewCertificateTitle}
                 </DialogTitle>
+                <div className="flex items-center gap-2 pt-2">
+                  {previewCertificateUrl ? (
+                    <a
+                      href={previewCertificateUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Button size="sm" variant="secondary" className="gap-2">
+                        <ExternalLink className="w-4 h-4" />
+                        Open in new tab
+                      </Button>
+                    </a>
+                  ) : null}
+                  {previewDownloadUrl ? (
+                    <a href={previewDownloadUrl}>
+                      <Button size="sm" variant="outline" className="gap-2">
+                        <Download className="w-4 h-4" />
+                        Download PDF
+                      </Button>
+                    </a>
+                  ) : null}
+                </div>
               </DialogHeader>
 
               {previewCertificateUrl ? (
                 <iframe
-                  src={previewCertificateUrl}
+                  src={`${previewCertificateUrl}#view=FitH`}
                   title="Certificate Preview"
-                  className="w-full h-full border-0"
+                  className="w-full flex-1 border-0 bg-slate-100"
+                  loading="lazy"
                 />
               ) : null}
             </DialogContent>
