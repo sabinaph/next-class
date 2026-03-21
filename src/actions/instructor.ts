@@ -176,7 +176,13 @@ export async function createLesson(
   courseId: string,
   title: string,
   type: "VIDEO" | "TEXT" | "PDF" | "QUIZ" | "ASSIGNMENT",
-  content?: string
+  content?: string,
+  options?: {
+    duration?: number;
+    order?: number;
+    isPublished?: boolean;
+    isFree?: boolean;
+  }
 ) {
   const session = await getServerSession(authOptions);
 
@@ -200,7 +206,11 @@ export async function createLesson(
     orderBy: { order: "desc" },
   });
 
-  const newOrder = lastLesson ? lastLesson.order + 1 : 1;
+  const newOrder = options?.order && options.order > 0
+    ? options.order
+    : lastLesson
+    ? lastLesson.order + 1
+    : 1;
 
   const lesson = await prisma.lesson.create({
     data: {
@@ -209,7 +219,9 @@ export async function createLesson(
       content,
       courseId,
       order: newOrder,
-      isPublished: true,
+      duration: options?.duration,
+      isPublished: options?.isPublished ?? true,
+      isFree: options?.isFree ?? false,
     },
   });
 
@@ -222,10 +234,12 @@ export async function updateLesson(
   id: string,
   data: {
     title?: string;
+    type?: "VIDEO" | "TEXT" | "PDF" | "QUIZ" | "ASSIGNMENT";
     content?: string;
     isPublished?: boolean;
     isFree?: boolean;
     duration?: number;
+    order?: number;
   }
 ) {
   const session = await getServerSession(authOptions);

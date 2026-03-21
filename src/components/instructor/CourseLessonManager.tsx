@@ -55,6 +55,10 @@ export function CourseLessonManager({
   const [title, setTitle] = useState("");
   const [type, setType] = useState<LessonType>("VIDEO");
   const [content, setContent] = useState("");
+  const [duration, setDuration] = useState<number | "">("");
+  const [order, setOrder] = useState<number>(1);
+  const [isPublished, setIsPublished] = useState(true);
+  const [isFree, setIsFree] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadingFile, setIsUploadingFile] = useState(false);
 
@@ -63,6 +67,10 @@ export function CourseLessonManager({
     setTitle("");
     setType("VIDEO");
     setContent("");
+    setDuration("");
+    setOrder(1);
+    setIsPublished(true);
+    setIsFree(false);
     setIsAdding(false);
     setEditingLesson(null);
   };
@@ -71,7 +79,12 @@ export function CourseLessonManager({
     e.preventDefault();
     setIsLoading(true);
     try {
-      await createLesson(courseId, title, type, content);
+      await createLesson(courseId, title, type, content, {
+        duration: duration === "" ? undefined : Number(duration),
+        isPublished,
+        isFree,
+        order,
+      });
       window.location.reload();
     } catch (error) {
       console.error(error);
@@ -109,6 +122,10 @@ export function CourseLessonManager({
     setTitle(lesson.title);
     setType(lesson.type);
     setContent(lesson.content || "");
+    setDuration(lesson.duration ?? "");
+    setOrder(lesson.order);
+    setIsPublished(lesson.isPublished);
+    setIsFree(lesson.isFree);
   };
 
   const handleUpdateSubmit = async (e: React.FormEvent) => {
@@ -119,8 +136,12 @@ export function CourseLessonManager({
     try {
       await updateLesson(editingLesson.id, {
         title,
+        type,
         content,
-        // We aren't updating type for now as it complicates file handling logic for existing lessons
+        duration: duration === "" ? undefined : Number(duration),
+        order,
+        isPublished,
+        isFree,
       });
       window.location.reload();
     } catch (error) {
@@ -263,6 +284,49 @@ export function CourseLessonManager({
                       <option value="ASSIGNMENT">Assignment</option>
                     </select>
                   </div>
+
+                  <div className="space-y-2">
+                    <Label>Order</Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      value={order}
+                      onChange={(e) => setOrder(Number(e.target.value || 1))}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Duration (minutes)</Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      value={duration}
+                      onChange={(e) =>
+                        setDuration(e.target.value === "" ? "" : Number(e.target.value))
+                      }
+                      placeholder="Optional"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <label className="inline-flex items-center gap-2 text-sm font-medium">
+                    <input
+                      type="checkbox"
+                      checked={isPublished}
+                      onChange={(e) => setIsPublished(e.target.checked)}
+                    />
+                    Published
+                  </label>
+
+                  <label className="inline-flex items-center gap-2 text-sm font-medium">
+                    <input
+                      type="checkbox"
+                      checked={isFree}
+                      onChange={(e) => setIsFree(e.target.checked)}
+                    />
+                    Free Preview
+                  </label>
                 </div>
 
                 {/* Content Input or Uploader */}
@@ -350,7 +414,7 @@ export function CourseLessonManager({
         )}
 
         <div className="space-y-3">
-          {initialLessons.map((lesson) => (
+          {lessons.map((lesson) => (
             <div
               key={lesson.id}
               className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-card border rounded-lg hover:border-primary/50 transition-all shadow-sm"
@@ -376,6 +440,8 @@ export function CourseLessonManager({
                     <span className="bg-muted px-1.5 py-0.5 rounded uppercase tracking-wider font-semibold text-[10px]">
                       {lesson.type}
                     </span>
+                    <span>#{lesson.order}</span>
+                    {lesson.isFree && <span>• Free</span>}
                     <span className="flex items-center gap-1">
                       {lesson.isPublished ? (
                         <CheckCircle2 className="h-3 w-3 text-green-500" />
@@ -465,13 +531,65 @@ export function CourseLessonManager({
                 />
               </div>
 
-              {/* We disable type editing to simplify file handling logic */}
-              <div className="space-y-2">
-                <Label>Lesson Type</Label>
-                <Input value={type} disabled className="bg-muted text-muted-foreground" />
-                <p className="text-xs text-muted-foreground">
-                  Cannot change lesson type after creation.
-                </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Lesson Type</Label>
+                  <select
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    value={type}
+                    onChange={(e) => setType(e.target.value as LessonType)}
+                  >
+                    <option value="VIDEO">Video Lesson</option>
+                    <option value="TEXT">Article / Text</option>
+                    <option value="PDF">PDF Resource</option>
+                    <option value="QUIZ">Quiz / Assessment</option>
+                    <option value="ASSIGNMENT">Assignment</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Order</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={order}
+                    onChange={(e) => setOrder(Number(e.target.value || 1))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Duration (minutes)</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={duration}
+                    onChange={(e) =>
+                      setDuration(e.target.value === "" ? "" : Number(e.target.value))
+                    }
+                    placeholder="Optional"
+                  />
+                </div>
+
+                <div className="space-y-2 flex items-end">
+                  <div className="flex flex-col gap-2">
+                    <label className="inline-flex items-center gap-2 text-sm font-medium">
+                      <input
+                        type="checkbox"
+                        checked={isPublished}
+                        onChange={(e) => setIsPublished(e.target.checked)}
+                      />
+                      Published
+                    </label>
+                    <label className="inline-flex items-center gap-2 text-sm font-medium">
+                      <input
+                        type="checkbox"
+                        checked={isFree}
+                        onChange={(e) => setIsFree(e.target.checked)}
+                      />
+                      Free Preview
+                    </label>
+                  </div>
+                </div>
               </div>
 
                <div className="space-y-2">
