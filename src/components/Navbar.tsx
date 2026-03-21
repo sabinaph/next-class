@@ -142,11 +142,14 @@ export default function Navbar({ className }: NavbarProps) {
         method: "POST",
       });
 
+      const body = (await response.json().catch(() => null)) as
+        | { count?: number; error?: string }
+        | null;
+
       if (!response.ok) {
-        throw new Error("Failed to send notifications email");
+        throw new Error(body?.error || "Failed to send notifications email");
       }
 
-      const body = (await response.json()) as { count?: number };
       const count = body.count || 0;
 
       showToast({
@@ -157,11 +160,16 @@ export default function Navbar({ className }: NavbarProps) {
             ? `${count} notifications were sent to your email.`
             : "No new notifications right now, but we sent a quick update email.",
       });
-    } catch {
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Could not send notifications email right now. Please try again.";
+
       showToast({
         type: "error",
         title: "Email Failed",
-        message: "Could not send notifications email right now. Please try again.",
+        message,
       });
     } finally {
       setIsSendingNotificationsEmail(false);

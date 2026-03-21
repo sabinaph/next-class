@@ -16,6 +16,13 @@ interface NotificationItem {
   createdAt: string;
 }
 
+function isBlockedRecipientEmail(email: string) {
+  const normalized = email.trim().toLowerCase();
+  const blockedDomains = ["nextclass.com", "example.com", "test.com"];
+  const domain = normalized.split("@")[1] || "";
+  return blockedDomains.includes(domain);
+}
+
 async function buildNotificationItems(userId: string): Promise<NotificationItem[]> {
   const completedOrders = await prisma.order.findMany({
     where: {
@@ -201,6 +208,16 @@ export async function POST() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id || !session.user.email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (isBlockedRecipientEmail(session.user.email)) {
+    return NextResponse.json(
+      {
+        error:
+          "Your account email is a demo/test address. Please update your profile email to a real inbox before sending notifications.",
+      },
+      { status: 400 }
+    );
   }
 
   const notifications = await buildNotificationItems(session.user.id);
