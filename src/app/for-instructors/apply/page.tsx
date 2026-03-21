@@ -50,7 +50,7 @@ export default function InstructorApplyPage() {
     "Other",
   ];
 
-  const handleSampleVideoUpload = async (file: File) => {
+  const handleSampleCourseUpload = async (file: File) => {
     setIsUploadingVideo(true);
     setErrorMessage("");
 
@@ -70,12 +70,12 @@ export default function InstructorApplyPage() {
       };
 
       if (!response.ok || !result.success || !result.url) {
-        throw new Error(result.error || "Video upload failed");
+        throw new Error(result.error || "Sample course upload failed");
       }
 
       setFormData((prev) => ({ ...prev, sampleVideoFileUrl: result.url || "" }));
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : "Video upload failed");
+      setErrorMessage(error instanceof Error ? error.message : "Sample course upload failed");
     } finally {
       setIsUploadingVideo(false);
     }
@@ -280,14 +280,14 @@ export default function InstructorApplyPage() {
             <h2 className="text-lg font-semibold">5. Content Quality Check</h2>
             <div className="space-y-3">
               <div className="space-y-2">
-                <Label htmlFor="sampleVideoUpload">Upload Sample Video</Label>
-                <Input id="sampleVideoUpload" type="file" accept="video/*" onChange={(e) => { const file = e.target.files?.[0]; if (file) { void handleSampleVideoUpload(file); } }} />
-                {isUploadingVideo ? <p className="text-xs text-muted-foreground">Uploading sample video...</p> : null}
+                <Label htmlFor="sampleVideoUpload">Upload Sample Course</Label>
+                <Input id="sampleVideoUpload" type="file" accept="video/*" onChange={(e) => { const file = e.target.files?.[0]; if (file) { void handleSampleCourseUpload(file); } }} />
+                {isUploadingVideo ? <p className="text-xs text-muted-foreground">Uploading sample course...</p> : null}
                 {formData.sampleVideoFileUrl ? <p className="text-xs text-green-700 dark:text-green-300">Uploaded: {formData.sampleVideoFileUrl}</p> : null}
               </div>
               <p className="text-xs text-muted-foreground">OR</p>
               <div className="space-y-2">
-                <Label htmlFor="sampleVideoLink">Provide Video Link (YouTube/Drive)</Label>
+                <Label htmlFor="sampleVideoLink">Provide Course Link (YouTube/Drive)</Label>
                 <Input id="sampleVideoLink" value={formData.sampleVideoLink} onChange={(e) => setFormData((prev) => ({ ...prev, sampleVideoLink: e.target.value }))} />
               </div>
             </div>

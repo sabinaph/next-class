@@ -40,7 +40,7 @@ const instructorApplicationSchema = z.object({
   if (!data.sampleVideoFileUrl && !data.sampleVideoLink) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: "Provide sample video upload or video link",
+      message: "Provide sample course upload or course link",
       path: ["sampleVideoLink"],
     });
   }

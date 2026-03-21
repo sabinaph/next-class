@@ -134,16 +134,16 @@ export default async function InstructorApplicationsPage() {
                   ) : null}
                   {(application.sampleVideoFileUrl || application.sampleVideoLink) ? (
                     <div>
-                      <p className="text-sm text-muted-foreground">Sample Video</p>
+                      <p className="text-sm text-muted-foreground">Sample Course</p>
                       <div className="space-y-1">
                         {application.sampleVideoFileUrl ? (
                           <a href={application.sampleVideoFileUrl} target="_blank" rel="noreferrer" className="text-primary underline break-all">
-                            Uploaded Video File
+                            Uploaded Sample Course File
                           </a>
                         ) : null}
                         {application.sampleVideoLink ? (
                           <a href={application.sampleVideoLink} target="_blank" rel="noreferrer" className="text-primary underline break-all">
-                            Video Link
+                            Course Link
                           </a>
                         ) : null}
                       </div>
