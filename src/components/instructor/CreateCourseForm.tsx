@@ -38,12 +38,20 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 const formSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
   description: z.string().min(20, "Description must be at least 20 characters"),
+  shortDescription: z
+    .string()
+    .max(500, "Short description must be at most 500 characters")
+    .optional(),
   category: z.string().min(1, "Category is required"),
   tags: z.string().optional(),
   level: z.string().min(1, "Level is required"),
   thumbnail: z.string().optional(),
   price: z.number().min(0, "Price must be positive"),
   duration: z.number().int().min(1, "Duration must be at least 1 hour"),
+  maxStudents: z.number().int().min(1, "Max students must be at least 1"),
+  prerequisites: z.string().optional(),
+  learningOutcomes: z.string().optional(),
+  syllabus: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -79,11 +87,16 @@ export function CreateCourseForm() {
     defaultValues: {
       title: "",
       description: "",
+      shortDescription: "",
       category: "",
       tags: "",
       level: "",
       price: 0,
       duration: 1,
+      maxStudents: 30,
+      prerequisites: "",
+      learningOutcomes: "",
+      syllabus: "",
       thumbnail: "",
     },
   });
@@ -219,6 +232,23 @@ export function CreateCourseForm() {
                 {errors.description && (
                   <p className="text-sm text-red-500 font-medium">
                     {errors.description.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="shortDescription" className="text-base">
+                  Short Description
+                </Label>
+                <Textarea
+                  id="shortDescription"
+                  placeholder="A short summary shown in course cards and previews..."
+                  className="min-h-[90px] resize-y"
+                  {...register("shortDescription")}
+                />
+                {errors.shortDescription && (
+                  <p className="text-sm text-red-500 font-medium">
+                    {errors.shortDescription.message}
                   </p>
                 )}
               </div>
@@ -373,6 +403,57 @@ export function CreateCourseForm() {
                     {errors.duration.message}
                   </p>
                 )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="maxStudents">Max Students</Label>
+                <Input
+                  id="maxStudents"
+                  type="number"
+                  min="1"
+                  className="h-11"
+                  placeholder="e.g. 30"
+                  {...register("maxStudents", { valueAsNumber: true })}
+                />
+                {errors.maxStudents && (
+                  <p className="text-sm text-red-500 font-medium">
+                    {errors.maxStudents.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-6 rounded-xl border p-6 bg-card">
+              <h3 className="text-lg font-semibold">Curriculum Details</h3>
+
+              <div className="space-y-2">
+                <Label htmlFor="prerequisites">Prerequisites</Label>
+                <Textarea
+                  id="prerequisites"
+                  placeholder="What students should know before starting this course..."
+                  className="min-h-[90px] resize-y"
+                  {...register("prerequisites")}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="learningOutcomes">Learning Outcomes</Label>
+                <Textarea
+                  id="learningOutcomes"
+                  placeholder="What students will be able to do after completing this course..."
+                  className="min-h-[90px] resize-y"
+                  {...register("learningOutcomes")}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="syllabus">Syllabus</Label>
+                <Textarea
+                  id="syllabus"
+                  placeholder="Outline your modules, chapters, and lesson flow..."
+                  className="min-h-[110px] resize-y"
+                  {...register("syllabus")}
+                />
               </div>
             </div>
           </CardContent>
