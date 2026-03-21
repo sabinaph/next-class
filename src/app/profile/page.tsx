@@ -73,7 +73,23 @@ export default async function ProfilePage() {
     email: user.email,
     username: user.username || "",
     bookings: user.bookings.map((booking) => ({
-      ...booking,
+      id: booking.id,
+      bookingReference: booking.bookingReference,
+      studentId: booking.studentId,
+      courseId: booking.courseId,
+      sessionId: booking.sessionId,
+      status: booking.status,
+      numberOfSeats: booking.numberOfSeats,
+      totalAmount: booking.totalAmount.toString(),
+      cancellationDate: booking.cancellationDate
+        ? booking.cancellationDate.toISOString()
+        : null,
+      cancellationReason: booking.cancellationReason,
+      attended: booking.attended,
+      attendanceMarkedAt: booking.attendanceMarkedAt
+        ? booking.attendanceMarkedAt.toISOString()
+        : null,
+      deletedAt: booking.deletedAt ? booking.deletedAt.toISOString() : null,
       createdAt: booking.createdAt.toISOString(),
       updatedAt: booking.updatedAt.toISOString(),
       session: {
@@ -81,6 +97,9 @@ export default async function ProfilePage() {
         sessionDate: booking.session.sessionDate.toISOString(),
         startTime: booking.session.startTime.toISOString(),
         endTime: booking.session.endTime.toISOString(),
+        deletedAt: booking.session.deletedAt
+          ? booking.session.deletedAt.toISOString()
+          : null,
         createdAt: booking.session.createdAt.toISOString(),
         updatedAt: booking.session.updatedAt.toISOString(),
       },
