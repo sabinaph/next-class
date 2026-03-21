@@ -114,7 +114,7 @@ export default function CourseFilter({ onFilterChange, isLoading = false, instru
           value={category}
           onChange={(e) => setCategory(e.target.value)}
           disabled={isLoading}
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-card dark:text-foreground"
         >
           {categories.map((cat) => (
             <option key={cat} value={cat}>{cat}</option>
@@ -141,7 +141,7 @@ export default function CourseFilter({ onFilterChange, isLoading = false, instru
           value={level}
           onChange={(e) => setLevel(e.target.value)}
           disabled={isLoading}
-           className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+           className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-card dark:text-foreground"
         >
           {levels.map((lvl) => (
             <option key={lvl} value={lvl}>{lvl}</option>
@@ -157,7 +157,7 @@ export default function CourseFilter({ onFilterChange, isLoading = false, instru
           value={resourceType}
           onChange={(e) => setResourceType(e.target.value)}
           disabled={isLoading}
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-card dark:text-foreground"
         >
           <option value="All Types">All Types</option>
           <option value="VIDEO">Video</option>
@@ -175,7 +175,7 @@ export default function CourseFilter({ onFilterChange, isLoading = false, instru
           value={instructorId}
           onChange={(e) => setInstructorId(e.target.value)}
           disabled={isLoading}
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-card dark:text-foreground"
         >
           <option value="All Instructors">All Instructors</option>
           {instructors.map((instructor) => (
@@ -236,7 +236,7 @@ export default function CourseFilter({ onFilterChange, isLoading = false, instru
   return (
     <>
       {/* Desktop Filter Sidebar */}
-      <Card className="hidden lg:block h-fit sticky top-24 border-none shadow-nav bg-card/50 backdrop-blur-sm">
+      <Card className="hidden lg:block h-fit sticky top-24 border-none bg-card/70 shadow-nav backdrop-blur-sm dark:bg-card/90">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <Filter className="h-5 w-5" />
@@ -252,12 +252,12 @@ export default function CourseFilter({ onFilterChange, isLoading = false, instru
       <div className="lg:hidden mb-6">
         <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
           <SheetTrigger asChild>
-            <Button variant="outline" className="w-full gap-2">
+            <Button variant="outline" className="w-full gap-2 dark:border-border dark:bg-card/60 dark:text-foreground">
               <Filter className="h-4 w-4" />
               Filters & Search
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-[300px] sm:w-[400px] overflow-y-auto">
+          <SheetContent side="left" className="w-[300px] sm:w-[400px] overflow-y-auto dark:bg-card dark:text-foreground">
             <SheetHeader className="mb-6">
               <SheetTitle>Filter Courses</SheetTitle>
               <SheetDescription>

@@ -43,7 +43,7 @@ export function WishlistButton({
       className={cn(
         "transition-colors",
         isWishlisted &&
-          "bg-pink-50 border-pink-200 text-pink-500 hover:text-pink-600 hover:bg-pink-100 dark:bg-pink-900/20 dark:border-pink-900"
+          "border-pink-200 bg-pink-50 text-pink-600 hover:bg-pink-100 hover:text-pink-700 dark:border-pink-900/70 dark:bg-pink-900/20 dark:text-pink-300 dark:hover:bg-pink-900/35 dark:hover:text-pink-200"
       )}
     >
       <Heart className={cn("h-5 w-5", isWishlisted && "fill-current")} />
