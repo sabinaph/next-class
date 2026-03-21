@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import { readFile } from "fs/promises";
+import path from "path";
 
 import { prisma } from "@/app/lib/prisma";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -67,132 +69,302 @@ export async function GET(
     certificate.course.instructor.name ||
     "Instructor";
 
+  const drawCenteredText = (
+    text: string,
+    y: number,
+    size: number,
+    font: Awaited<ReturnType<typeof PDFDocument.create>>["embedFont"] extends (
+      ...args: any[]
+    ) => Promise<infer T>
+      ? T
+      : never,
+    color = rgb(0.1, 0.15, 0.25),
+    width = 1190
+  ) => {
+    const textWidth = font.widthOfTextAtSize(text, size);
+    return {
+      text,
+      x: (width - textWidth) / 2,
+      y,
+      size,
+      font,
+      color,
+    };
+  };
+
+  const fitFontSize = (
+    text: string,
+    font: Awaited<ReturnType<typeof PDFDocument.create>>["embedFont"] extends (
+      ...args: any[]
+    ) => Promise<infer T>
+      ? T
+      : never,
+    maxWidth: number,
+    start: number,
+    min: number
+  ) => {
+    let size = start;
+    while (size > min && font.widthOfTextAtSize(text, size) > maxWidth) {
+      size -= 1;
+    }
+    return size;
+  };
+
+  const wrapText = (
+    text: string,
+    font: Awaited<ReturnType<typeof PDFDocument.create>>["embedFont"] extends (
+      ...args: any[]
+    ) => Promise<infer T>
+      ? T
+      : never,
+    size: number,
+    maxWidth: number
+  ) => {
+    const words = text.split(/\s+/).filter(Boolean);
+    const lines: string[] = [];
+    let current = "";
+
+    for (const word of words) {
+      const candidate = current ? `${current} ${word}` : word;
+      if (font.widthOfTextAtSize(candidate, size) <= maxWidth) {
+        current = candidate;
+      } else {
+        if (current) lines.push(current);
+        current = word;
+      }
+    }
+    if (current) lines.push(current);
+    return lines;
+  };
+
   const pdfDoc = await PDFDocument.create();
   const page = pdfDoc.addPage([1190, 842]);
   const titleFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   const bodyFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const italicFont = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
 
   const { width, height } = page.getSize();
 
+  const outerBlue = rgb(0.72, 0.81, 0.98);
+  const borderBlue = rgb(0.49, 0.64, 0.92);
+  const deepBlue = rgb(0.17, 0.25, 0.44);
+  const mutedBlue = rgb(0.37, 0.46, 0.64);
+
+  // Paper background and decorative frame
   page.drawRectangle({
-    x: 20,
-    y: 20,
-    width: width - 40,
-    height: height - 40,
-    borderColor: rgb(0.08, 0.42, 0.29),
-    borderWidth: 4,
-    color: rgb(0.97, 0.99, 0.98),
+    x: 0,
+    y: 0,
+    width,
+    height,
+    color: rgb(0.95, 0.97, 1),
   });
 
   page.drawRectangle({
-    x: 40,
-    y: 40,
-    width: width - 80,
-    height: height - 80,
-    borderColor: rgb(0.13, 0.52, 0.36),
-    borderWidth: 1,
+    x: 14,
+    y: 14,
+    width: width - 28,
+    height: height - 28,
+    borderColor: borderBlue,
+    borderWidth: 2,
+    color: outerBlue,
   });
 
-  page.drawText("CERTIFICATE OF COMPLETION", {
-    x: 295,
-    y: height - 130,
-    size: 42,
+  page.drawRectangle({
+    x: 36,
+    y: 36,
+    width: width - 72,
+    height: height - 72,
+    borderColor: borderBlue,
+    borderWidth: 1.5,
+    color: rgb(0.99, 0.995, 1),
+  });
+
+  // Corner ornaments
+  const drawCorner = (x: number, y: number, flipX = 1, flipY = 1) => {
+    page.drawLine({
+      start: { x, y },
+      end: { x: x + 28 * flipX, y },
+      thickness: 2,
+      color: borderBlue,
+    });
+    page.drawLine({
+      start: { x, y },
+      end: { x, y: y + 28 * flipY },
+      thickness: 2,
+      color: borderBlue,
+    });
+    page.drawLine({
+      start: { x: x + 8 * flipX, y },
+      end: { x: x + 8 * flipX, y: y + 20 * flipY },
+      thickness: 1,
+      color: borderBlue,
+    });
+    page.drawLine({
+      start: { x, y: y + 8 * flipY },
+      end: { x: x + 20 * flipX, y: y + 8 * flipY },
+      thickness: 1,
+      color: borderBlue,
+    });
+  };
+
+  drawCorner(30, height - 30, 1, -1);
+  drawCorner(width - 30, height - 30, -1, -1);
+  drawCorner(30, 30, 1, 1);
+  drawCorner(width - 30, 30, -1, 1);
+
+  // Header accent lines
+  page.drawLine({
+    start: { x: 80, y: height - 72 },
+    end: { x: width - 80, y: height - 72 },
+    thickness: 1,
+    color: borderBlue,
+  });
+
+  // Brand logo
+  try {
+    const logoPath = path.join(process.cwd(), "public", "NEXTCLASS.png");
+    const logoBytes = await readFile(logoPath);
+    const logoImage = await pdfDoc.embedPng(logoBytes);
+    const logoW = 84;
+    const logoH = (logoImage.height / logoImage.width) * logoW;
+    page.drawImage(logoImage, {
+      x: 88,
+      y: height - 130,
+      width: logoW,
+      height: logoH,
+      opacity: 0.95,
+    });
+  } catch {
+    // If logo is missing, certificate still renders.
+  }
+
+  page.drawText("Next Class", {
+    x: 185,
+    y: height - 97,
+    size: 30,
     font: titleFont,
-    color: rgb(0.08, 0.32, 0.25),
+    color: deepBlue,
   });
 
-  page.drawText("This certifies that", {
-    x: 495,
-    y: height - 220,
-    size: 24,
-    font: bodyFont,
-    color: rgb(0.2, 0.2, 0.2),
+  page.drawText("CERTIFICATE OF ACHIEVEMENT", {
+    ...drawCenteredText(
+      "CERTIFICATE OF ACHIEVEMENT",
+      height - 168,
+      33,
+      titleFont,
+      deepBlue,
+      width
+    ),
   });
 
+  page.drawText("This certificate is awarded to", {
+    ...drawCenteredText(
+      "This certificate is awarded to",
+      height - 220,
+      19,
+      bodyFont,
+      mutedBlue,
+      width
+    ),
+  });
+
+  const studentFontSize = fitFontSize(studentName, titleFont, width - 220, 56, 36);
   page.drawText(studentName, {
-    x: 170,
-    y: height - 300,
-    size: 52,
+    ...drawCenteredText(studentName, height - 286, studentFontSize, titleFont, deepBlue, width),
+  });
+
+  page.drawLine({
+    start: { x: 220, y: height - 302 },
+    end: { x: width - 220, y: height - 302 },
+    thickness: 1,
+    color: rgb(0.72, 0.76, 0.84),
+  });
+
+  page.drawText("For successfully completing the course", {
+    ...drawCenteredText(
+      "For successfully completing the course",
+      height - 356,
+      20,
+      bodyFont,
+      mutedBlue,
+      width
+    ),
+  });
+
+  const courseTitleSize = fitFontSize(certificate.course.title, titleFont, width - 220, 44, 26);
+  const courseLines = wrapText(certificate.course.title, titleFont, courseTitleSize, width - 220).slice(0, 2);
+  let courseY = height - 414;
+  for (const line of courseLines) {
+    page.drawText(line, {
+      ...drawCenteredText(line, courseY, courseTitleSize, titleFont, deepBlue, width),
+    });
+    courseY -= courseTitleSize + 6;
+  }
+
+  page.drawText("Issued by Next Class", {
+    ...drawCenteredText("Issued by Next Class", courseY - 18, 16, italicFont, mutedBlue, width),
+  });
+
+  const issuedDate = new Date(certificate.issueDate).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  // Footer blocks
+  page.drawText(issuedDate, {
+    x: 120,
+    y: 146,
+    size: 19,
     font: titleFont,
-    color: rgb(0.06, 0.29, 0.2),
+    color: deepBlue,
   });
-
-  page.drawText("has successfully completed", {
-    x: 410,
-    y: height - 360,
-    size: 24,
-    font: bodyFont,
-    color: rgb(0.2, 0.2, 0.2),
-  });
-
-  page.drawText(certificate.course.title, {
+  page.drawText("Date of Completion", {
     x: 120,
-    y: height - 430,
-    size: 36,
-    font: titleFont,
-    color: rgb(0.08, 0.32, 0.25),
+    y: 124,
+    size: 13,
+    font: bodyFont,
+    color: mutedBlue,
   });
 
-  page.drawText(`Instructor: ${instructorName}`, {
-    x: 120,
-    y: 170,
-    size: 22,
-    font: bodyFont,
-    color: rgb(0.2, 0.2, 0.2),
+  page.drawLine({
+    start: { x: width - 420, y: 156 },
+    end: { x: width - 120, y: 156 },
+    thickness: 1,
+    color: rgb(0.68, 0.74, 0.85),
   });
-
-  page.drawText(`Certificate No: ${certificate.certificateNumber}`, {
-    x: 120,
-    y: 120,
-    size: 16,
-    font: bodyFont,
-    color: rgb(0.25, 0.25, 0.25),
+  page.drawText(instructorName, {
+    x: width - 410,
+    y: 132,
+    size: 17,
+    font: italicFont,
+    color: deepBlue,
   });
-
-  page.drawText(`Verification Code: ${certificate.verificationCode}`, {
-    x: 120,
-    y: 95,
-    size: 16,
+  page.drawText("Instructor", {
+    x: width - 410,
+    y: 112,
+    size: 13,
     font: bodyFont,
-    color: rgb(0.25, 0.25, 0.25),
+    color: mutedBlue,
   });
 
   page.drawText(
-    `Issued On: ${new Date(certificate.issueDate).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    })}`,
+    `Certificate No: ${certificate.certificateNumber}   |   Verification: ${certificate.verificationCode}`,
     {
       x: 120,
-      y: 70,
-      size: 16,
+      y: 78,
+      size: 12,
       font: bodyFont,
-      color: rgb(0.25, 0.25, 0.25),
+      color: rgb(0.33, 0.4, 0.53),
     }
   );
 
-  page.drawLine({
-    start: { x: width - 390, y: 170 },
-    end: { x: width - 120, y: 170 },
-    thickness: 1,
-    color: rgb(0.25, 0.25, 0.25),
-  });
-
-  page.drawText(instructorName, {
-    x: width - 365,
-    y: 145,
-    size: 16,
+  page.drawText(`Verify at: https://nextclass.app/certificates/${certificate.id}`, {
+    x: 120,
+    y: 58,
+    size: 11,
     font: bodyFont,
-    color: rgb(0.2, 0.2, 0.2),
-  });
-
-  page.drawText("Instructor Signature", {
-    x: width - 350,
-    y: 120,
-    size: 13,
-    font: bodyFont,
-    color: rgb(0.35, 0.35, 0.35),
+    color: rgb(0.39, 0.45, 0.58),
   });
 
   const pdfBytes = await pdfDoc.save();
