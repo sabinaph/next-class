@@ -21,10 +21,6 @@ export default function InstructorApplyPage() {
     yearsOfExperience: "",
     areaOfExpertise: "",
     shortBio: "",
-    courseTitle: "",
-    courseCategory: "Programming",
-    courseLevel: "Beginner",
-    courseDescription: "",
     hasTaughtBefore: false,
     teachingExperienceDetails: "",
     previousCourseLinks: "",
@@ -40,15 +36,6 @@ export default function InstructorApplyPage() {
     studyBackground: "",
     hobbies: "",
   });
-
-  const categories = [
-    "Programming",
-    "Marketing",
-    "Design",
-    "Business",
-    "Data Science",
-    "Other",
-  ];
 
   const handleSampleCourseUpload = async (file: File) => {
     setIsUploadingVideo(true);
@@ -118,10 +105,6 @@ export default function InstructorApplyPage() {
         yearsOfExperience: "",
         areaOfExpertise: "",
         shortBio: "",
-        courseTitle: "",
-        courseCategory: "Programming",
-        courseLevel: "Beginner",
-        courseDescription: "",
         hasTaughtBefore: false,
         teachingExperienceDetails: "",
         previousCourseLinks: "",
@@ -222,37 +205,7 @@ export default function InstructorApplyPage() {
           </div>
 
           <div className="space-y-4 rounded-xl border p-4">
-            <h2 className="text-lg font-semibold">3. Course Details</h2>
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="courseTitle">Course Title</Label>
-                <Input id="courseTitle" required value={formData.courseTitle} onChange={(e) => setFormData((prev) => ({ ...prev, courseTitle: e.target.value }))} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="courseCategory">Course Category</Label>
-                <select id="courseCategory" className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={formData.courseCategory} onChange={(e) => setFormData((prev) => ({ ...prev, courseCategory: e.target.value }))}>
-                  {categories.map((category) => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="courseLevel">Course Level</Label>
-                <select id="courseLevel" className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={formData.courseLevel} onChange={(e) => setFormData((prev) => ({ ...prev, courseLevel: e.target.value }))}>
-                  <option value="Beginner">Beginner</option>
-                  <option value="Intermediate">Intermediate</option>
-                  <option value="Advanced">Advanced</option>
-                </select>
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="courseDescription">Course Description</Label>
-                <Textarea id="courseDescription" rows={4} required value={formData.courseDescription} onChange={(e) => setFormData((prev) => ({ ...prev, courseDescription: e.target.value }))} />
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-4 rounded-xl border p-4">
-            <h2 className="text-lg font-semibold">4. Teaching Experience</h2>
+            <h2 className="text-lg font-semibold">3. Teaching Experience</h2>
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Have you taught before?</Label>
@@ -277,7 +230,7 @@ export default function InstructorApplyPage() {
           </div>
 
           <div className="space-y-4 rounded-xl border p-4">
-            <h2 className="text-lg font-semibold">5. Content Quality Check</h2>
+            <h2 className="text-lg font-semibold">4. Content Quality Check</h2>
             <div className="space-y-3">
               <div className="space-y-2">
                 <Label htmlFor="sampleVideoUpload">Upload Sample Course</Label>
@@ -294,7 +247,7 @@ export default function InstructorApplyPage() {
           </div>
 
           <div className="space-y-4 rounded-xl border p-4">
-            <h2 className="text-lg font-semibold">6. Technical Setup</h2>
+            <h2 className="text-lg font-semibold">5. Technical Setup</h2>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label>Do you have recording equipment?</Label>
@@ -314,7 +267,7 @@ export default function InstructorApplyPage() {
           </div>
 
           <div className="space-y-4 rounded-xl border p-4">
-            <h2 className="text-lg font-semibold">7. Marketing Contribution (Optional)</h2>
+            <h2 className="text-lg font-semibold">6. Marketing Contribution (Optional)</h2>
             <div className="space-y-3">
               <div className="space-y-2">
                 <Label>Can you promote your course?</Label>
@@ -331,7 +284,7 @@ export default function InstructorApplyPage() {
           </div>
 
           <div className="space-y-4 rounded-xl border p-4">
-            <h2 className="text-lg font-semibold">8. Agreement</h2>
+            <h2 className="text-lg font-semibold">7. Agreement</h2>
             <div className="space-y-3 text-sm">
               <label className="flex items-start gap-2"><input type="checkbox" checked={formData.agreedToTerms} onChange={(e) => setFormData((prev) => ({ ...prev, agreedToTerms: e.target.checked }))} /><span>I agree to platform terms.</span></label>
               <label className="flex items-start gap-2"><input type="checkbox" checked={formData.agreedToRevenueShare} onChange={(e) => setFormData((prev) => ({ ...prev, agreedToRevenueShare: e.target.checked }))} /><span>I accept revenue share (60% instructor / 40% platform).</span></label>

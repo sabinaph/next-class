@@ -13,10 +13,28 @@ const instructorApplicationSchema = z.object({
   areaOfExpertise: z.string().min(2, "Area of expertise is required"),
   shortBio: z.string().min(10, "Short bio is required"),
 
-  courseTitle: z.string().min(2, "Course title is required"),
-  courseCategory: z.string().min(2, "Course category is required"),
-  courseLevel: z.enum(["Beginner", "Intermediate", "Advanced"]),
-  courseDescription: z.string().min(10, "Course description is required"),
+  courseTitle: z
+    .string()
+    .trim()
+    .min(2, "Course title must be at least 2 characters")
+    .optional()
+    .or(z.literal(""))
+    .transform((value) => (value === "" ? undefined : value)),
+  courseCategory: z
+    .string()
+    .trim()
+    .min(2, "Course category must be at least 2 characters")
+    .optional()
+    .or(z.literal(""))
+    .transform((value) => (value === "" ? undefined : value)),
+  courseLevel: z.enum(["Beginner", "Intermediate", "Advanced"]).optional(),
+  courseDescription: z
+    .string()
+    .trim()
+    .min(10, "Course description must be at least 10 characters")
+    .optional()
+    .or(z.literal(""))
+    .transform((value) => (value === "" ? undefined : value)),
 
   hasTaughtBefore: z.boolean(),
   teachingExperienceDetails: z.string().optional(),
