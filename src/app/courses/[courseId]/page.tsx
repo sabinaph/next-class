@@ -279,7 +279,7 @@ export default async function CourseSubPage({ params }: Props) {
                           className={`h-4 w-4 ${
                             i < review.rating
                               ? "text-yellow-500 fill-current"
-                              : "text-gray-300"
+                              : "text-muted-foreground/40"
                           }`}
                         />
                       ))}

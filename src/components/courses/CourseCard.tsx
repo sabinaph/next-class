@@ -72,7 +72,7 @@ export default function CourseCard({ course }: CourseCardProps) {
           <div className="absolute top-2 left-2 z-10">
             <Badge
               variant="secondary"
-              className="bg-white/90 dark:bg-black/90 backdrop-blur-sm shadow-sm font-semibold"
+              className="border border-border/70 bg-background/90 text-foreground backdrop-blur-sm shadow-sm font-semibold"
             >
               {category}
             </Badge>
@@ -94,11 +94,11 @@ export default function CourseCard({ course }: CourseCardProps) {
             </div>
           </div>
 
-          <h3 className="text-lg font-bold leading-tight group-hover:text-primary transition-colors line-clamp-2 min-h-[3rem]">
+          <h3 className="text-lg font-bold leading-tight group-hover:text-primary transition-colors line-clamp-2 min-h-12">
             {title}
           </h3>
 
-          <p className="text-sm text-muted-foreground line-clamp-2 min-h-[2.5rem]">
+          <p className="text-sm text-muted-foreground line-clamp-2 min-h-10">
             {shortDescription || description}
           </p>
         </CardHeader>
@@ -126,7 +126,7 @@ export default function CourseCard({ course }: CourseCardProps) {
           </div>
         </CardContent>
 
-        <CardFooter className="p-5 pt-0 mt-auto flex items-center justify-between border-t border-border/50 bg-muted/5 pt-4">
+        <CardFooter className="mt-auto flex items-center justify-between border-t border-border/50 bg-muted/5 p-5 pt-4">
           <div className="flex flex-col">
             {price > 0 ? (
               <span className="text-lg font-bold text-primary">

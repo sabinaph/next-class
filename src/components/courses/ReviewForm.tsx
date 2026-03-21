@@ -50,7 +50,7 @@ export function ReviewForm({
           >
             <Star
               className={`h-5 w-5 ${
-                value <= rating ? "text-yellow-500 fill-yellow-500" : "text-gray-300"
+                value <= rating ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground/40"
               }`}
             />
           </button>
@@ -63,12 +63,12 @@ export function ReviewForm({
         className="min-h-[120px]"
       />
       {error && (
-        <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error}
         </p>
       )}
       {message && (
-        <p className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+        <p className="rounded-md border border-primary/30 bg-primary/10 px-3 py-2 text-sm text-primary">
           {message}
         </p>
       )}
