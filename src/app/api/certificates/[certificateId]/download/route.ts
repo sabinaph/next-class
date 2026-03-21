@@ -333,13 +333,64 @@ export async function GET(
     thickness: 1,
     color: rgb(0.68, 0.74, 0.85),
   });
-  page.drawText(instructorName, {
-    x: width - 410,
-    y: 132,
-    size: 17,
-    font: italicFont,
-    color: deepBlue,
-  });
+
+  // Optional handwritten signature image for instructor.
+  // Put file at: public/uploads/signatures/<instructorId>.(png|jpg|jpeg|webp)
+  const signatureBasePath = path.join(
+    process.cwd(),
+    "public",
+    "uploads",
+    "signatures",
+    certificate.course.instructor.id
+  );
+  const signatureCandidates = [
+    `${signatureBasePath}.png`,
+    `${signatureBasePath}.jpg`,
+    `${signatureBasePath}.jpeg`,
+    `${signatureBasePath}.webp`,
+  ];
+
+  let hasSignatureImage = false;
+  for (const signaturePath of signatureCandidates) {
+    try {
+      const signatureBytes = await readFile(signaturePath);
+      const signatureImage = signaturePath.endsWith(".png")
+        ? await pdfDoc.embedPng(signatureBytes)
+        : await pdfDoc.embedJpg(signatureBytes);
+
+      const maxSignatureWidth = 220;
+      const maxSignatureHeight = 52;
+      const widthRatio = maxSignatureWidth / signatureImage.width;
+      const heightRatio = maxSignatureHeight / signatureImage.height;
+      const scale = Math.min(widthRatio, heightRatio, 1);
+
+      const drawWidth = signatureImage.width * scale;
+      const drawHeight = signatureImage.height * scale;
+
+      page.drawImage(signatureImage, {
+        x: width - 410,
+        y: 162,
+        width: drawWidth,
+        height: drawHeight,
+        opacity: 0.95,
+      });
+
+      hasSignatureImage = true;
+      break;
+    } catch {
+      // Try next candidate extension.
+    }
+  }
+
+  if (!hasSignatureImage) {
+    page.drawText(instructorName, {
+      x: width - 410,
+      y: 132,
+      size: 17,
+      font: italicFont,
+      color: deepBlue,
+    });
+  }
   page.drawText("Instructor", {
     x: width - 410,
     y: 112,
