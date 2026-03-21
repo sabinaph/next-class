@@ -22,7 +22,7 @@ const hasRequiredDelegates = (client: PrismaClient | undefined) => {
   if (!client) return false;
   const typed = client as unknown as Record<string, unknown>;
   // Guard against stale dev singleton after schema changes (e.g., newly added models)
-  return Boolean(typed.order && typed.invoice && typed.category);
+  return Boolean(typed.order && typed.invoice && typed.category && typed.instructorApplication);
 };
 
 export const prisma = hasRequiredDelegates(globalForPrisma.prisma)
