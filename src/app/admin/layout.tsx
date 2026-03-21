@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   FolderTree,
   BarChart3,
+  ClipboardCheck,
 } from "lucide-react";
 
 export default async function AdminLayout({
@@ -49,6 +50,13 @@ export default async function AdminLayout({
           >
             <Users className="w-5 h-5" />
             Instructors
+          </Link>
+          <Link
+            href="/admin/instructor-applications"
+            className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          >
+            <ClipboardCheck className="w-5 h-5" />
+            Instructor Applications
           </Link>
           <Link
             href="/admin/students"

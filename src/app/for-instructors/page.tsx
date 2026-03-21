@@ -24,7 +24,7 @@ export default function ForInstructorsPage() {
 
         <div className="pt-1">
           <Link
-            href="/auth/signup"
+            href="/for-instructors/apply"
             className="inline-flex items-center rounded-md bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
           >
             Apply Now
