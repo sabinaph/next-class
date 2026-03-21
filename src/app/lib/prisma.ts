@@ -21,8 +21,19 @@ function createPrismaClient() {
 const hasRequiredDelegates = (client: PrismaClient | undefined) => {
   if (!client) return false;
   const typed = client as unknown as Record<string, unknown>;
+  const instructorApplicationDelegate = typed.instructorApplication as
+    | { findMany?: unknown; findFirst?: unknown; create?: unknown }
+    | undefined;
   // Guard against stale dev singleton after schema changes (e.g., newly added models)
-  return Boolean(typed.order && typed.invoice && typed.category && typed.instructorApplication);
+  return Boolean(
+    typed.order &&
+      typed.invoice &&
+      typed.category &&
+      instructorApplicationDelegate &&
+      typeof instructorApplicationDelegate.findMany === "function" &&
+      typeof instructorApplicationDelegate.findFirst === "function" &&
+      typeof instructorApplicationDelegate.create === "function"
+  );
 };
 
 export const prisma = hasRequiredDelegates(globalForPrisma.prisma)

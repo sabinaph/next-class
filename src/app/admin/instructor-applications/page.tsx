@@ -4,14 +4,23 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
 export default async function InstructorApplicationsPage() {
-  const applications = await prisma.instructorApplication.findMany({
-    include: {
-      reviewedBy: {
-        select: { name: true, email: true },
-      },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const instructorApplicationDelegate = (prisma as unknown as {
+    instructorApplication?: {
+      findMany: typeof prisma.instructorApplication.findMany;
+    };
+  }).instructorApplication;
+
+  const delegateMissing = !instructorApplicationDelegate;
+  const applications = delegateMissing
+    ? []
+    : await instructorApplicationDelegate.findMany({
+        include: {
+          reviewedBy: {
+            select: { name: true, email: true },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      });
 
   const pending = applications.filter((a) => a.status === "PENDING");
   const reviewed = applications.filter((a) => a.status !== "PENDING");
@@ -23,6 +32,12 @@ export default async function InstructorApplicationsPage() {
         <p className="mt-1 text-muted-foreground">
           Review applications, approve or reject, and send email updates automatically.
         </p>
+        {delegateMissing ? (
+          <p className="mt-2 rounded-md border border-amber-400/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-300">
+            Prisma client is stale in this dev session. Restart the dev server to reload the
+            latest model delegates.
+          </p>
+        ) : null}
       </div>
 
       <section className="space-y-4">
