@@ -51,6 +51,10 @@ export default async function InstructorApplicationsPage() {
                     <p className="font-medium">{application.phoneNumber || "-"}</p>
                   </div>
                   <div>
+                    <p className="text-sm text-muted-foreground">Country / Location</p>
+                    <p className="font-medium">{application.countryLocation || "-"}</p>
+                  </div>
+                  <div>
                     <p className="text-sm text-muted-foreground">Applied On</p>
                     <p className="font-medium">{new Date(application.createdAt).toLocaleString()}</p>
                   </div>
@@ -58,25 +62,120 @@ export default async function InstructorApplicationsPage() {
 
                 <div className="grid grid-cols-1 gap-3">
                   <div>
+                    <p className="text-sm text-muted-foreground">Current Job / Profession</p>
+                    <p>{application.currentJob || "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Years of Experience</p>
+                    <p>{application.yearsOfExperience ?? "-"}</p>
+                  </div>
+                  <div>
                     <p className="text-sm text-muted-foreground">Study Background</p>
                     <p>{application.studyBackground}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Area of Expertise</p>
+                    <p>{application.areaOfExpertise || application.expertise || "-"}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Hobbies</p>
                     <p>{application.hobbies}</p>
                   </div>
-                  {application.expertise ? (
+                  {application.shortBio || application.bio ? (
                     <div>
-                      <p className="text-sm text-muted-foreground">Expertise</p>
-                      <p>{application.expertise}</p>
+                      <p className="text-sm text-muted-foreground">Short Bio</p>
+                      <p>{application.shortBio || application.bio}</p>
                     </div>
                   ) : null}
-                  {application.bio ? (
+                  {application.courseTitle ? (
                     <div>
-                      <p className="text-sm text-muted-foreground">Bio</p>
-                      <p>{application.bio}</p>
+                      <p className="text-sm text-muted-foreground">Course Title</p>
+                      <p>{application.courseTitle}</p>
                     </div>
                   ) : null}
+                  {application.courseCategory ? (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Course Category</p>
+                      <p>{application.courseCategory}</p>
+                    </div>
+                  ) : null}
+                  {application.courseLevel ? (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Course Level</p>
+                      <p>{application.courseLevel}</p>
+                    </div>
+                  ) : null}
+                  {application.courseDescription ? (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Course Description</p>
+                      <p>{application.courseDescription}</p>
+                    </div>
+                  ) : null}
+                  <div>
+                    <p className="text-sm text-muted-foreground">Have taught before</p>
+                    <p>{application.hasTaughtBefore ? "Yes" : "No"}</p>
+                  </div>
+                  {application.teachingExperienceDetails ? (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Teaching Experience Details</p>
+                      <p>{application.teachingExperienceDetails}</p>
+                    </div>
+                  ) : null}
+                  {application.previousCourseLinks ? (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Previous Course Links</p>
+                      <p>{application.previousCourseLinks}</p>
+                    </div>
+                  ) : null}
+                  {application.portfolioLinks ? (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Portfolio / Work Samples</p>
+                      <p>{application.portfolioLinks}</p>
+                    </div>
+                  ) : null}
+                  {(application.sampleVideoFileUrl || application.sampleVideoLink) ? (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Sample Video</p>
+                      <div className="space-y-1">
+                        {application.sampleVideoFileUrl ? (
+                          <a href={application.sampleVideoFileUrl} target="_blank" rel="noreferrer" className="text-primary underline break-all">
+                            Uploaded Video File
+                          </a>
+                        ) : null}
+                        {application.sampleVideoLink ? (
+                          <a href={application.sampleVideoLink} target="_blank" rel="noreferrer" className="text-primary underline break-all">
+                            Video Link
+                          </a>
+                        ) : null}
+                      </div>
+                    </div>
+                  ) : null}
+                  <div>
+                    <p className="text-sm text-muted-foreground">Recording Equipment</p>
+                    <p>{application.hasRecordingEquipment ? "Yes" : "No"}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Will create video courses</p>
+                    <p>{application.willCreateVideoCourses ? "Yes" : "No"}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Can promote course</p>
+                    <p>{application.canPromoteCourse ? "Yes" : "No"}</p>
+                  </div>
+                  {application.socialMediaLinks ? (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Social Media Links</p>
+                      <p>{application.socialMediaLinks}</p>
+                    </div>
+                  ) : null}
+                  <div>
+                    <p className="text-sm text-muted-foreground">Agreement Accepted</p>
+                    <p>
+                      {application.agreedToTerms && application.agreedToRevenueShare
+                        ? "Terms + 60/40 accepted"
+                        : "Not accepted"}
+                    </p>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
