@@ -186,8 +186,8 @@ export default function ProfileDashboard({
         <NavButton tab="schedule" icon={Calendar} label="Schedule" />
         <NavButton tab="wishlist" icon={Heart} label="Wishlist" />
 
-        <div className="h-px bg-gray-200 dark:bg-gray-800 my-2" />
-        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 mb-2">
+        <div className="my-2 h-px bg-border/70" />
+          <h2 className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Account
         </h2>
 
@@ -222,7 +222,7 @@ export default function ProfileDashboard({
                       key={booking.id}
                       className="flex flex-col sm:flex-row gap-4 p-4 border rounded-xl hover:shadow-md transition-shadow bg-card"
                     >
-                      <div className="w-full sm:w-48 aspect-video bg-gray-100 rounded-lg overflow-hidden shrink-0">
+                      <div className="w-full sm:w-48 aspect-video bg-muted rounded-lg overflow-hidden shrink-0">
                         <img
                           src={booking.course.thumbnail || "/default-coures.jpg"}
                           alt={booking.course.title}
@@ -253,7 +253,7 @@ export default function ProfileDashboard({
                                 ? "bg-green-100 text-green-700 hover:bg-green-100"
                                 : ""
                             }
-                          >
+                            <p className="text-sm text-muted-foreground">
                             {booking.status}
                           </Badge>
                           <Link href={`/learn/${booking.course.id}`}>
@@ -267,14 +267,14 @@ export default function ProfileDashboard({
                   ))
                 )}
 
-                <div className="mt-4 rounded-xl border p-4 bg-gray-50 dark:bg-gray-800/40">
+                <div className="mt-4 rounded-xl border border-border bg-muted/60 p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <Award className="w-5 h-5 text-emerald-600" />
                     <h4 className="font-semibold text-base">My Certificates</h4>
                   </div>
 
                   {initialData.certificates?.length === 0 ? (
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-muted-foreground">
                       Complete all lessons in a course to unlock certificates.
                     </p>
                   ) : (
@@ -540,7 +540,7 @@ export default function ProfileDashboard({
                 {/* Read Only Fields */}
                 <div className="space-y-2">
                   <label className="flex items-center gap-2 text-sm font-medium text-foreground">
-                    <Mail size={14} className="text-gray-400" />
+                    <Mail size={14} className="text-muted-foreground" />
                     Email Address
                     <span className="ml-auto text-xs font-normal text-muted-foreground">
                       (Cannot be changed)
@@ -556,7 +556,7 @@ export default function ProfileDashboard({
 
                 <div className="space-y-2">
                   <label className="flex items-center gap-2 text-sm font-medium text-foreground">
-                    <User size={14} className="text-gray-400" />
+                    <User size={14} className="text-muted-foreground" />
                     Username
                     <span className="ml-auto text-xs font-normal text-muted-foreground">
                       (Cannot be changed)
@@ -617,7 +617,7 @@ export default function ProfileDashboard({
                   <div className="relative">
                     <Key
                       size={18}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                     />
                     <input
                       type="password"
@@ -642,7 +642,7 @@ export default function ProfileDashboard({
                   <div className="relative">
                     <Lock
                       size={18}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                     />
                     <input
                       type="password"
@@ -668,7 +668,7 @@ export default function ProfileDashboard({
                   <div className="relative">
                     <Lock
                       size={18}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                     />
                     <input
                       type="password"
