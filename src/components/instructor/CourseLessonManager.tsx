@@ -83,7 +83,6 @@ export function CourseLessonManager({
         duration: duration === "" ? undefined : Number(duration),
         isPublished,
         isFree,
-        order,
       });
       window.location.reload();
     } catch (error) {
@@ -283,16 +282,6 @@ export function CourseLessonManager({
                       <option value="QUIZ">Quiz / Assessment</option>
                       <option value="ASSIGNMENT">Assignment</option>
                     </select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Order</Label>
-                    <Input
-                      type="number"
-                      min={1}
-                      value={order}
-                      onChange={(e) => setOrder(Number(e.target.value || 1))}
-                    />
                   </div>
 
                   <div className="space-y-2">
