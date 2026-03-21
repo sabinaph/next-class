@@ -8,7 +8,7 @@ import { prisma } from "@/app/lib/prisma";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ certificateId: string }> }
 ) {
   const session = await getServerSession(authOptions);
@@ -369,11 +369,13 @@ export async function GET(
 
   const pdfBytes = await pdfDoc.save();
   const fileName = `${certificate.course.title.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-certificate.pdf`;
+  const url = new URL(request.url);
+  const isPreview = url.searchParams.get("preview") === "1";
 
   return new Response(Buffer.from(pdfBytes), {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="${fileName}"`,
+      "Content-Disposition": `${isPreview ? "inline" : "attachment"}; filename="${fileName}"`,
       "Cache-Control": "no-store",
     },
   });

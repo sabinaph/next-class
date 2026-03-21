@@ -16,6 +16,7 @@ import {
   Clock,
   Award,
   Download,
+  Eye,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -285,12 +286,24 @@ export default function ProfileDashboard({
                               Issued: {new Date(certificate.issueDate).toLocaleDateString()}
                             </p>
                           </div>
-                          <a href={certificate.certificateUrl}>
-                            <Button size="sm" variant="outline" className="gap-2">
-                              <Download className="w-4 h-4" />
-                              Download Certificate
-                            </Button>
-                          </a>
+                          <div className="flex items-center gap-2">
+                            <a
+                              href={`${certificate.certificateUrl}?preview=1`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <Button size="sm" variant="secondary" className="gap-2">
+                                <Eye className="w-4 h-4" />
+                                Preview
+                              </Button>
+                            </a>
+                            <a href={certificate.certificateUrl}>
+                              <Button size="sm" variant="outline" className="gap-2">
+                                <Download className="w-4 h-4" />
+                                Download Certificate
+                              </Button>
+                            </a>
+                          </div>
                         </div>
                       ))}
                     </div>
