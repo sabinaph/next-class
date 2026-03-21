@@ -14,6 +14,8 @@ import {
   BookOpen,
   ChevronLeft,
   ChevronRight,
+  Sparkles,
+  SlidersHorizontal,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -99,51 +101,136 @@ export default function CoursesPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const activeFilters = Object.entries(filters).filter(([, value]) => {
+    if (value === undefined || value === null) return false;
+    if (typeof value === "string") return value.trim().length > 0;
+    return true;
+  });
+
+  const filterLabelMap: Record<string, string> = {
+    search: "Search",
+    category: "Category",
+    tag: "Tag",
+    level: "Level",
+    instructorId: "Instructor",
+    resourceType: "Type",
+    minPrice: "Min",
+    maxPrice: "Max",
+  };
+
+  const rangeStart =
+    pagination.total === 0 ? 0 : (pagination.page - 1) * pagination.limit + 1;
+  const rangeEnd = Math.min(pagination.page * pagination.limit, pagination.total);
+
+  const renderPaginationButtons = () => {
+    const pages: number[] = [];
+    const start = Math.max(1, pagination.page - 1);
+    const end = Math.min(pagination.totalPages, pagination.page + 1);
+
+    for (let i = start; i <= end; i += 1) {
+      pages.push(i);
+    }
+
+    return pages;
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Hero Section */}
-      <div className="relative bg-muted/30 border-b border-border">
+      <div className="relative overflow-hidden border-b border-border bg-muted/25">
+        <div className="pointer-events-none absolute -left-72 -top-24 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
+        <div className="pointer-events-none absolute -right-28 top-10 h-88 w-88 rounded-full bg-cyan-500/10 blur-3xl" />
         <div className="absolute inset-0 bg-grid-black/[0.02] dark:bg-grid-white/[0.02]" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-          <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 bg-linear-to-r from-primary to-blue-600 bg-clip-text text-transparent animate-in slide-in-from-bottom-2">
+        <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 md:py-18 lg:px-8 lg:py-20">
+          <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
+            <div className="max-w-3xl">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/70 px-3 py-1 text-xs font-semibold text-muted-foreground backdrop-blur">
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
+                Learn From Industry Experts
+              </div>
+              <h1 className="mb-5 text-4xl font-bold tracking-tight text-foreground md:text-5xl">
               Expand Your Knowledge
-            </h1>
-            <p className="text-xl text-muted-foreground leading-relaxed animate-in slide-in-from-bottom-3 fade-in duration-500">
-              Discover expert-led courses across development, design, business,
-              and more. Start your learning journey today.
-            </p>
+              </h1>
+              <p className="text-lg leading-relaxed text-muted-foreground md:text-xl">
+                Discover expert-led courses across development, design, business,
+                and more. Start your learning journey today.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 rounded-2xl border border-border/70 bg-background/70 p-3 backdrop-blur sm:gap-3 sm:p-4 lg:min-w-[330px]">
+              <div className="rounded-xl border border-border/60 bg-card px-3 py-3 text-center">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Courses</p>
+                <p className="mt-1 text-xl font-bold text-foreground">{pagination.total}</p>
+              </div>
+              <div className="rounded-xl border border-border/60 bg-card px-3 py-3 text-center">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Instructors</p>
+                <p className="mt-1 text-xl font-bold text-foreground">{instructors.length}</p>
+              </div>
+              <div className="rounded-xl border border-border/60 bg-card px-3 py-3 text-center">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Page</p>
+                <p className="mt-1 text-xl font-bold text-foreground">{pagination.page}</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-10 lg:px-8">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[300px_1fr] lg:gap-8">
           {/* Sidebar Filters */}
-          <aside className="h-full">
-            <CourseFilter
-              onFilterChange={handleFilterChange}
-              isLoading={isLoading}
-              instructors={instructors}
-            />
+          <aside className="h-fit lg:sticky lg:top-24">
+            <div className="rounded-2xl border border-border/70 bg-card/35 p-3 backdrop-blur-sm lg:bg-transparent lg:p-0 lg:border-0">
+              <CourseFilter
+                onFilterChange={handleFilterChange}
+                isLoading={isLoading}
+                instructors={instructors}
+              />
+            </div>
           </aside>
 
           {/* Main Content */}
           <main className="space-y-8 min-h-[500px]">
             {/* Results Status */}
             {!isLoading && !error && (
-              <div className="flex items-center justify-between pb-2 border-b border-border">
-                <p className="text-muted-foreground text-sm font-medium">
-                  Showing{" "}
-                  <span className="text-foreground font-bold">
-                    {courses.length}
-                  </span>{" "}
-                  of{" "}
-                  <span className="text-foreground font-bold">
-                    {pagination.total}
-                  </span>{" "}
-                  courses
-                </p>
+              <div className="rounded-2xl border border-border/70 bg-card/50 p-4 sm:p-5">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">
+                      {rangeStart}-{rangeEnd} of {pagination.total} courses
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Page {pagination.page} of {pagination.totalPages || 1}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <SlidersHorizontal className="h-3.5 w-3.5" />
+                    {activeFilters.length > 0
+                      ? `${activeFilters.length} active filter${activeFilters.length > 1 ? "s" : ""}`
+                      : "No filters applied"}
+                  </div>
+                </div>
+
+                {activeFilters.length > 0 ? (
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    {activeFilters.map(([key, value]) => (
+                      <span
+                        key={key}
+                        className="inline-flex items-center rounded-full border border-border/70 bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground"
+                      >
+                        {filterLabelMap[key] || key}: {String(value)}
+                      </span>
+                    ))}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 px-2 text-xs"
+                      onClick={() => handleFilterChange({})}
+                    >
+                      Clear filters
+                    </Button>
+                  </div>
+                ) : null}
               </div>
             )}
 
@@ -162,6 +249,7 @@ export default function CoursesPage() {
                 <Button
                   onClick={() => fetchCourses(pagination.page, filters)}
                   variant="outline"
+                  className="min-w-28"
                 >
                   Try Again
                 </Button>
@@ -170,7 +258,7 @@ export default function CoursesPage() {
 
             {/* Loading Grid */}
             {isLoading && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
                 {[...Array(6)].map((_, i) => (
                   <div key={i} className="flex flex-col space-y-3">
                     <Skeleton className="h-48 w-full rounded-xl" />
@@ -212,7 +300,7 @@ export default function CoursesPage() {
 
             {/* Course Grid */}
             {!isLoading && !error && courses.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in duration-500">
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 animate-in fade-in duration-500">
                 {courses.map((course) => (
                   <CourseCard key={course.id} course={course} />
                 ))}
@@ -221,7 +309,7 @@ export default function CoursesPage() {
 
             {/* Pagination */}
             {!isLoading && !error && pagination.totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 border-t border-border pt-8">
+              <div className="flex flex-wrap items-center justify-center gap-2 border-t border-border pt-8">
                 <Button
                   variant="outline"
                   size="icon"
@@ -231,9 +319,17 @@ export default function CoursesPage() {
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
 
-                <span className="text-sm font-medium px-4">
-                  Page {pagination.page} of {pagination.totalPages}
-                </span>
+                {renderPaginationButtons().map((pageNumber) => (
+                  <Button
+                    key={pageNumber}
+                    variant={pageNumber === pagination.page ? "default" : "outline"}
+                    size="sm"
+                    className="min-w-9"
+                    onClick={() => handlePageChange(pageNumber)}
+                  >
+                    {pageNumber}
+                  </Button>
+                ))}
 
                 <Button
                   variant="outline"
