@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toggleCoursePublish } from "@/actions/instructor";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
-// import { useToast } from "@/components/ui/use-toast"; // unavailable
+import { showToast } from "@/lib/toast";
 
 interface CoursePublishButtonProps {
   courseId: string;
@@ -20,22 +20,26 @@ export function CoursePublishButton({
 }: CoursePublishButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  // const { toast } = useToast();
 
   const onClick = async () => {
     try {
       setIsLoading(true);
       await toggleCoursePublish(courseId, !isPublished);
-      // toast({
-      //   title: !isPublished ? "Course Published" : "Course Unpublished",
-      //   description: !isPublished
-      //     ? "Your course is now live and visible to students."
-      //     : "Your course has been hidden from students.",
-      // });
+      showToast({
+        type: "success",
+        title: !isPublished ? "Course Published" : "Course Unpublished",
+        message: !isPublished
+          ? "Your course is now live and visible to students."
+          : "Your course has been hidden from students.",
+      });
       router.refresh();
     } catch (error) {
       console.error(error);
-      alert("Something went wrong");
+      showToast({
+        type: "error",
+        title: "Action Failed",
+        message: "Something went wrong.",
+      });
     } finally {
       setIsLoading(false);
     }

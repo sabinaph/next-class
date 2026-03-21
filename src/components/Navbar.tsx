@@ -18,9 +18,6 @@ import {
   Megaphone,
   BookPlus,
   Layers,
-  CheckCircle2,
-  AlertTriangle,
-  Sparkles,
 } from "lucide-react";
 import { SimpleModeToggle } from "@/components/ModeToggle";
 import { cn } from "@/lib/utils";
@@ -35,6 +32,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { showToast } from "@/lib/toast";
 
 interface NavbarProps {
   className?: string;
@@ -51,19 +49,12 @@ interface NotificationItem {
   createdAt: string;
 }
 
-interface ToastState {
-  type: "success" | "error";
-  title: string;
-  message: string;
-}
-
 export default function Navbar({ className }: NavbarProps) {
   const { data: session } = useSession();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [isNotificationsLoading, setIsNotificationsLoading] = useState(false);
   const [isSendingNotificationsEmail, setIsSendingNotificationsEmail] = useState(false);
-  const [toast, setToast] = useState<ToastState | null>(null);
 
   useEffect(() => {
     if (!session?.user?.id) {
@@ -114,16 +105,6 @@ export default function Navbar({ className }: NavbarProps) {
     };
   }, [session?.user?.id]);
 
-  useEffect(() => {
-    if (!toast) return;
-
-    const timer = setTimeout(() => {
-      setToast(null);
-    }, 3200);
-
-    return () => clearTimeout(timer);
-  }, [toast]);
-
   const getNotificationIcon = (type: NotificationType) => {
     if (type === "ANNOUNCEMENT") {
       return <Megaphone className="h-4 w-4 text-blue-600" />;
@@ -168,7 +149,7 @@ export default function Navbar({ className }: NavbarProps) {
       const body = (await response.json()) as { count?: number };
       const count = body.count || 0;
 
-      setToast({
+      showToast({
         type: "success",
         title: "Email Sent",
         message:
@@ -177,7 +158,7 @@ export default function Navbar({ className }: NavbarProps) {
             : "No new notifications right now, but we sent a quick update email.",
       });
     } catch {
-      setToast({
+      showToast({
         type: "error",
         title: "Email Failed",
         message: "Could not send notifications email right now. Please try again.",
@@ -565,53 +546,6 @@ export default function Navbar({ className }: NavbarProps) {
         </div>
       )}
 
-      {toast && (
-        <div className="fixed right-4 top-20 z-80 w-[360px] max-w-[calc(100vw-2rem)] animate-in slide-in-from-top-3 fade-in-0 duration-300">
-          <div
-            className={cn(
-              "rounded-2xl border px-4 py-3 shadow-xl backdrop-blur-md",
-              toast.type === "success"
-                ? "border-emerald-300/70 bg-emerald-50/95 dark:border-emerald-800 dark:bg-emerald-950/90"
-                : "border-rose-300/70 bg-rose-50/95 dark:border-rose-800 dark:bg-rose-950/90"
-            )}
-          >
-            <div className="flex items-start gap-3">
-              <div
-                className={cn(
-                  "mt-0.5 rounded-full p-1.5",
-                  toast.type === "success"
-                    ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/70 dark:text-emerald-300"
-                    : "bg-rose-100 text-rose-700 dark:bg-rose-900/70 dark:text-rose-300"
-                )}
-              >
-                {toast.type === "success" ? (
-                  <CheckCircle2 className="h-4 w-4" />
-                ) : (
-                  <AlertTriangle className="h-4 w-4" />
-                )}
-              </div>
-
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-semibold leading-none">{toast.title}</p>
-                  {toast.type === "success" && <Sparkles className="h-3.5 w-3.5 text-amber-500" />}
-                </div>
-                <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                  {toast.message}
-                </p>
-              </div>
-
-              <button
-                onClick={() => setToast(null)}
-                className="text-muted-foreground hover:text-foreground text-sm"
-                aria-label="Dismiss notification"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </nav>
   );
 }

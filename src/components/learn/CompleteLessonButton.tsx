@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { showToast } from "@/lib/toast";
 
 interface CompleteLessonButtonProps {
   courseId: string;
@@ -49,9 +50,12 @@ export function CompleteLessonButton({
       setCompleted(true);
 
       if (payload.courseCompleted) {
-        alert(
-          "Congratulations! You completed this course and your certificate is ready in your profile."
-        );
+        showToast({
+          type: "success",
+          title: "Course Completed",
+          message:
+            "Congratulations! You completed this course and your certificate is ready in your profile.",
+        });
       }
 
       router.refresh();
@@ -60,7 +64,11 @@ export function CompleteLessonButton({
         error instanceof Error
           ? error.message
           : "Failed to mark lesson as complete.";
-      alert(message);
+      showToast({
+        type: "error",
+        title: "Could Not Complete Lesson",
+        message,
+      });
     } finally {
       setIsSubmitting(false);
     }

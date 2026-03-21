@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2, Clock } from "lucide-react";
+import { showToast } from "@/lib/toast";
 
 interface WaitlistButtonProps {
   courseId: string;
@@ -24,7 +25,11 @@ export function WaitlistButton({ courseId, isWaitlisted }: WaitlistButtonProps) 
       if (!res.ok) throw new Error("Failed");
       setJoined(!joined);
     } catch (e) {
-      alert("Could not update waitlist. Please try again.");
+      showToast({
+        type: "error",
+        title: "Waitlist Update Failed",
+        message: "Could not update waitlist. Please try again.",
+      });
     } finally {
       setJoining(false);
     }

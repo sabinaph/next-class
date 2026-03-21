@@ -37,6 +37,7 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
+import { showToast } from "@/lib/toast";
 
 interface CourseLessonManagerProps {
   courseId: string;
@@ -87,7 +88,11 @@ export function CourseLessonManager({
       window.location.reload();
     } catch (error) {
       console.error(error);
-      alert("Failed to add lesson");
+      showToast({
+        type: "error",
+        title: "Lesson Not Added",
+        message: "Failed to add lesson.",
+      });
     } finally {
       setIsLoading(false);
       resetForm();
@@ -112,7 +117,11 @@ export function CourseLessonManager({
       window.location.reload();
     } catch (error) {
       console.error(error);
-      alert("Failed to update lesson publish status");
+      showToast({
+        type: "error",
+        title: "Publish Update Failed",
+        message: "Failed to update lesson publish status.",
+      });
     }
   };
 
@@ -145,7 +154,11 @@ export function CourseLessonManager({
       window.location.reload();
     } catch (error) {
       console.error(error);
-      alert("Failed to update lesson");
+      showToast({
+        type: "error",
+        title: "Lesson Update Failed",
+        message: "Failed to update lesson.",
+      });
     } finally {
       setIsLoading(false);
       resetForm();
@@ -185,7 +198,11 @@ export function CourseLessonManager({
       setContent(payload.url);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Upload failed.";
-      alert(`ERROR! ${message}`);
+      showToast({
+        type: "error",
+        title: "Upload Failed",
+        message,
+      });
     } finally {
       setIsUploadingFile(false);
       event.target.value = "";
