@@ -184,3 +184,85 @@ export const sendInvoiceEmail = async (data: {
     return false;
   }
 };
+
+export const sendNotificationsDigestEmail = async (data: {
+  to: string;
+  userName: string;
+  appUrl: string;
+  notifications: Array<{
+    title: string;
+    description: string;
+    href: string;
+    createdAt: string;
+  }>;
+}) => {
+  if (!emailUser || !emailPass) {
+    console.error("Missing email credentials.");
+    return false;
+  }
+
+  const topItems = data.notifications.slice(0, 15);
+
+  const rows =
+    topItems.length > 0
+      ? topItems
+          .map((item) => {
+            const absoluteUrl = `${data.appUrl}${item.href}`;
+            const created = new Date(item.createdAt).toLocaleString("en-US", {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+
+            return `
+              <tr>
+                <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">
+                  <p style="margin: 0 0 4px; font-size: 14px; font-weight: 600; color: #111827;">${item.title}</p>
+                  <p style="margin: 0 0 6px; font-size: 13px; color: #4b5563;">${item.description}</p>
+                  <p style="margin: 0 0 6px; font-size: 12px; color: #6b7280;">${created}</p>
+                  <a href="${absoluteUrl}" style="font-size: 12px; color: #059669; text-decoration: none;">Open notification</a>
+                </td>
+              </tr>
+            `;
+          })
+          .join("")
+      : `
+        <tr>
+          <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">
+            No new notifications right now.
+          </td>
+        </tr>
+      `;
+
+  const mailOptions = {
+    from: process.env.EMAIL_FROM || emailUser,
+    to: data.to,
+    subject: "NextClass Notifications Update",
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto;">
+        <h2 style="color: #111827;">Hi ${data.userName},</h2>
+        <p style="color: #374151; font-size: 14px; line-height: 1.6;">
+          Here is your latest activity update from NextClass.
+        </p>
+        <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 12px;">
+          ${rows}
+        </table>
+        <p style="margin-top: 18px;">
+          <a href="${data.appUrl}/my-courses" style="display: inline-block; padding: 10px 16px; background: #059669; color: #fff; text-decoration: none; border-radius: 6px; font-size: 14px;">
+            Open My Courses
+          </a>
+        </p>
+      </div>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    return true;
+  } catch (error) {
+    console.error("Error sending notifications email:", error);
+    return false;
+  }
+};

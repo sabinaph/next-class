@@ -53,6 +53,7 @@ export default function Navbar({ className }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [isNotificationsLoading, setIsNotificationsLoading] = useState(false);
+  const [isSendingNotificationsEmail, setIsSendingNotificationsEmail] = useState(false);
 
   useEffect(() => {
     if (!session?.user?.id) {
@@ -129,6 +130,27 @@ export default function Navbar({ className }: NavbarProps) {
       return `${Math.floor(diffMs / hour)}h ago`;
     }
     return `${Math.floor(diffMs / day)}d ago`;
+  };
+
+  const sendNotificationsToEmail = async () => {
+    if (isSendingNotificationsEmail) return;
+
+    setIsSendingNotificationsEmail(true);
+    try {
+      const response = await fetch("/api/notifications", {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to send notifications email");
+      }
+
+      window.alert("Notifications sent to your email.");
+    } catch {
+      window.alert("Could not send email right now. Please try again.");
+    } finally {
+      setIsSendingNotificationsEmail(false);
+    }
   };
 
   const getInitials = (name: string) => {
@@ -220,7 +242,18 @@ export default function Navbar({ className }: NavbarProps) {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-96 max-h-[420px] overflow-y-auto" align="end">
-                    <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+                    <DropdownMenuLabel className="flex items-center justify-between gap-2">
+                      <span>Notifications</span>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 px-2 text-xs"
+                        onClick={sendNotificationsToEmail}
+                        disabled={isSendingNotificationsEmail}
+                      >
+                        {isSendingNotificationsEmail ? "Sending..." : "Send to email"}
+                      </Button>
+                    </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     {isNotificationsLoading && notifications.length === 0 ? (
                       <div className="px-3 py-6 text-sm text-muted-foreground">Loading notifications...</div>

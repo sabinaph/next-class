@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 
 import { prisma } from "@/app/lib/prisma";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { sendNotificationsDigestEmail } from "@/lib/email";
 
 type NotificationType = "ANNOUNCEMENT" | "NEW_LESSON" | "NEW_COURSE";
 
@@ -15,15 +16,10 @@ interface NotificationItem {
   createdAt: string;
 }
 
-export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
+async function buildNotificationItems(userId: string): Promise<NotificationItem[]> {
   const completedOrders = await prisma.order.findMany({
     where: {
-      userId: session.user.id,
+      userId,
       status: "COMPLETED",
     },
     orderBy: {
@@ -45,7 +41,7 @@ export async function GET() {
   });
 
   if (completedOrders.length === 0) {
-    return NextResponse.json({ count: 0, notifications: [] });
+    return [];
   }
 
   const purchaseDateByCourseId = new Map<string, Date>();
@@ -74,7 +70,7 @@ export async function GET() {
   const instructorIds = Array.from(firstPurchaseDateByInstructorId.keys());
 
   if (purchasedCourseIds.length === 0) {
-    return NextResponse.json({ count: 0, notifications: [] });
+    return [];
   }
 
   const [announcements, lessons, newInstructorCourses] = await Promise.all([
@@ -184,10 +180,49 @@ export async function GET() {
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 
-  const cappedNotifications = notifications.slice(0, 25);
+  return notifications.slice(0, 25);
+}
+
+export async function GET() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const notifications = await buildNotificationItems(session.user.id);
 
   return NextResponse.json({
-    count: cappedNotifications.length,
-    notifications: cappedNotifications,
+    count: notifications.length,
+    notifications,
+  });
+}
+
+export async function POST() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id || !session.user.email) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const notifications = await buildNotificationItems(session.user.id);
+
+  const appUrl = process.env.NEXTAUTH_URL || process.env.APP_URL || "http://localhost:3000";
+
+  const sent = await sendNotificationsDigestEmail({
+    to: session.user.email,
+    userName: session.user.name || "Learner",
+    appUrl,
+    notifications,
+  });
+
+  if (!sent) {
+    return NextResponse.json(
+      { error: "Failed to send notifications email." },
+      { status: 500 }
+    );
+  }
+
+  return NextResponse.json({
+    message: "Notifications sent to your email.",
+    count: notifications.length,
   });
 }
