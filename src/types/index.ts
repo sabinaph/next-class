@@ -120,6 +120,7 @@ export interface CreateCourseInput {
   learningOutcomes?: string;
   syllabus?: string;
   isPublished?: boolean;
+  isActive?: boolean;
 }
 
 export interface UpdateCourseInput extends Partial<CreateCourseInput> {

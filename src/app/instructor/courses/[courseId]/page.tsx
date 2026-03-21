@@ -13,6 +13,7 @@ interface Props {
 
 import { CoursePublishButton } from "@/components/instructor/CoursePublishButton";
 import { CourseReviewManager } from "@/components/instructor/CourseReviewManager";
+import { CourseDetailsForm } from "@/components/instructor/CourseDetailsForm";
 
 // ... existing imports
 
@@ -60,6 +61,10 @@ export default async function CourseManagePage({
 
       <div className="grid gap-8 md:grid-cols-[2fr_1fr]">
         <div className="space-y-8">
+          <section>
+            <CourseDetailsForm course={course as any} />
+          </section>
+
           <section>
             <CourseLessonManager
               courseId={course.id}
