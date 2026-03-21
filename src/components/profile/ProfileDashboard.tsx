@@ -253,7 +253,7 @@ export default function ProfileDashboard({
                                 ? "bg-green-100 text-green-700 hover:bg-green-100"
                                 : ""
                             }
-                            <p className="text-sm text-muted-foreground">
+                          >
                             {booking.status}
                           </Badge>
                           <Link href={`/learn/${booking.course.id}`}>
