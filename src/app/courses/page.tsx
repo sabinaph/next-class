@@ -102,7 +102,7 @@ export default function CoursesPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Hero Section */}
-      <div className="relative bg-muted/30 border-b">
+      <div className="relative bg-muted/30 border-b border-border">
         <div className="absolute inset-0 bg-grid-black/[0.02] dark:bg-grid-white/[0.02]" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
           <div className="max-w-3xl">
@@ -132,7 +132,7 @@ export default function CoursesPage() {
           <main className="space-y-8 min-h-[500px]">
             {/* Results Status */}
             {!isLoading && !error && (
-              <div className="flex items-center justify-between pb-2 border-b">
+              <div className="flex items-center justify-between pb-2 border-b border-border">
                 <p className="text-muted-foreground text-sm font-medium">
                   Showing{" "}
                   <span className="text-foreground font-bold">
@@ -192,7 +192,7 @@ export default function CoursesPage() {
 
             {/* Empty State */}
             {!isLoading && !error && courses.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-20 bg-card border rounded-2xl border-dashed">
+              <div className="flex flex-col items-center justify-center rounded-2xl border border-border border-dashed bg-card py-20">
                 <div className="p-4 bg-muted/50 rounded-full mb-4">
                   <SearchX className="h-10 w-10 text-muted-foreground" />
                 </div>
@@ -221,7 +221,7 @@ export default function CoursesPage() {
 
             {/* Pagination */}
             {!isLoading && !error && pagination.totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 pt-8 border-t">
+              <div className="flex items-center justify-center gap-2 border-t border-border pt-8">
                 <Button
                   variant="outline"
                   size="icon"
