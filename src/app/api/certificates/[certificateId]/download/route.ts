@@ -350,7 +350,6 @@ export async function GET(
     `${signatureBasePath}.webp`,
   ];
 
-  let hasSignatureImage = false;
   for (const signaturePath of signatureCandidates) {
     try {
       const signatureBytes = await readFile(signaturePath);
@@ -375,22 +374,19 @@ export async function GET(
         opacity: 0.95,
       });
 
-      hasSignatureImage = true;
       break;
     } catch {
       // Try next candidate extension.
     }
   }
 
-  if (!hasSignatureImage) {
-    page.drawText(instructorName, {
-      x: width - 410,
-      y: 132,
-      size: 17,
-      font: italicFont,
-      color: deepBlue,
-    });
-  }
+  page.drawText(instructorName, {
+    x: width - 410,
+    y: 132,
+    size: 17,
+    font: italicFont,
+    color: deepBlue,
+  });
   page.drawText("Instructor", {
     x: width - 410,
     y: 112,
