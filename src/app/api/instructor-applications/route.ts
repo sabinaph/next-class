@@ -5,11 +5,55 @@ import { z } from "zod";
 const instructorApplicationSchema = z.object({
   fullName: z.string().min(2, "Full name is required"),
   email: z.string().email("Valid email is required"),
-  phoneNumber: z.string().optional(),
+  phoneNumber: z.string().min(5, "Phone number is required"),
+  countryLocation: z.string().min(2, "Country / Location is required"),
+
+  currentJob: z.string().min(2, "Current job is required"),
+  yearsOfExperience: z.number().int().min(0, "Years of experience is required"),
+  areaOfExpertise: z.string().min(2, "Area of expertise is required"),
+  shortBio: z.string().min(10, "Short bio is required"),
+
+  courseTitle: z.string().min(2, "Course title is required"),
+  courseCategory: z.string().min(2, "Course category is required"),
+  courseLevel: z.enum(["Beginner", "Intermediate", "Advanced"]),
+  courseDescription: z.string().min(10, "Course description is required"),
+
+  hasTaughtBefore: z.boolean(),
+  teachingExperienceDetails: z.string().optional(),
+  previousCourseLinks: z.string().optional(),
+  portfolioLinks: z.string().optional(),
+
+  sampleVideoFileUrl: z.string().optional(),
+  sampleVideoLink: z.string().optional(),
+
+  hasRecordingEquipment: z.boolean(),
+  willCreateVideoCourses: z.boolean(),
+  canPromoteCourse: z.boolean(),
+  socialMediaLinks: z.string().optional(),
+
+  agreedToTerms: z.literal(true),
+  agreedToRevenueShare: z.literal(true),
+
   studyBackground: z.string().min(5, "Study background is required"),
   hobbies: z.string().min(2, "Hobbies are required"),
   expertise: z.string().optional(),
   bio: z.string().optional(),
+}).superRefine((data, ctx) => {
+  if (!data.sampleVideoFileUrl && !data.sampleVideoLink) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Provide sample video upload or video link",
+      path: ["sampleVideoLink"],
+    });
+  }
+
+  if (data.hasTaughtBefore && !data.teachingExperienceDetails) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Teaching experience details are required",
+      path: ["teachingExperienceDetails"],
+    });
+  }
 });
 
 export async function POST(request: NextRequest) {
@@ -48,11 +92,39 @@ export async function POST(request: NextRequest) {
       data: {
         fullName: data.fullName,
         email: data.email,
-        phoneNumber: data.phoneNumber || null,
+        phoneNumber: data.phoneNumber,
+        countryLocation: data.countryLocation,
+
+        currentJob: data.currentJob,
+        yearsOfExperience: data.yearsOfExperience,
+        areaOfExpertise: data.areaOfExpertise,
+        shortBio: data.shortBio,
+
+        courseTitle: data.courseTitle,
+        courseCategory: data.courseCategory,
+        courseLevel: data.courseLevel,
+        courseDescription: data.courseDescription,
+
+        hasTaughtBefore: data.hasTaughtBefore,
+        teachingExperienceDetails: data.teachingExperienceDetails || null,
+        previousCourseLinks: data.previousCourseLinks || null,
+        portfolioLinks: data.portfolioLinks || null,
+
+        sampleVideoFileUrl: data.sampleVideoFileUrl || null,
+        sampleVideoLink: data.sampleVideoLink || null,
+
+        hasRecordingEquipment: data.hasRecordingEquipment,
+        willCreateVideoCourses: data.willCreateVideoCourses,
+        canPromoteCourse: data.canPromoteCourse,
+        socialMediaLinks: data.socialMediaLinks || null,
+
+        agreedToTerms: data.agreedToTerms,
+        agreedToRevenueShare: data.agreedToRevenueShare,
+
         studyBackground: data.studyBackground,
         hobbies: data.hobbies,
-        expertise: data.expertise || null,
-        bio: data.bio || null,
+        expertise: data.expertise || data.areaOfExpertise,
+        bio: data.bio || data.shortBio,
       },
       select: { id: true, createdAt: true },
     });

@@ -662,10 +662,37 @@ model InstructorApplication {
   fullName String
   email String
   phoneNumber String?
+  countryLocation String?
+
   studyBackground String
   hobbies String
-  expertise String?
-  bio String? @db.Text
+
+  currentJob String?
+  yearsOfExperience Int?
+  areaOfExpertise String?
+  shortBio String? @db.Text
+
+  courseTitle String?
+  courseCategory String?
+  courseLevel String?
+  courseDescription String? @db.Text
+
+  hasTaughtBefore Boolean @default(false)
+  teachingExperienceDetails String? @db.Text
+  previousCourseLinks String? @db.Text
+  portfolioLinks String? @db.Text
+
+  sampleVideoFileUrl String?
+  sampleVideoLink String?
+
+  hasRecordingEquipment Boolean @default(false)
+  willCreateVideoCourses Boolean @default(false)
+
+  canPromoteCourse Boolean @default(false)
+  socialMediaLinks String? @db.Text
+
+  agreedToTerms Boolean @default(false)
+  agreedToRevenueShare Boolean @default(false)
 
   status InstructorApplicationStatus @default(PENDING)
   adminNotes String? @db.Text

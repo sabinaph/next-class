@@ -1,0 +1,23 @@
+-- AlterTable
+ALTER TABLE "instructor_applications"
+ADD COLUMN "countryLocation" TEXT,
+ADD COLUMN "currentJob" TEXT,
+ADD COLUMN "yearsOfExperience" INTEGER,
+ADD COLUMN "areaOfExpertise" TEXT,
+ADD COLUMN "shortBio" TEXT,
+ADD COLUMN "courseTitle" TEXT,
+ADD COLUMN "courseCategory" TEXT,
+ADD COLUMN "courseLevel" TEXT,
+ADD COLUMN "courseDescription" TEXT,
+ADD COLUMN "hasTaughtBefore" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN "teachingExperienceDetails" TEXT,
+ADD COLUMN "previousCourseLinks" TEXT,
+ADD COLUMN "portfolioLinks" TEXT,
+ADD COLUMN "sampleVideoFileUrl" TEXT,
+ADD COLUMN "sampleVideoLink" TEXT,
+ADD COLUMN "hasRecordingEquipment" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN "willCreateVideoCourses" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN "canPromoteCourse" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN "socialMediaLinks" TEXT,
+ADD COLUMN "agreedToTerms" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN "agreedToRevenueShare" BOOLEAN NOT NULL DEFAULT false;
