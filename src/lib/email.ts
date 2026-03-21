@@ -321,3 +321,93 @@ export const sendAutomatedStudentNotificationEmail = async (data: {
     return false;
   }
 };
+
+export const sendInstructorApplicationApprovedEmail = async (data: {
+  to: string;
+  name: string;
+  username: string;
+  password: string;
+  signInUrl: string;
+}) => {
+  if (!emailUser || !emailPass) {
+    console.error("Missing email credentials.");
+    return false;
+  }
+
+  const mailOptions = {
+    from: process.env.EMAIL_FROM || emailUser,
+    to: data.to,
+    subject: "NextClass Instructor Application Approved",
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 620px; margin: 0 auto;">
+        <h2 style="color: #111827;">Congratulations ${data.name},</h2>
+        <p style="color: #374151; font-size: 14px; line-height: 1.6;">
+          Your instructor application has been approved by the NextClass admin team.
+        </p>
+        <p style="color: #111827; font-weight: 600; margin-bottom: 8px;">Your login credentials:</p>
+        <div style="padding: 14px 16px; border: 1px solid #e5e7eb; border-radius: 10px; background: #f9fafb;">
+          <p style="margin: 0 0 8px; font-size: 14px;"><strong>Username:</strong> ${data.username}</p>
+          <p style="margin: 0; font-size: 14px;"><strong>Password:</strong> ${data.password}</p>
+        </div>
+        <p style="margin-top: 16px; color: #6b7280; font-size: 13px;">
+          Please sign in and change your password immediately for security.
+        </p>
+        <p style="margin-top: 18px;">
+          <a href="${data.signInUrl}" style="display: inline-block; padding: 10px 16px; background: #059669; color: #fff; text-decoration: none; border-radius: 6px; font-size: 14px;">
+            Sign In to NextClass
+          </a>
+        </p>
+      </div>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    return true;
+  } catch (error) {
+    console.error("Error sending instructor approval email:", error);
+    return false;
+  }
+};
+
+export const sendInstructorApplicationRejectedEmail = async (data: {
+  to: string;
+  name: string;
+  reason?: string;
+}) => {
+  if (!emailUser || !emailPass) {
+    console.error("Missing email credentials.");
+    return false;
+  }
+
+  const reasonHtml = data.reason
+    ? `<p style="color: #374151; font-size: 14px; line-height: 1.6;"><strong>Reason:</strong> ${data.reason}</p>`
+    : "";
+
+  const mailOptions = {
+    from: process.env.EMAIL_FROM || emailUser,
+    to: data.to,
+    subject: "NextClass Instructor Application Update",
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 620px; margin: 0 auto;">
+        <h2 style="color: #111827;">Hi ${data.name},</h2>
+        <p style="color: #374151; font-size: 14px; line-height: 1.6;">
+          Thank you for applying to become an instructor on NextClass.
+          At this time, your application was not approved.
+        </p>
+        ${reasonHtml}
+        <p style="color: #374151; font-size: 14px; line-height: 1.6;">
+          You are welcome to improve your profile and apply again later.
+        </p>
+      </div>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    return true;
+  } catch (error) {
+    console.error("Error sending instructor rejection email:", error);
+    return false;
+  }
+};
