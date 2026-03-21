@@ -47,6 +47,10 @@ const levels = [
   'Advanced',
 ];
 
+const PRICE_MIN = 0;
+const PRICE_MAX = 50000;
+const PRICE_STEP = 500;
+
 export default function CourseFilter({ onFilterChange, isLoading = false, instructors = [] }: CourseFilterProps) {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All Categories');
@@ -57,6 +61,13 @@ export default function CourseFilter({ onFilterChange, isLoading = false, instru
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+
+  const parsedMinPrice = minPrice === '' ? PRICE_MIN : Number(minPrice);
+  const parsedMaxPrice = maxPrice === '' ? PRICE_MAX : Number(maxPrice);
+  const safeMinPrice = Number.isFinite(parsedMinPrice) ? parsedMinPrice : PRICE_MIN;
+  const safeMaxPrice = Number.isFinite(parsedMaxPrice) ? parsedMaxPrice : PRICE_MAX;
+  const sliderMin = Math.max(PRICE_MIN, Math.min(safeMinPrice, safeMaxPrice));
+  const sliderMax = Math.min(PRICE_MAX, Math.max(safeMaxPrice, safeMinPrice));
 
   const applyFilters = () => {
     const filters: CourseFilters = {};
@@ -188,16 +199,63 @@ export default function CourseFilter({ onFilterChange, isLoading = false, instru
 
       <div className="space-y-2">
         <Label>Price Range</Label>
-        <div className="flex gap-2">
-          <div className="relative flex-1">
-             <span className="absolute left-3 top-2.5 text-xs text-muted-foreground">NPR</span>
+        <div className="rounded-xl border border-border/70 bg-muted/25 p-3">
+          <div className="mb-3 flex items-center justify-between text-xs font-medium">
+            <span className="rounded-md bg-background px-2 py-1 text-foreground">NPR {sliderMin.toLocaleString()}</span>
+            <span className="rounded-md bg-background px-2 py-1 text-foreground">NPR {sliderMax.toLocaleString()}</span>
+          </div>
+
+          <div className="relative mb-3 h-8">
+            <div className="absolute left-0 right-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-muted" />
+
+            <Input
+              type="range"
+              min={PRICE_MIN}
+              max={PRICE_MAX}
+              step={PRICE_STEP}
+              value={sliderMin}
+              onChange={(e) => {
+                const nextMin = Math.min(Number(e.target.value), sliderMax);
+                setMinPrice(String(nextMin));
+              }}
+              disabled={isLoading}
+              className="pointer-events-auto absolute left-0 top-1/2 h-1 w-full -translate-y-1/2 appearance-none bg-transparent p-0 accent-primary"
+            />
+            <Input
+              type="range"
+              min={PRICE_MIN}
+              max={PRICE_MAX}
+              step={PRICE_STEP}
+              value={sliderMax}
+              onChange={(e) => {
+                const nextMax = Math.max(Number(e.target.value), sliderMin);
+                setMaxPrice(String(nextMax));
+              }}
+              disabled={isLoading}
+              className="pointer-events-auto absolute left-0 top-1/2 h-1 w-full -translate-y-1/2 appearance-none bg-transparent p-0 accent-primary"
+            />
+          </div>
+
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <span className="absolute left-3 top-2.5 text-xs text-muted-foreground">NPR</span>
             <Input
               type="number"
               placeholder="Min"
               className="pl-6"
               value={minPrice}
-              onChange={(e) => setMinPrice(e.target.value)}
-              min="0"
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === '') {
+                  setMinPrice('');
+                  return;
+                }
+
+                const num = Math.max(PRICE_MIN, Math.min(Number(value), sliderMax));
+                setMinPrice(String(num));
+              }}
+              min={PRICE_MIN}
+              max={PRICE_MAX}
               disabled={isLoading}
             />
           </div>
@@ -208,12 +266,23 @@ export default function CourseFilter({ onFilterChange, isLoading = false, instru
               placeholder="Max"
               className="pl-6"
               value={maxPrice}
-              onChange={(e) => setMaxPrice(e.target.value)}
-              min="0"
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === '') {
+                  setMaxPrice('');
+                  return;
+                }
+
+                const num = Math.min(PRICE_MAX, Math.max(Number(value), sliderMin));
+                setMaxPrice(String(num));
+              }}
+              min={PRICE_MIN}
+              max={PRICE_MAX}
               disabled={isLoading}
             />
           </div>
         </div>
+      </div>
       </div>
 
       {/* Actions */}
