@@ -14,6 +14,13 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+export const isBlockedRecipientEmail = (email: string) => {
+  const normalized = email.trim().toLowerCase();
+  const domain = normalized.split("@")[1] || "";
+  const blockedDomains = ["nextclass.com", "example.com", "test.com"];
+  return blockedDomains.includes(domain);
+};
+
 export const sendOTP = async (email: string, otp: string) => {
   if (!emailUser || !emailPass) {
     console.error(
@@ -263,6 +270,54 @@ export const sendNotificationsDigestEmail = async (data: {
     return true;
   } catch (error) {
     console.error("Error sending notifications email:", error);
+    return false;
+  }
+};
+
+export const sendAutomatedStudentNotificationEmail = async (data: {
+  to: string;
+  userName: string;
+  eventTitle: string;
+  eventDescription: string;
+  actionUrl: string;
+  actionLabel: string;
+}) => {
+  if (!emailUser || !emailPass) {
+    console.error("Missing email credentials.");
+    return false;
+  }
+
+  if (isBlockedRecipientEmail(data.to)) {
+    return false;
+  }
+
+  const mailOptions = {
+    from: process.env.EMAIL_FROM || emailUser,
+    to: data.to,
+    subject: `NextClass Update: ${data.eventTitle}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 620px; margin: 0 auto;">
+        <h2 style="color: #111827; margin-bottom: 8px;">Hi ${data.userName},</h2>
+        <p style="color: #374151; font-size: 14px; line-height: 1.6; margin-top: 0;">
+          ${data.eventTitle}
+        </p>
+        <div style="padding: 14px 16px; border: 1px solid #e5e7eb; border-radius: 10px; background: #f9fafb;">
+          <p style="margin: 0; color: #111827; font-size: 14px;">${data.eventDescription}</p>
+        </div>
+        <p style="margin-top: 18px;">
+          <a href="${data.actionUrl}" style="display: inline-block; padding: 10px 16px; background: #059669; color: #fff; text-decoration: none; border-radius: 6px; font-size: 14px;">
+            ${data.actionLabel}
+          </a>
+        </p>
+      </div>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    return true;
+  } catch (error) {
+    console.error("Error sending automated notification email:", error);
     return false;
   }
 };

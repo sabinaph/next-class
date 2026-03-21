@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 
 import { prisma } from "@/app/lib/prisma";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { sendNotificationsDigestEmail } from "@/lib/email";
+import { isBlockedRecipientEmail, sendNotificationsDigestEmail } from "@/lib/email";
 
 type NotificationType = "ANNOUNCEMENT" | "NEW_LESSON" | "NEW_COURSE";
 
@@ -14,13 +14,6 @@ interface NotificationItem {
   description: string;
   href: string;
   createdAt: string;
-}
-
-function isBlockedRecipientEmail(email: string) {
-  const normalized = email.trim().toLowerCase();
-  const blockedDomains = ["nextclass.com", "example.com", "test.com"];
-  const domain = normalized.split("@")[1] || "";
-  return blockedDomains.includes(domain);
 }
 
 async function buildNotificationItems(userId: string): Promise<NotificationItem[]> {

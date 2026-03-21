@@ -5,6 +5,10 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { revalidatePath } from "next/cache";
 import { CreateCourseInput, UpdateCourseInput } from "@/types";
+import {
+  notifyStudentsAboutNewCourse,
+  notifyStudentsAboutNewLesson,
+} from "@/lib/notification-emails";
 
 export async function getInstructorStats() {
   const session = await getServerSession(authOptions);
@@ -220,6 +224,21 @@ export async function createLesson(
     },
   });
 
+  if (lesson.isPublished) {
+    const courseDetails = await prisma.course.findUnique({
+      where: { id: courseId },
+      select: { id: true, title: true },
+    });
+
+    if (courseDetails) {
+      await notifyStudentsAboutNewLesson({
+        courseId: courseDetails.id,
+        courseTitle: courseDetails.title,
+        lessonTitle: lesson.title,
+      });
+    }
+  }
+
   revalidatePath(`/instructor/courses/${courseId}`);
   revalidatePath(`/learn/${courseId}`);
   return lesson;
@@ -257,6 +276,14 @@ export async function updateLesson(
     where: { id },
     data,
   });
+
+  if (!lesson.isPublished && updatedLesson.isPublished) {
+    await notifyStudentsAboutNewLesson({
+      courseId: lesson.courseId,
+      courseTitle: lesson.course.title,
+      lessonTitle: updatedLesson.title,
+    });
+  }
 
   revalidatePath(`/instructor/courses/${lesson.courseId}`);
   revalidatePath(`/learn/${lesson.courseId}`);
@@ -306,6 +333,14 @@ export async function toggleCoursePublish(id: string, isPublished: boolean) {
     where: { id },
     data: { isPublished },
   });
+
+  if (!course.isPublished && isPublished) {
+    await notifyStudentsAboutNewCourse({
+      instructorId: session.user.id,
+      courseId: course.id,
+      courseTitle: course.title,
+    });
+  }
 
   revalidatePath(`/instructor/courses/${id}`);
   revalidatePath("/instructor/courses");

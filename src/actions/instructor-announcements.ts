@@ -4,6 +4,7 @@ import { prisma } from "@/app/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { revalidatePath } from "next/cache";
+import { notifyStudentsAboutAnnouncement } from "@/lib/notification-emails";
 
 type AnnouncementPayload = {
   courseId: string;
@@ -78,6 +79,12 @@ export async function createInstructorAnnouncement(payload: AnnouncementPayload)
         },
       },
     },
+  });
+
+  await notifyStudentsAboutAnnouncement({
+    courseId: announcement.course.id,
+    courseTitle: announcement.course.title,
+    announcementTitle: announcement.title,
   });
 
   revalidatePath("/instructor/announcements");
