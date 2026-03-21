@@ -179,7 +179,6 @@ export async function createLesson(
   content?: string,
   options?: {
     duration?: number;
-    order?: number;
     isPublished?: boolean;
     isFree?: boolean;
   }
@@ -206,11 +205,7 @@ export async function createLesson(
     orderBy: { order: "desc" },
   });
 
-  const newOrder = options?.order && options.order > 0
-    ? options.order
-    : lastLesson
-    ? lastLesson.order + 1
-    : 1;
+  const newOrder = lastLesson ? lastLesson.order + 1 : 1;
 
   const lesson = await prisma.lesson.create({
     data: {
