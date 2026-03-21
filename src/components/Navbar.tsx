@@ -132,6 +132,17 @@ export default function Navbar({ className }: NavbarProps) {
     setIsMobileMenuOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isMobileMenuOpen]);
+
   const getNotificationIcon = (type: NotificationType) => {
     if (type === "ANNOUNCEMENT") {
       return <Megaphone className="h-4 w-4 text-blue-600" />;
@@ -217,6 +228,7 @@ export default function Navbar({ className }: NavbarProps) {
   const userInitials = session?.user?.name
     ? getInitials(session.user.name)
     : "U";
+  const unreadCount = notifications.length;
 
   const isActiveRoute = (href: string) => {
     if (href === "/") {
@@ -228,17 +240,19 @@ export default function Navbar({ className }: NavbarProps) {
   return (
     <nav
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 px-3 sm:px-6",
+        "fixed left-0 right-0 top-0 z-50 px-2 sm:px-4 lg:px-6",
         className
       )}
     >
       <div
         className={cn(
-          "mx-auto mt-2 w-full max-w-7xl rounded-2xl border border-border/75 bg-background/75 backdrop-blur-xl transition-all duration-300",
-          isScrolled ? "shadow-xl shadow-black/10 dark:shadow-black/30" : "shadow-md shadow-black/5 dark:shadow-black/20"
+          "mx-auto mt-2 w-full max-w-7xl rounded-2xl border border-border/70 bg-background/80 backdrop-blur-2xl transition-all duration-300",
+          isScrolled
+            ? "shadow-2xl shadow-black/10 dark:shadow-black/35"
+            : "shadow-lg shadow-black/5 dark:shadow-black/20"
         )}
       >
-        <div className="flex h-16 items-center justify-between px-4 sm:px-6">
+        <div className="flex h-16 items-center justify-between px-3 sm:px-5 lg:px-6">
           {/* Logo */}
           <Link href="/" className="group flex items-center gap-2">
             <Image
@@ -256,7 +270,7 @@ export default function Navbar({ className }: NavbarProps) {
 
           {/* Desktop Navigation */}
           <div className="hidden items-center gap-2 md:flex">
-            <div className="flex items-center rounded-full border border-border/80 bg-muted/45 p-1">
+            <div className="flex items-center rounded-full border border-border/80 bg-muted/40 p-1">
               {navLinks.map((link) => {
                 const isActive = isActiveRoute(link.href);
 
@@ -265,10 +279,10 @@ export default function Navbar({ className }: NavbarProps) {
                     key={link.href}
                     href={link.href}
                     className={cn(
-                      "relative rounded-full px-4 py-2 text-sm font-semibold transition",
+                      "relative rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200",
                       isActive
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-foreground"
+                        ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
+                        : "text-muted-foreground hover:bg-background/80 hover:text-foreground"
                     )}
                   >
                     {link.label}
@@ -286,13 +300,13 @@ export default function Navbar({ className }: NavbarProps) {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="relative h-9 w-9 rounded-full border border-border/70 bg-background/70 p-0"
+                      className="relative h-9 w-9 rounded-full border border-border/70 bg-background/70 p-0 transition hover:bg-muted"
                       aria-label="Notifications"
                     >
                       <Bell className="h-5 w-5" />
-                      {notifications.length > 0 && (
+                      {unreadCount > 0 && (
                         <span className="absolute -right-1 -top-1 inline-flex min-h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white">
-                          {notifications.length > 9 ? "9+" : notifications.length}
+                          {unreadCount > 9 ? "9+" : unreadCount}
                         </span>
                       )}
                     </Button>
@@ -336,7 +350,7 @@ export default function Navbar({ className }: NavbarProps) {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="relative h-10 w-10 rounded-full p-0 ring-2 ring-green-100 transition-all hover:ring-green-200 dark:ring-green-900 dark:hover:ring-green-800"
+                      className="relative h-10 w-10 rounded-full p-0 ring-2 ring-green-100 transition-all hover:scale-[1.02] hover:ring-green-200 dark:ring-green-900 dark:hover:ring-green-800"
                     >
                       <Avatar className="h-10 w-10">
                         <AvatarImage
@@ -438,7 +452,7 @@ export default function Navbar({ className }: NavbarProps) {
               <div className="ml-2 flex items-center gap-2">
                 <Link
                   href="/auth/signin"
-                  className="rounded-full px-4 py-2 text-sm font-semibold text-foreground/90 transition hover:text-primary"
+                  className="rounded-full px-4 py-2 text-sm font-semibold text-foreground/90 transition hover:bg-muted hover:text-primary"
                 >
                   Sign In
                 </Link>
@@ -455,9 +469,60 @@ export default function Navbar({ className }: NavbarProps) {
           {/* Mobile Menu Button */}
           <div className="flex items-center gap-2 md:hidden">
             <SimpleModeToggle />
+            {session ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="relative h-9 w-9 rounded-full border border-border/70 bg-background/70 p-0"
+                    aria-label="Notifications"
+                  >
+                    <Bell className="h-5 w-5" />
+                    {unreadCount > 0 ? (
+                      <span className="absolute -right-1 -top-1 inline-flex min-h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white">
+                        {unreadCount > 9 ? "9+" : unreadCount}
+                      </span>
+                    ) : null}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="max-h-[420px] w-[92vw] max-w-sm overflow-y-auto" align="end">
+                  <DropdownMenuLabel className="flex items-center justify-between gap-2">
+                    <span>Notifications</span>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 px-2 text-xs"
+                      onClick={sendNotificationsToEmail}
+                      disabled={isSendingNotificationsEmail}
+                    >
+                      {isSendingNotificationsEmail ? "Sending..." : "Send to email"}
+                    </Button>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {isNotificationsLoading && notifications.length === 0 ? (
+                    <div className="px-3 py-6 text-sm text-muted-foreground">Loading notifications...</div>
+                  ) : notifications.length === 0 ? (
+                    <div className="px-3 py-6 text-sm text-muted-foreground">No notifications yet.</div>
+                  ) : (
+                    notifications.map((notification) => (
+                      <DropdownMenuItem key={notification.id} asChild>
+                        <Link href={notification.href} className="cursor-pointer items-start py-3">
+                          <span className="mr-2 mt-0.5">{getNotificationIcon(notification.type)}</span>
+                          <span className="flex flex-1 flex-col">
+                            <span className="text-sm font-medium leading-5">{notification.title}</span>
+                            <span className="line-clamp-2 text-xs text-muted-foreground">{notification.description}</span>
+                            <span className="mt-1 text-[11px] text-muted-foreground">{formatRelativeTime(notification.createdAt)}</span>
+                          </span>
+                        </Link>
+                      </DropdownMenuItem>
+                    ))
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : null}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="rounded-full border border-border/70 bg-background/70 p-2 text-foreground/85 transition hover:text-primary"
+              className="rounded-full border border-border/70 bg-background/70 p-2 text-foreground/85 transition hover:bg-muted hover:text-primary"
               aria-label={isMobileMenuOpen ? "Close mobile menu" : "Open mobile menu"}
             >
               {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -468,8 +533,15 @@ export default function Navbar({ className }: NavbarProps) {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="mx-auto mt-2 w-full max-w-7xl rounded-2xl border border-border/75 bg-background/95 p-3 shadow-xl shadow-black/10 backdrop-blur-xl md:hidden">
-          <div className="space-y-1">
+        <>
+          <button
+            type="button"
+            aria-label="Close mobile menu overlay"
+            className="fixed inset-0 z-40 bg-black/35 backdrop-blur-[2px] md:hidden"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+          <div className="fixed left-2 right-2 top-[74px] z-50 max-h-[calc(100vh-86px)] overflow-y-auto rounded-2xl border border-border/75 bg-background/95 p-3 shadow-2xl shadow-black/15 backdrop-blur-2xl sm:left-4 sm:right-4 md:hidden">
+            <div className="space-y-1">
             {navLinks.map((link) => {
               const isActive = isActiveRoute(link.href);
 
@@ -478,7 +550,7 @@ export default function Navbar({ className }: NavbarProps) {
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    "block rounded-xl px-3 py-2 text-base font-medium transition",
+                    "block rounded-xl px-3 py-2.5 text-base font-semibold transition",
                     isActive
                       ? "bg-primary text-primary-foreground"
                       : "text-foreground/85 hover:bg-muted"
@@ -549,7 +621,7 @@ export default function Navbar({ className }: NavbarProps) {
 
                   <button
                     onClick={() => signOut({ callbackUrl: "/" })}
-                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 px-3 py-2 text-base font-medium text-white transition hover:bg-red-700"
+                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 px-3 py-2.5 text-base font-medium text-white transition hover:bg-red-700"
                   >
                     <LogOut size={18} />
                     Logout
@@ -575,7 +647,8 @@ export default function Navbar({ className }: NavbarProps) {
               )}
             </div>
           </div>
-        </div>
+          </div>
+        </>
       )}
 
     </nav>
