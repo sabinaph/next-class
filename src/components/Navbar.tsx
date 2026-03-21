@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Menu,
   X,
@@ -14,6 +14,10 @@ import {
   Heart,
   Shield,
   GraduationCap,
+  Bell,
+  Megaphone,
+  BookPlus,
+  Layers,
 } from "lucide-react";
 import { SimpleModeToggle } from "@/components/ModeToggle";
 import { cn } from "@/lib/utils";
@@ -33,9 +37,99 @@ interface NavbarProps {
   className?: string;
 }
 
+type NotificationType = "ANNOUNCEMENT" | "NEW_LESSON" | "NEW_COURSE";
+
+interface NotificationItem {
+  id: string;
+  type: NotificationType;
+  title: string;
+  description: string;
+  href: string;
+  createdAt: string;
+}
+
 export default function Navbar({ className }: NavbarProps) {
   const { data: session } = useSession();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [isNotificationsLoading, setIsNotificationsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!session?.user?.id) {
+      setNotifications([]);
+      return;
+    }
+
+    let isMounted = true;
+
+    const loadNotifications = async () => {
+      setIsNotificationsLoading(true);
+      try {
+        const response = await fetch("/api/notifications", {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch notifications");
+        }
+
+        const body = (await response.json()) as {
+          notifications?: NotificationItem[];
+        };
+
+        if (isMounted) {
+          setNotifications(body.notifications || []);
+        }
+      } catch {
+        if (isMounted) {
+          setNotifications([]);
+        }
+      } finally {
+        if (isMounted) {
+          setIsNotificationsLoading(false);
+        }
+      }
+    };
+
+    void loadNotifications();
+    const intervalId = setInterval(() => {
+      void loadNotifications();
+    }, 60000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
+  }, [session?.user?.id]);
+
+  const getNotificationIcon = (type: NotificationType) => {
+    if (type === "ANNOUNCEMENT") {
+      return <Megaphone className="h-4 w-4 text-blue-600" />;
+    }
+    if (type === "NEW_LESSON") {
+      return <Layers className="h-4 w-4 text-emerald-600" />;
+    }
+    return <BookPlus className="h-4 w-4 text-violet-600" />;
+  };
+
+  const formatRelativeTime = (dateString: string) => {
+    const date = new Date(dateString).getTime();
+    const now = Date.now();
+    const diffMs = now - date;
+    const minute = 60 * 1000;
+    const hour = 60 * minute;
+    const day = 24 * hour;
+
+    if (diffMs < hour) {
+      const minutes = Math.max(1, Math.floor(diffMs / minute));
+      return `${minutes}m ago`;
+    }
+    if (diffMs < day) {
+      return `${Math.floor(diffMs / hour)}h ago`;
+    }
+    return `${Math.floor(diffMs / day)}d ago`;
+  };
 
   const getInitials = (name: string) => {
     return (
@@ -109,7 +203,46 @@ export default function Navbar({ className }: NavbarProps) {
 
             {/* Auth Buttons / User Menu */}
             {session ? (
-              <div className="ml-4">
+              <div className="ml-4 flex items-center gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="relative h-10 w-10 rounded-full"
+                      aria-label="Notifications"
+                    >
+                      <Bell className="h-5 w-5" />
+                      {notifications.length > 0 && (
+                        <span className="absolute -top-1 -right-1 inline-flex min-w-5 h-5 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white">
+                          {notifications.length > 9 ? "9+" : notifications.length}
+                        </span>
+                      )}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-96 max-h-[420px] overflow-y-auto" align="end">
+                    <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {isNotificationsLoading && notifications.length === 0 ? (
+                      <div className="px-3 py-6 text-sm text-muted-foreground">Loading notifications...</div>
+                    ) : notifications.length === 0 ? (
+                      <div className="px-3 py-6 text-sm text-muted-foreground">No notifications yet.</div>
+                    ) : (
+                      notifications.map((notification) => (
+                        <DropdownMenuItem key={notification.id} asChild>
+                          <Link href={notification.href} className="cursor-pointer items-start py-3">
+                            <span className="mr-2 mt-0.5">{getNotificationIcon(notification.type)}</span>
+                            <span className="flex flex-1 flex-col">
+                              <span className="text-sm font-medium leading-5">{notification.title}</span>
+                              <span className="text-xs text-muted-foreground line-clamp-2">{notification.description}</span>
+                              <span className="mt-1 text-[11px] text-muted-foreground">{formatRelativeTime(notification.createdAt)}</span>
+                            </span>
+                          </Link>
+                        </DropdownMenuItem>
+                      ))
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
