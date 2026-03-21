@@ -9,6 +9,7 @@ import {
   notifyStudentsAboutNewCourse,
   notifyStudentsAboutNewLesson,
 } from "@/lib/notification-emails";
+import { getInstructorShare } from "@/lib/revenue-share";
 
 export async function getInstructorStats() {
   const session = await getServerSession(authOptions);
@@ -19,7 +20,7 @@ export async function getInstructorStats() {
 
   const instructorId = session.user.id;
 
-  const [coursesCount, totalStudents, totalRevenue, reviews] =
+  const [coursesCount, totalStudents, grossSales, reviews] =
     await Promise.all([
       // Total Courses
       prisma.course.count({
@@ -34,14 +35,14 @@ export async function getInstructorStats() {
         },
       }),
 
-      // Revenue
-      prisma.booking.aggregate({
+      // Gross sales from completed course orders for this instructor
+      prisma.orderItem.aggregate({
         where: {
           course: { instructorId },
-          status: "CONFIRMED",
+          order: { status: "COMPLETED" },
         },
         _sum: {
-          totalAmount: true,
+          priceAtPurchase: true,
         },
       }),
 
@@ -59,7 +60,7 @@ export async function getInstructorStats() {
   return {
     coursesCount,
     totalStudents, // This is technically bookings count, fixing distinct students is heavier
-    totalRevenue: totalRevenue._sum.totalAmount?.toNumber() || 0,
+    totalRevenue: getInstructorShare(grossSales._sum.priceAtPurchase?.toNumber() || 0),
     averageRating: reviews._avg.rating || 0,
   };
 }

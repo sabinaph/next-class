@@ -1,7 +1,8 @@
 import { prisma } from "@/app/lib/prisma";
+import { getPlatformShare } from "@/lib/revenue-share";
 
 export default async function AdminReportsPage() {
-  const [totalRevenue, completedOrders, pendingOrders, topCourses] = await Promise.all([
+  const [grossRevenue, completedOrders, pendingOrders, topCourses] = await Promise.all([
     prisma.order.aggregate({
       where: { status: "COMPLETED" },
       _sum: { totalAmount: true },
@@ -42,9 +43,9 @@ export default async function AdminReportsPage() {
 
       <div className="grid gap-4 md:grid-cols-3">
         <div className="rounded-xl border p-4">
-          <p className="text-sm text-muted-foreground">Total Revenue</p>
+          <p className="text-sm text-muted-foreground">Platform Revenue (40%)</p>
           <p className="text-2xl font-bold">
-            {formatNPR(Number(totalRevenue._sum.totalAmount || 0))}
+            {formatNPR(getPlatformShare(Number(grossRevenue._sum.totalAmount || 0)))}
           </p>
         </div>
         <div className="rounded-xl border p-4">

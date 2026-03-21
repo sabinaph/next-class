@@ -3,6 +3,7 @@
 import { prisma } from "@/app/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getPlatformShare } from "@/lib/revenue-share";
 
 export async function getAnalyticsData() {
   const session = await getServerSession(authOptions);
@@ -71,8 +72,7 @@ export async function getAnalyticsData() {
       totalOrders,
       completedOrders,
       pendingOrders,
-      totalRevenue:
-        totalRevenue._sum?.totalAmount?.toFixed(2) || "0.00",
+      totalRevenue: getPlatformShare(Number(totalRevenue._sum?.totalAmount || 0)).toFixed(2),
       totalStudents: studentCount,
       totalInstructors: instructorCount,
       totalAdmins: adminCount,
@@ -104,7 +104,7 @@ export async function getPaymentGatewayBreakdown() {
   return result.map((item) => ({
     name: item.paymentGateway || "Unknown",
     value: item._count,
-    revenue: Number(item._sum?.totalAmount || 0),
+    revenue: getPlatformShare(Number(item._sum?.totalAmount || 0)),
   }));
 }
 
@@ -128,7 +128,7 @@ export async function getMonthlyRevenueData() {
     const date = new Date(order.paidAt);
     const monthKey = date.toISOString().split("T")[0].slice(0, 7); // YYYY-MM
 
-    monthlyData[monthKey] = (monthlyData[monthKey] || 0) + Number(order.totalAmount);
+    monthlyData[monthKey] = (monthlyData[monthKey] || 0) + getPlatformShare(Number(order.totalAmount));
   });
 
   return Object.entries(monthlyData)

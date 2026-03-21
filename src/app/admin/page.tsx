@@ -134,7 +134,7 @@ export default function AdminDashboard() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <CardTitle className="text-sm font-medium">Platform Revenue (40%)</CardTitle>
             <DollarSign className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
@@ -238,7 +238,7 @@ export default function AdminDashboard() {
         {/* Monthly Revenue Trend */}
         <Card>
           <CardHeader>
-            <CardTitle>Monthly Revenue Trend</CardTitle>
+            <CardTitle>Monthly Platform Revenue Trend</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -268,7 +268,7 @@ export default function AdminDashboard() {
                   strokeWidth={2}
                   dot={{ fill: "#3b82f6", r: 4 }}
                   activeDot={{ r: 6 }}
-                  name="Revenue (₨)"
+                  name="Platform Revenue (₨)"
                 />
               </LineChart>
             </ResponsiveContainer>
