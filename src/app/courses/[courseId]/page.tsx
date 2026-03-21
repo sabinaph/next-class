@@ -38,93 +38,129 @@ export default async function CourseSubPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      {/* Hero Section */}
-      <div className="bg-muted/30 border-b">
-        <div className="container mx-auto px-4 py-12 md:py-20">
-          <div className="max-w-4xl mx-auto space-y-6">
-            <div className="flex items-center gap-2 text-sm font-medium text-primary">
-              <span>{course.category}</span>
-              <span>•</span>
-              <span>{course.level}</span>
-            </div>
-
-            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
-              {course.title}
-            </h1>
-            <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl">
-              {course.description}
-            </p>
-
-            <div className="flex flex-wrap items-center gap-6 text-sm">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                <span>
-                  Created by{" "}
-                  {course.instructor.name ||
-                    course.instructor.firstName ||
-                    "Instructor"}
+      <div className="border-b bg-linear-to-b from-primary/8 via-background to-background">
+        <div className="container mx-auto px-4 py-10 md:py-16 max-w-6xl">
+          <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] gap-10 items-start">
+            <div className="space-y-6">
+              <div className="flex flex-wrap items-center gap-2 text-sm">
+                <span className="rounded-full border px-3 py-1 bg-background/80 font-medium">
+                  {course.category}
+                </span>
+                <span className="rounded-full border px-3 py-1 bg-background/80 font-medium">
+                  {course.level}
+                </span>
+                <span className="rounded-full border px-3 py-1 bg-background/80 font-medium">
+                  {course._count.lessons} lessons
                 </span>
               </div>
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                <span>{course.duration} Hours</span>
+
+              <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
+                {course.title}
+              </h1>
+
+              <p className="text-lg text-muted-foreground leading-relaxed max-w-3xl">
+                {course.description}
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="rounded-xl border bg-card/70 p-4">
+                  <p className="text-xs text-muted-foreground mb-1">Instructor</p>
+                  <p className="font-semibold">
+                    {course.instructor.name ||
+                      course.instructor.firstName ||
+                      "Instructor"}
+                  </p>
+                </div>
+                <div className="rounded-xl border bg-card/70 p-4">
+                  <p className="text-xs text-muted-foreground mb-1">Duration</p>
+                  <p className="font-semibold">{course.duration} hours</p>
+                </div>
+                <div className="rounded-xl border bg-card/70 p-4">
+                  <p className="text-xs text-muted-foreground mb-1">Reviews</p>
+                  <p className="font-semibold flex items-center gap-1">
+                    <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                    4.8 ({course._count.reviews})
+                  </p>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                <span>4.8 ({course._count.reviews} reviews)</span>
+
+              <div className="flex flex-wrap items-center gap-3 pt-1">
+                {course.canReview ? (
+                  <Link href={`/learn/${course.id}`}>
+                    <Button size="lg" className="px-7">
+                      Start Learning
+                    </Button>
+                  </Link>
+                ) : course.isFull ? (
+                  <div className="max-w-sm rounded-lg border bg-card p-3">
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Course is full. Join the waitlist to get notified.
+                    </p>
+                    <WaitlistButton
+                      courseId={course.id}
+                      isWaitlisted={course.isWaitlisted}
+                    />
+                  </div>
+                ) : (
+                  <Link href={`/courses/${course.id}/enroll`}>
+                    <Button size="lg" className="px-7">
+                      Enroll Now - {price}
+                    </Button>
+                  </Link>
+                )}
+                {!course.canReview && <AddToCartButton courseId={course.id} />}
+                <WishlistButton
+                  courseId={course.id}
+                  initialIsWishlisted={course.isWishlisted}
+                />
               </div>
             </div>
 
-            <div className="flex items-center gap-4 pt-4">
-              {course.canReview ? (
-                <Link href={`/learn/${course.id}`}>
-                  <Button size="lg" className="text-lg px-8">
-                    Start Learning
-                  </Button>
-                </Link>
-              ) : course.isFull ? (
-                <div className="max-w-sm">
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Course is full. Join the waitlist to be notified when a seat opens.
-                  </p>
-                  <WaitlistButton
-                    courseId={course.id}
-                    isWaitlisted={course.isWaitlisted}
+            <div className="rounded-2xl border bg-card p-3 shadow-md">
+              <div className="aspect-video overflow-hidden rounded-xl bg-muted">
+                {course.thumbnail ? (
+                  <img
+                    src={course.thumbnail}
+                    alt={course.title}
+                    className="h-full w-full object-cover"
                   />
+                ) : (
+                  <div className="h-full w-full flex items-center justify-center text-muted-foreground">
+                    <BookOpen className="h-8 w-8" />
+                  </div>
+                )}
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                <div className="rounded-lg border p-3 bg-background/70">
+                  <p className="text-xs text-muted-foreground">Price</p>
+                  <p className="font-bold text-base">{price}</p>
                 </div>
-              ) : (
-                <Link href={`/courses/${course.id}/enroll`}>
-                  <Button size="lg" className="text-lg px-8">
-                    Enroll Now - {price}
-                  </Button>
-                </Link>
-              )}
-              {!course.canReview && <AddToCartButton courseId={course.id} />}
-              <WishlistButton
-                courseId={course.id}
-                initialIsWishlisted={course.isWishlisted}
-              />
+                <div className="rounded-lg border p-3 bg-background/70">
+                  <p className="text-xs text-muted-foreground">Access</p>
+                  <p className="font-bold text-base">Lifetime</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-[1fr_300px] gap-12 max-w-6xl">
+      <div className="container mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-[1fr_320px] gap-12 max-w-6xl">
         <div className="space-y-12">
           {/* Lessons */}
           <section>
             <h2 className="text-2xl font-bold mb-6">Course Content</h2>
-            <div className="border rounded-xl divide-y">
+            <div className="border rounded-xl divide-y overflow-hidden bg-card">
               {course.lessons.map((lesson, index) => (
                 <div
                   key={lesson.id}
-                  className="p-4 bg-card flex items-center justify-between hover:bg-muted/20 transition-colors"
+                  className="p-4 flex items-center justify-between hover:bg-muted/20 transition-colors"
                 >
                   <div className="flex items-center gap-4">
-                    <span className="text-muted-foreground w-6 text-center">
+                    <span className="text-muted-foreground w-6 text-center font-medium">
                       {index + 1}
                     </span>
-                    <div className="p-2 bg-muted rounded-full">
+                    <div className="p-2 bg-muted rounded-full shrink-0">
                       {lesson.type === "VIDEO" ? (
                         <Video className="h-4 w-4" />
                       ) : (
@@ -139,7 +175,7 @@ export default async function CourseSubPage({ params }: Props) {
                     </div>
                   </div>
                   {lesson.isFree ? (
-                    <Button variant="ghost" size="sm" className="text-primary">
+                    <Button variant="ghost" size="sm" className="text-primary border">
                       Preview
                     </Button>
                   ) : (
@@ -160,10 +196,14 @@ export default async function CourseSubPage({ params }: Props) {
           {/* Instructor */}
           <section>
             <h2 className="text-2xl font-bold mb-6">Instructor</h2>
-            <div className="flex items-start gap-4 p-6 border rounded-xl bg-card">
+            <div className="flex items-start gap-4 p-6 border rounded-xl bg-card shadow-xs">
               <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center overflow-hidden">
                 {course.instructor.image ? (
-                  <img src={course.instructor.image} alt="Instructor" />
+                  <img
+                    src={course.instructor.image}
+                    alt="Instructor"
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
                   <User className="h-8 w-8 text-muted-foreground" />
                 )}
@@ -270,7 +310,10 @@ export default async function CourseSubPage({ params }: Props) {
         {/* Sidebar */}
         <div className="space-y-6">
           <div className="p-6 border rounded-xl bg-card sticky top-24 shadow-sm">
-            <div className="text-3xl font-bold mb-2">{price}</div>
+            <div className="text-sm uppercase tracking-wide text-muted-foreground mb-1">
+              Course Price
+            </div>
+            <div className="text-3xl font-bold mb-4">{price}</div>
             {course.canReview ? (
               <Link href={`/learn/${course.id}`}>
                 <Button className="w-full mb-4" size="lg">
@@ -287,6 +330,9 @@ export default async function CourseSubPage({ params }: Props) {
             <ul className="space-y-3 text-sm">
               <li className="flex items-center gap-2 text-muted-foreground">
                 <Video className="h-4 w-4" /> {course._count.lessons} Lessons
+              </li>
+              <li className="flex items-center gap-2 text-muted-foreground">
+                <BookOpen className="h-4 w-4" /> Structured beginner-friendly path
               </li>
               <li className="flex items-center gap-2 text-muted-foreground">
                 <Clock className="h-4 w-4" /> Full Lifetime Access
