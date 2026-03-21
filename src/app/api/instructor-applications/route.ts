@@ -36,8 +36,6 @@ const instructorApplicationSchema = z.object({
 
   studyBackground: z.string().min(5, "Study background is required"),
   hobbies: z.string().min(2, "Hobbies are required"),
-  expertise: z.string().optional(),
-  bio: z.string().optional(),
 }).superRefine((data, ctx) => {
   if (!data.sampleVideoFileUrl && !data.sampleVideoLink) {
     ctx.addIssue({
@@ -123,8 +121,6 @@ export async function POST(request: NextRequest) {
 
         studyBackground: data.studyBackground,
         hobbies: data.hobbies,
-        expertise: data.expertise || data.areaOfExpertise,
-        bio: data.bio || data.shortBio,
       },
       select: { id: true, createdAt: true },
     });

@@ -73,7 +73,7 @@ export default function InstructorApplyPage() {
         throw new Error(result.error || "Video upload failed");
       }
 
-      setFormData((prev) => ({ ...prev, sampleVideoFileUrl: result.url }));
+      setFormData((prev) => ({ ...prev, sampleVideoFileUrl: result.url || "" }));
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Video upload failed");
     } finally {
@@ -94,8 +94,6 @@ export default function InstructorApplyPage() {
         body: JSON.stringify({
           ...formData,
           yearsOfExperience: Number(formData.yearsOfExperience),
-          expertise: formData.areaOfExpertise,
-          bio: formData.shortBio,
         }),
       });
 

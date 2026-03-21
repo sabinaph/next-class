@@ -75,16 +75,16 @@ export default async function InstructorApplicationsPage() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Area of Expertise</p>
-                    <p>{application.areaOfExpertise || application.expertise || "-"}</p>
+                    <p>{application.areaOfExpertise || "-"}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Hobbies</p>
                     <p>{application.hobbies}</p>
                   </div>
-                  {application.shortBio || application.bio ? (
+                  {application.shortBio ? (
                     <div>
                       <p className="text-sm text-muted-foreground">Short Bio</p>
-                      <p>{application.shortBio || application.bio}</p>
+                      <p>{application.shortBio}</p>
                     </div>
                   ) : null}
                   {application.courseTitle ? (
