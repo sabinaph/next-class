@@ -249,7 +249,7 @@ export default function Navbar({ className }: NavbarProps) {
               className="h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.03]"
               priority
             />
-            <span className="hidden text-xl font-bold text-gray-900 sm:block dark:text-white">
+            <span className="hidden text-xl font-bold text-foreground sm:block">
               Next<span className="text-green-600">Class</span>
             </span>
           </Link>

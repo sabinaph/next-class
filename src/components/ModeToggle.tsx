@@ -19,11 +19,11 @@ export function ModeToggle() {
   return (
     <button
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-      className="relative rounded-lg bg-gray-100 p-2 transition hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+      className="relative rounded-lg border border-border/70 bg-muted/70 p-2 text-foreground transition hover:bg-muted"
       aria-label="Toggle theme"
     >
-      <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 dark:text-gray-400 text-gray-900" />
-      <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 dark:text-gray-100 top-2" />
+      <Sun className="h-5 w-5 rotate-0 scale-100 text-foreground transition-all dark:-rotate-90 dark:scale-0 dark:text-muted-foreground" />
+      <Moon className="absolute top-2 h-5 w-5 rotate-90 scale-0 text-muted-foreground transition-all dark:rotate-0 dark:scale-100 dark:text-foreground" />
     </button>
   );
 }
@@ -43,7 +43,7 @@ export function SimpleModeToggle() {
   return (
     <button
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-      className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300"
+      className="p-2 rounded-full text-muted-foreground transition-colors hover:bg-muted"
       aria-label="Toggle theme"
     >
       {resolvedTheme === "dark" ? <Sun size={20} /> : <Moon size={20} />}

@@ -50,20 +50,20 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
+    <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-4">
+          <h1 className="mb-4 text-4xl font-extrabold text-foreground">
             Get in Touch
           </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Have a question or just want to say hi? We'd love to hear from you.
             Fill out the form below and we'll get back to you as soon as
             possible.
           </p>
         </div>
 
-        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row">
+        <div className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-xl md:flex-row">
           {/* Contact Info Sidebar */}
           <div className="bg-green-600 dark:bg-green-700 p-10 text-white md:w-1/3 flex flex-col justify-between relative overflow-hidden">
             <div className="relative z-10">
@@ -102,14 +102,14 @@ export default function ContactPage() {
           {/* Contact Form */}
           <div className="p-10 md:w-2/3">
             {status === "success" ? (
-              <div className="h-full flex flex-col items-center justify-center text-center p-8 animate-in zoom-in duration-300">
-                <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4">
+              <div className="animate-in zoom-in duration-300 h-full flex flex-col items-center justify-center p-8 text-center">
+                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
                   <CheckCircle2 className="w-8 h-8 text-green-600 dark:text-green-500" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                <h3 className="mb-2 text-2xl font-bold text-foreground">
                   Message Sent!
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-6">
+                <p className="mb-6 text-muted-foreground">
                   Thank you for reaching out. We'll get back to you shortly.
                 </p>
                 <button
@@ -128,9 +128,9 @@ export default function ContactPage() {
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className="text-sm font-medium text-foreground">
                       Name
                     </label>
                     <div className="relative">
@@ -145,13 +145,13 @@ export default function ContactPage() {
                         onChange={(e) =>
                           setFormData({ ...formData, name: e.target.value })
                         }
-                        className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all outline-none text-gray-900 dark:text-white placeholder-gray-400"
+                        className="w-full rounded-xl border border-border bg-muted px-4 py-3 pl-10 text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/70 placeholder:text-muted-foreground"
                         placeholder="Your name"
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className="text-sm font-medium text-foreground">
                       Email
                     </label>
                     <div className="relative">
@@ -166,7 +166,7 @@ export default function ContactPage() {
                         onChange={(e) =>
                           setFormData({ ...formData, email: e.target.value })
                         }
-                        className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all outline-none text-gray-900 dark:text-white placeholder-gray-400"
+                        className="w-full rounded-xl border border-border bg-muted px-4 py-3 pl-10 text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/70 placeholder:text-muted-foreground"
                         placeholder="you@example.com"
                       />
                     </div>
@@ -174,7 +174,7 @@ export default function ContactPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="text-sm font-medium text-foreground">
                     Subject
                   </label>
                   <input
@@ -184,13 +184,13 @@ export default function ContactPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, subject: e.target.value })
                     }
-                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all outline-none text-gray-900 dark:text-white placeholder-gray-400"
+                    className="w-full rounded-xl border border-border bg-muted px-4 py-3 text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/70 placeholder:text-muted-foreground"
                     placeholder="How can we help?"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="text-sm font-medium text-foreground">
                     Message
                   </label>
                   <textarea
@@ -200,7 +200,7 @@ export default function ContactPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, message: e.target.value })
                     }
-                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all outline-none text-gray-900 dark:text-white placeholder-gray-400 resize-none"
+                    className="w-full resize-none rounded-xl border border-border bg-muted px-4 py-3 text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/70 placeholder:text-muted-foreground"
                     placeholder="Write your message here..."
                   />
                 </div>
@@ -208,7 +208,7 @@ export default function ContactPage() {
                 <button
                   type="submit"
                   disabled={status === "loading"}
-                  className="w-full flex items-center justify-center gap-2 px-8 py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-100 transition shadow-lg shadow-gray-900/20 dark:shadow-none disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-primary px-8 py-4 font-bold text-primary-foreground transition hover:bg-primary/90 shadow-lg shadow-primary/20 disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {status === "loading" ? (
                     <Loader2 className="animate-spin w-5 h-5" />

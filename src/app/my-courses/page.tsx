@@ -55,12 +55,12 @@ export default async function MyCoursesPage() {
   const fallbackThumbnail = "/default-coures.jpg";
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 py-12">
+    <div className="min-h-screen bg-background py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">My Courses</h1>
-            <p className="text-sm text-muted-foreground mt-1">
+            <h1 className="text-3xl font-bold text-foreground">My Courses</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
               Access all courses you have purchased.
             </p>
           </div>
@@ -70,14 +70,14 @@ export default async function MyCoursesPage() {
         </div>
 
         {purchasedCourses.length === 0 ? (
-          <div className="rounded-xl border bg-white dark:bg-gray-900 p-8 text-center">
-            <h2 className="text-xl font-semibold mb-2">No purchased courses yet</h2>
-            <p className="text-sm text-muted-foreground mb-4">
+          <div className="rounded-xl border border-border bg-card p-8 text-center">
+            <h2 className="mb-2 text-xl font-semibold text-foreground">No purchased courses yet</h2>
+            <p className="mb-4 text-sm text-muted-foreground">
               Once you complete payment, your course will appear here.
             </p>
             <Link
               href="/courses"
-              className="inline-flex items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white dark:bg-white dark:text-gray-900"
+              className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
             >
               Explore Courses
             </Link>
@@ -93,7 +93,7 @@ export default async function MyCoursesPage() {
               return (
                 <article
                   key={course.id}
-                  className="rounded-xl border bg-white dark:bg-gray-900 overflow-hidden"
+                  className="overflow-hidden rounded-xl border border-border bg-card"
                 >
                   <div className="aspect-video bg-muted">
                     <img
@@ -116,13 +116,13 @@ export default async function MyCoursesPage() {
                     <div className="flex items-center gap-2 pt-1">
                       <Link
                         href={`/learn/${course.id}`}
-                        className="inline-flex items-center justify-center rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white dark:bg-white dark:text-gray-900"
+                        className="inline-flex items-center justify-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground"
                       >
                         Start Learning
                       </Link>
                       <Link
                         href={`/courses/${course.id}`}
-                        className="inline-flex items-center justify-center rounded-md border px-3 py-2 text-sm font-medium"
+                        className="inline-flex items-center justify-center rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-muted"
                       >
                         View Course
                       </Link>

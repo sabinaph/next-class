@@ -3,12 +3,12 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="bg-card/70 text-gray-600 dark:text-gray-300 py-12 border-t border-border transition-colors duration-300">
+    <footer className="border-t border-border bg-card/80 py-12 text-muted-foreground transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="col-span-1 md:col-span-1">
-            <Link href="/" className="flex items-center gap-2 mb-4">
+            <Link href="/" className="mb-4 flex items-center gap-2">
               <Image
                 src="/NEXTCLASS.png"
                 alt="NextClass Logo"
@@ -16,11 +16,11 @@ export default function Footer() {
                 height={50}
                 className="h-10 w-auto object-contain"
               />
-              <span className="text-xl font-bold text-gray-900 dark:text-white">
+              <span className="text-xl font-bold text-foreground">
                 Next<span className="text-green-600">Class</span>
               </span>
             </Link>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">
+            <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
               Empowering students and educators with next-generation learning
               tools. Join the future of education today.
             </p>
@@ -28,7 +28,7 @@ export default function Footer() {
 
           {/* Links */}
           <div>
-            <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            <h4 className="mb-4 text-lg font-semibold text-foreground">
               Platform
             </h4>
             <ul className="space-y-2 text-sm">
@@ -68,7 +68,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            <h4 className="mb-4 text-lg font-semibold text-foreground">
               Resources
             </h4>
             <ul className="space-y-2 text-sm">
@@ -108,7 +108,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            <h4 className="mb-4 text-lg font-semibold text-foreground">
               Legal
             </h4>
             <ul className="space-y-2 text-sm">
@@ -140,28 +140,28 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row justify-between items-center bg-background/60 rounded-lg p-4">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+        <div className="mt-12 flex flex-col items-center justify-between rounded-lg border-t border-border bg-background/60 p-4 pt-8 md:flex-row">
+          <p className="text-sm text-muted-foreground">
             &copy; {new Date().getFullYear()} NextClass Hub. All rights
             reserved.
           </p>
-          <div className="flex space-x-6 mt-4 md:mt-0">
+          <div className="mt-4 flex space-x-6 md:mt-0">
             {/* Social Placeholders */}
             <a
               href="#"
-              className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition"
+              className="text-muted-foreground transition hover:text-foreground"
             >
               Twitter
             </a>
             <a
               href="#"
-              className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition"
+              className="text-muted-foreground transition hover:text-foreground"
             >
               LinkedIn
             </a>
             <a
               href="#"
-              className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition"
+              className="text-muted-foreground transition hover:text-foreground"
             >
               Instagram
             </a>

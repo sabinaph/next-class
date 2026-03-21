@@ -54,7 +54,7 @@ export default async function LessonIdPage({
       <div className="p-4 w-full">
         {/* Media Player */}
         {lesson.type === "VIDEO" && lesson.content && (
-          <div className="relative aspect-video rounded-xl overflow-hidden bg-black shadow-lg">
+          <div className="relative aspect-video rounded-xl overflow-hidden bg-muted shadow-lg">
             {/* Basic iframe support for now; in production use a robust player */}
             <iframe
               src={lesson.content}

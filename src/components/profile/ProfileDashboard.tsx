@@ -165,8 +165,8 @@ export default function ProfileDashboard({
       onClick={() => setActiveTab(tab)}
       className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm font-medium w-full ${
         activeTab === tab
-          ? "bg-white dark:bg-gray-800 text-green-600 dark:text-green-400 shadow-md shadow-gray-200/50 dark:shadow-none"
-          : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+          ? "bg-card text-primary shadow-sm border border-border"
+          : "text-muted-foreground hover:bg-muted hover:text-foreground"
       }`}
     >
       <Icon size={18} />
@@ -175,10 +175,10 @@ export default function ProfileDashboard({
   );
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row min-h-[600px]">
+    <div className="flex min-h-[600px] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-xl md:flex-row">
       {/* Sidebar / Tabs */}
-      <div className="w-full md:w-64 bg-gray-50 dark:bg-gray-950 border-r border-gray-100 dark:border-gray-800 p-6 flex flex-col gap-2">
-        <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-6 px-2">
+      <div className="flex w-full flex-col gap-2 border-r border-border bg-muted/60 p-6 md:w-64">
+        <h2 className="mb-6 px-2 text-xl font-bold text-foreground">
           Dashboard
         </h2>
 
@@ -196,18 +196,18 @@ export default function ProfileDashboard({
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 p-8 md:p-12 bg-white dark:bg-gray-900">
+      <div className="flex-1 bg-card p-8 md:p-12">
         <div className="max-w-4xl mx-auto">
           {activeTab === "learning" && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+              <h3 className="text-2xl font-bold text-foreground">
                 My Learning
               </h3>
               <div className="grid gap-6">
                 {initialData.bookings?.length === 0 ? (
                   <div className="text-center py-12 border-2 border-dashed rounded-xl">
-                    <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                    <p className="text-gray-500">
+                    <BookOpen className="mx-auto mb-3 h-12 w-12 text-muted-foreground" />
+                    <p className="text-muted-foreground">
                       You haven't enrolled in any courses yet.
                     </p>
                     <Link href="/courses">
@@ -234,7 +234,7 @@ export default function ProfileDashboard({
                           <h4 className="font-semibold text-lg line-clamp-1">
                             {booking.course.title}
                           </h4>
-                          <p className="text-sm text-gray-500 mb-2">
+                          <p className="mb-2 text-sm text-muted-foreground">
                             Instructor:{" "}
                             {booking.course.instructor?.name ||
                               booking.course.instructor?.firstName ||
@@ -282,14 +282,14 @@ export default function ProfileDashboard({
                       {initialData.certificates.map((certificate: any) => (
                         <div
                           key={certificate.id}
-                          className="rounded-lg border bg-white dark:bg-gray-900 p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+                          className="flex flex-col gap-3 rounded-lg border bg-card p-3 sm:flex-row sm:items-center sm:justify-between"
                         >
                           <div>
                             <p className="font-medium">{certificate.course.title}</p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-muted-foreground">
                               Instructor: {certificate.course.instructor?.name || certificate.course.instructor?.firstName || "N/A"}
                             </p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-muted-foreground">
                               Issued: {new Date(certificate.issueDate).toLocaleDateString()}
                             </p>
                           </div>
@@ -325,14 +325,14 @@ export default function ProfileDashboard({
 
           {activeTab === "schedule" && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+              <h3 className="text-2xl font-bold text-foreground">
                 Upcoming Schedule
               </h3>
               <div className="space-y-4">
                 {initialData.bookings?.filter(
                   (b) => new Date(b.session.sessionDate) > new Date()
                 ).length === 0 ? (
-                  <p className="text-gray-500">
+                  <p className="text-muted-foreground">
                     No upcoming sessions scheduled.
                   </p>
                 ) : (
@@ -343,15 +343,15 @@ export default function ProfileDashboard({
                     .map((booking) => (
                       <div
                         key={booking.id}
-                        className="flex items-center gap-4 p-4 border rounded-xl bg-gray-50 dark:bg-gray-800/50"
+                          className="flex items-center gap-4 rounded-xl border border-border bg-muted/60 p-4"
                       >
-                        <div className="p-3 bg-white dark:bg-gray-700 rounded-lg text-center min-w-[60px]">
-                          <div className="text-xs text-gray-500 uppercase font-bold">
+                          <div className="min-w-[60px] rounded-lg bg-card p-3 text-center">
+                            <div className="text-xs font-bold uppercase text-muted-foreground">
                             {new Date(
                               booking.session.sessionDate
                             ).toLocaleDateString("en-US", { month: "short" })}
                           </div>
-                          <div className="text-xl font-bold text-green-600">
+                            <div className="text-xl font-bold text-green-600">
                             {new Date(
                               booking.session.sessionDate
                             ).toLocaleDateString("en-US", { day: "numeric" })}
@@ -361,10 +361,10 @@ export default function ProfileDashboard({
                           <h4 className="font-semibold">
                             {booking.session.title}
                           </h4>
-                          <p className="text-sm text-gray-500">
+                            <p className="text-sm text-muted-foreground">
                             {booking.course.title}
                           </p>
-                          <div className="text-sm text-gray-500 mt-1 flex items-center gap-2">
+                            <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
                             <Clock className="w-3 h-3" />
                             {new Date(
                               booking.session.startTime
@@ -433,21 +433,21 @@ export default function ProfileDashboard({
 
           {activeTab === "wishlist" && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+              <h3 className="text-2xl font-bold text-foreground">
                 My Wishlist
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {initialData.wishlist?.length === 0 ? (
-                  <p className="text-gray-500 col-span-full">
+                  <p className="col-span-full text-muted-foreground">
                     Your wishlist is empty.
                   </p>
                 ) : (
                   initialData.wishlist?.map((item: any) => (
                     <div
                       key={item.id}
-                      className="border rounded-xl overflow-hidden hover:shadow-lg transition-all"
+                      className="overflow-hidden rounded-xl border border-border bg-card transition-all hover:shadow-lg"
                     >
-                      <div className="aspect-video bg-gray-100 relative">
+                      <div className="relative aspect-video bg-muted">
                         <img
                           src={item.course.thumbnail || "/default-coures.jpg"}
                           alt={item.course.title}
@@ -458,7 +458,7 @@ export default function ProfileDashboard({
                         <h4 className="font-semibold line-clamp-1 mb-1">
                           {item.course.title}
                         </h4>
-                        <p className="text-lg font-bold text-green-600 mb-3">
+                        <p className="mb-3 text-lg font-bold text-green-600">
                           {new Intl.NumberFormat("en-NP", {
                             style: "currency",
                             currency: "NPR",
@@ -478,10 +478,10 @@ export default function ProfileDashboard({
 
           {activeTab === "personal" && (
             <div className="max-w-xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-300">
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              <h3 className="mb-2 text-2xl font-bold text-foreground">
                 Personal Information
               </h3>
-              <p className="text-gray-500 dark:text-gray-400 mb-8">
+              <p className="mb-8 text-muted-foreground">
                 Update your personal details below.
               </p>
 
@@ -500,7 +500,7 @@ export default function ProfileDashboard({
               <form onSubmit={handleProfileUpdate} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className="text-sm font-medium text-foreground">
                       First Name
                     </label>
                     <input
@@ -512,13 +512,13 @@ export default function ProfileDashboard({
                           firstName: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+                      className="w-full rounded-lg border border-border bg-muted px-4 py-3 text-foreground transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/70"
                       placeholder="Enter first name"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className="text-sm font-medium text-foreground">
                       Last Name
                     </label>
                     <input
@@ -530,7 +530,7 @@ export default function ProfileDashboard({
                           lastName: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+                      className="w-full rounded-lg border border-border bg-muted px-4 py-3 text-foreground transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/70"
                       placeholder="Enter last name"
                       required
                     />
@@ -539,10 +539,10 @@ export default function ProfileDashboard({
 
                 {/* Read Only Fields */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                  <label className="flex items-center gap-2 text-sm font-medium text-foreground">
                     <Mail size={14} className="text-gray-400" />
                     Email Address
-                    <span className="text-xs text-gray-400 font-normal ml-auto">
+                    <span className="ml-auto text-xs font-normal text-muted-foreground">
                       (Cannot be changed)
                     </span>
                   </label>
@@ -550,15 +550,15 @@ export default function ProfileDashboard({
                     type="email"
                     value={initialData.email}
                     disabled
-                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-lg text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                    className="w-full cursor-not-allowed rounded-lg border border-border bg-muted px-4 py-3 text-muted-foreground"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                  <label className="flex items-center gap-2 text-sm font-medium text-foreground">
                     <User size={14} className="text-gray-400" />
                     Username
-                    <span className="text-xs text-gray-400 font-normal ml-auto">
+                    <span className="ml-auto text-xs font-normal text-muted-foreground">
                       (Cannot be changed)
                     </span>
                   </label>
@@ -566,7 +566,7 @@ export default function ProfileDashboard({
                     type="text"
                     value={initialData.username || "Not set"}
                     disabled
-                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-lg text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                    className="w-full cursor-not-allowed rounded-lg border border-border bg-muted px-4 py-3 text-muted-foreground"
                   />
                 </div>
 
@@ -590,10 +590,10 @@ export default function ProfileDashboard({
 
           {activeTab === "security" && (
             <div className="max-w-xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-300">
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              <h3 className="mb-2 text-2xl font-bold text-foreground">
                 Security Settings
               </h3>
-              <p className="text-gray-500 dark:text-gray-400 mb-8">
+              <p className="mb-8 text-muted-foreground">
                 Manage your password and account security.
               </p>
 
@@ -611,7 +611,7 @@ export default function ProfileDashboard({
 
               <form onSubmit={handlePasswordUpdate} className="space-y-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="text-sm font-medium text-foreground">
                     Current Password
                   </label>
                   <div className="relative">
@@ -628,7 +628,7 @@ export default function ProfileDashboard({
                           currentPassword: e.target.value,
                         })
                       }
-                      className="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+                      className="w-full rounded-lg border border-border bg-muted px-4 py-3 pl-10 text-foreground transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/70"
                       placeholder="Enter current password"
                       required
                     />
@@ -636,7 +636,7 @@ export default function ProfileDashboard({
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="text-sm font-medium text-foreground">
                     New Password
                   </label>
                   <div className="relative">
@@ -653,7 +653,7 @@ export default function ProfileDashboard({
                           newPassword: e.target.value,
                         })
                       }
-                      className="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+                      className="w-full rounded-lg border border-border bg-muted px-4 py-3 pl-10 text-foreground transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/70"
                       placeholder="Enter new password"
                       required
                       minLength={6}
@@ -662,7 +662,7 @@ export default function ProfileDashboard({
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="text-sm font-medium text-foreground">
                     Confirm New Password
                   </label>
                   <div className="relative">
@@ -679,7 +679,7 @@ export default function ProfileDashboard({
                           confirmPassword: e.target.value,
                         })
                       }
-                      className="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+                      className="w-full rounded-lg border border-border bg-muted px-4 py-3 pl-10 text-foreground transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/70"
                       placeholder="Confirm new password"
                       required
                       minLength={6}
