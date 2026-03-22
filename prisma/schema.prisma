@@ -84,6 +84,27 @@ enum AuditAction {
   PAYMENT_COMPLETED
 }
 
+enum CommunityPostType {
+  QUESTION
+  DISCUSSION
+}
+
+enum CommunityNotificationType {
+  COMMUNITY_POST
+  COMMUNITY_COMMENT
+  COMMUNITY_REPLY
+  COMMUNITY_REACTION
+  QUIZ_PUBLISHED
+  QUIZ_ATTEMPTED
+}
+
+enum QuizQuestionType {
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  SHORT_ANSWER
+}
+
 // ============================================
 // MODELS
 // ============================================
@@ -131,6 +152,13 @@ model User {
   cartItems         CartItem[]
   orders            Order[]
   reviewedInstructorApplications InstructorApplication[] @relation("InstructorApplicationReviewer")
+  communityPosts CommunityPost[]
+  communityComments CommunityComment[]
+  communityReactions CommunityReaction[]
+  quizzesCreated Quiz[] @relation("QuizCreator")
+  quizAttempts QuizAttempt[]
+  notificationsReceived UserNotification[] @relation("NotificationRecipient")
+  notificationsSent UserNotification[] @relation("NotificationActor")
 
   @@index([email])
   @@index([role])
@@ -223,6 +251,8 @@ model Course {
   downloadLogs  DownloadLog[]
   cartItems     CartItem[]
   orderItems    OrderItem[]
+  quizzes Quiz[]
+  communityPosts CommunityPost[]
 
   @@index([instructorId])
   @@index([category])
@@ -708,4 +738,210 @@ model InstructorApplication {
   @@index([email])
   @@index([reviewedById])
   @@map("instructor_applications")
+}
+
+model Quiz {
+  id String @id @default(cuid())
+
+  courseId String?
+  course Course? @relation(fields: [courseId], references: [id], onDelete: SetNull)
+
+  title String
+  description String? @db.Text
+  isPublished Boolean @default(false)
+
+  createdById String
+  createdBy User @relation("QuizCreator", fields: [createdById], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  questions QuizQuestion[]
+  attempts QuizAttempt[]
+
+  @@index([courseId])
+  @@index([createdById])
+  @@index([isPublished])
+  @@map("quizzes")
+}
+
+model QuizQuestion {
+  id String @id @default(cuid())
+
+  quizId String
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  type QuizQuestionType
+  text String @db.Text
+  order Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  options QuizOption[]
+  answers QuizAnswer[]
+
+  @@index([quizId])
+  @@index([order])
+  @@map("quiz_questions")
+}
+
+model QuizOption {
+  id String @id @default(cuid())
+
+  questionId String
+  question QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  text String
+  isCorrect Boolean @default(false)
+  order Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  selectedInAnswers QuizAnswer[] @relation("SelectedOption")
+
+  @@index([questionId])
+  @@index([order])
+  @@map("quiz_options")
+}
+
+model QuizAttempt {
+  id String @id @default(cuid())
+
+  quizId String
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  studentId String
+  student User @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  score Int @default(0)
+  total Int @default(0)
+
+  startedAt DateTime @default(now())
+  submittedAt DateTime?
+
+  answers QuizAnswer[]
+
+  @@index([quizId])
+  @@index([studentId])
+  @@map("quiz_attempts")
+}
+
+model QuizAnswer {
+  id String @id @default(cuid())
+
+  attemptId String
+  attempt QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  questionId String
+  question QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  selectedOptionId String?
+  selectedOption QuizOption? @relation("SelectedOption", fields: [selectedOptionId], references: [id], onDelete: SetNull)
+
+  textAnswer String? @db.Text
+  isCorrect Boolean @default(false)
+
+  @@index([attemptId])
+  @@index([questionId])
+  @@map("quiz_answers")
+}
+
+model CommunityPost {
+  id String @id @default(cuid())
+
+  authorId String
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  courseId String?
+  course Course? @relation(fields: [courseId], references: [id], onDelete: SetNull)
+
+  type CommunityPostType @default(QUESTION)
+  title String
+  body String @db.Text
+
+  isSolved Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  comments CommunityComment[]
+  reactions CommunityReaction[]
+
+  @@index([authorId])
+  @@index([courseId])
+  @@index([type])
+  @@map("community_posts")
+}
+
+model CommunityComment {
+  id String @id @default(cuid())
+
+  postId String
+  post CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  authorId String
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  parentId String?
+  parent CommunityComment? @relation("CommunityCommentReplies", fields: [parentId], references: [id], onDelete: SetNull)
+  replies CommunityComment[] @relation("CommunityCommentReplies")
+
+  body String @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reactions CommunityReaction[]
+
+  @@index([postId])
+  @@index([authorId])
+  @@index([parentId])
+  @@map("community_comments")
+}
+
+model CommunityReaction {
+  id String @id @default(cuid())
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  postId String?
+  post CommunityPost? @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  commentId String?
+  comment CommunityComment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+  @@unique([userId, commentId])
+  @@index([postId])
+  @@index([commentId])
+  @@map("community_reactions")
+}
+
+model UserNotification {
+  id String @id @default(cuid())
+
+  userId String
+  user User @relation("NotificationRecipient", fields: [userId], references: [id], onDelete: Cascade)
+
+  actorId String?
+  actor User? @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  type CommunityNotificationType
+  title String
+  description String @db.Text
+  href String
+
+  isRead Boolean @default(false)
+  emailedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+  @@map("user_notifications")
 }

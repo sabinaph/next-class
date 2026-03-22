@@ -1,10 +1,18 @@
 import { prisma } from "@/app/lib/prisma";
 
 export type NotificationType = "ANNOUNCEMENT" | "NEW_LESSON" | "NEW_COURSE";
+export type ExtendedNotificationType =
+  | NotificationType
+  | "COMMUNITY_POST"
+  | "COMMUNITY_COMMENT"
+  | "COMMUNITY_REPLY"
+  | "COMMUNITY_REACTION"
+  | "QUIZ_PUBLISHED"
+  | "QUIZ_ATTEMPTED";
 
 export interface NotificationItem {
   id: string;
-  type: NotificationType;
+  type: ExtendedNotificationType;
   title: string;
   description: string;
   href: string;
@@ -14,6 +22,16 @@ export interface NotificationItem {
 export async function buildNotificationItemsForUser(
   userId: string
 ): Promise<NotificationItem[]> {
+  const userNotifications = await prisma.userNotification.findMany({
+    where: {
+      userId,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    take: 30,
+  });
+
   const completedOrders = await prisma.order.findMany({
     where: {
       userId,
@@ -36,10 +54,6 @@ export async function buildNotificationItemsForUser(
       },
     },
   });
-
-  if (completedOrders.length === 0) {
-    return [];
-  }
 
   const purchaseDateByCourseId = new Map<string, Date>();
   const firstPurchaseDateByInstructorId = new Map<string, Date>();
@@ -66,61 +80,60 @@ export async function buildNotificationItemsForUser(
   const purchasedCourseIdSet = new Set(purchasedCourseIds);
   const instructorIds = Array.from(firstPurchaseDateByInstructorId.keys());
 
-  if (purchasedCourseIds.length === 0) {
-    return [];
-  }
-
-  const [announcements, lessons, newInstructorCourses] = await Promise.all([
-    prisma.announcement.findMany({
-      where: {
-        courseId: { in: purchasedCourseIds },
-      },
-      orderBy: { createdAt: "desc" },
-      take: 20,
-      include: {
-        course: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-      },
-    }),
-    prisma.lesson.findMany({
-      where: {
-        courseId: { in: purchasedCourseIds },
-        isPublished: true,
-      },
-      orderBy: { createdAt: "desc" },
-      take: 20,
-      include: {
-        course: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-      },
-    }),
-    prisma.course.findMany({
-      where: {
-        instructorId: { in: instructorIds },
-        isPublished: true,
-        isActive: true,
-      },
-      orderBy: { createdAt: "desc" },
-      take: 20,
-      include: {
-        instructor: {
-          select: {
-            firstName: true,
-            lastName: true,
-            name: true,
-          },
-        },
-      },
-    }),
-  ]);
+  const [announcements, lessons, newInstructorCourses] =
+    purchasedCourseIds.length === 0
+      ? [[], [], []]
+      : await Promise.all([
+          prisma.announcement.findMany({
+            where: {
+              courseId: { in: purchasedCourseIds },
+            },
+            orderBy: { createdAt: "desc" },
+            take: 20,
+            include: {
+              course: {
+                select: {
+                  id: true,
+                  title: true,
+                },
+              },
+            },
+          }),
+          prisma.lesson.findMany({
+            where: {
+              courseId: { in: purchasedCourseIds },
+              isPublished: true,
+            },
+            orderBy: { createdAt: "desc" },
+            take: 20,
+            include: {
+              course: {
+                select: {
+                  id: true,
+                  title: true,
+                },
+              },
+            },
+          }),
+          prisma.course.findMany({
+            where: {
+              instructorId: { in: instructorIds },
+              isPublished: true,
+              isActive: true,
+            },
+            orderBy: { createdAt: "desc" },
+            take: 20,
+            include: {
+              instructor: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  name: true,
+                },
+              },
+            },
+          }),
+        ]);
 
   const notifications: NotificationItem[] = [];
 
@@ -173,9 +186,22 @@ export async function buildNotificationItemsForUser(
     });
   }
 
-  notifications.sort(
+  const activityNotifications: NotificationItem[] = userNotifications.map(
+    (notification) => ({
+      id: `user:${notification.id}`,
+      type: notification.type,
+      title: notification.title,
+      description: notification.description,
+      href: notification.href,
+      createdAt: notification.createdAt.toISOString(),
+    })
+  );
+
+  const mergedNotifications = [...activityNotifications, ...notifications];
+
+  mergedNotifications.sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 
-  return notifications.slice(0, 25);
+  return mergedNotifications.slice(0, 25);
 }
