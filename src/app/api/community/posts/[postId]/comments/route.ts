@@ -10,7 +10,7 @@ import {
 } from "@/lib/community-notifications";
 
 const addCommentSchema = z.object({
-  body: z.string().min(2, "Comment is required"),
+  body: z.string().trim().min(2, "Comment must be at least 2 characters"),
   parentId: z.string().optional(),
 });
 

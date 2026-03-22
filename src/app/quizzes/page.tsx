@@ -51,11 +51,13 @@ export default function QuizzesPage() {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [quizFormError, setQuizFormError] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [activeQuizId, setActiveQuizId] = useState<string | null>(null);
   const [scoreVisibleQuizId, setScoreVisibleQuizId] = useState<string | null>(null);
   const [isAttemptSubmitting, setIsAttemptSubmitting] = useState(false);
+  const [attemptFormError, setAttemptFormError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [attemptFilter, setAttemptFilter] = useState<"ALL" | "ATTEMPTED" | "NOT_ATTEMPTED">("ALL");
   const [draftQuestions, setDraftQuestions] = useState<DraftQuestion[]>([
@@ -138,6 +140,7 @@ export default function QuizzesPage() {
     if (!isInstructor) return;
 
     setIsSubmitting(true);
+    setQuizFormError(null);
     try {
       const questions = draftQuestions.map((question) => {
         const options = question.type === "SHORT_ANSWER"
@@ -175,6 +178,14 @@ export default function QuizzesPage() {
         }),
       });
 
+      const payload = (await response
+        .json()
+        .catch(() => null)) as { success?: boolean; error?: string } | null;
+
+      if (!response.ok) {
+        throw new Error(payload?.error || "Failed to publish quiz");
+      }
+
       if (response.ok) {
         setTitle("");
         setDescription("");
@@ -188,6 +199,12 @@ export default function QuizzesPage() {
         ]);
         await loadQuizzes();
       }
+    } catch (error) {
+      setQuizFormError(
+        error instanceof Error
+          ? error.message
+          : "Could not publish quiz right now. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -195,6 +212,7 @@ export default function QuizzesPage() {
 
   const submitAttempt = async (quiz: Quiz) => {
     setIsAttemptSubmitting(true);
+    setAttemptFormError(null);
 
     const selectedByQuestion = answersByQuiz[quiz.id] || {};
     const textByQuestion = textAnswersByQuiz[quiz.id] || {};
@@ -212,11 +230,25 @@ export default function QuizzesPage() {
         body: JSON.stringify({ answers }),
       });
 
+      const payload = (await response
+        .json()
+        .catch(() => null)) as { success?: boolean; error?: string } | null;
+
+      if (!response.ok) {
+        throw new Error(payload?.error || "Failed to submit attempt");
+      }
+
       if (response.ok) {
         setActiveQuizId(null);
         setScoreVisibleQuizId(quiz.id);
         await loadQuizzes();
       }
+    } catch (error) {
+      setAttemptFormError(
+        error instanceof Error
+          ? error.message
+          : "Could not submit your attempt. Please try again."
+      );
     } finally {
       setIsAttemptSubmitting(false);
     }
@@ -447,6 +479,7 @@ export default function QuizzesPage() {
             {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             Publish Quiz
           </Button>
+          {quizFormError ? <p className="text-sm text-destructive">{quizFormError}</p> : null}
         </form>
       ) : null}
 
@@ -628,6 +661,7 @@ export default function QuizzesPage() {
               Cancel
             </Button>
           </div>
+          {attemptFormError ? <p className="mt-3 text-sm text-destructive">{attemptFormError}</p> : null}
         </section>
       ) : null}
     </div>
