@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
-import { Filter, Loader2, PlayCircle, PlusCircle, RotateCcw, Search, Send, SquarePen, Trophy } from "lucide-react";
+import { Filter, Loader2, PlayCircle, PlusCircle, RotateCcw, Search, Send, SquarePen, Trash2, Trophy } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { CardIllustration } from "@/components/ui/card-illustration";
@@ -67,6 +67,14 @@ export default function QuizzesPage({ forceInstructorView = false }: QuizzesPage
   const [editQuizId, setEditQuizId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
+  const [editDraftQuestions, setEditDraftQuestions] = useState<DraftQuestion[]>([
+    {
+      text: "",
+      type: "SINGLE_CHOICE",
+      optionsCsv: "",
+      correctIndexesCsv: "",
+    },
+  ]);
   const [editFormError, setEditFormError] = useState<string | null>(null);
   const [isEditSubmitting, setIsEditSubmitting] = useState(false);
   const [draftQuestions, setDraftQuestions] = useState<DraftQuestion[]>([
@@ -125,7 +133,7 @@ export default function QuizzesPage({ forceInstructorView = false }: QuizzesPage
 
       return matchesAttempt && matchesSearch;
     });
-  }, [quizzes, searchQuery, attemptFilter]);
+  }, [quizzes, searchQuery, attemptFilter, session?.user?.id, isInstructorView]);
 
   const loadQuizzes = async () => {
     if (!isAllowed) return;
@@ -164,6 +172,62 @@ export default function QuizzesPage({ forceInstructorView = false }: QuizzesPage
     ]);
   };
 
+  const addEditDraftQuestion = () => {
+    setEditDraftQuestions((prev) => [
+      ...prev,
+      {
+        text: "",
+        type: "SINGLE_CHOICE",
+        optionsCsv: "",
+        correctIndexesCsv: "",
+      },
+    ]);
+  };
+
+  const draftQuestionFromQuizQuestion = (question: QuizQuestion): DraftQuestion => {
+    const options = question.options;
+    const optionsCsv = options.map((option) => option.text).join(", ");
+    const correctIndexesCsv = options
+      .map((option, index) => ({ index, isCorrect: option.isCorrect }))
+      .filter((item) => item.isCorrect)
+      .map((item) => String(item.index + 1))
+      .join(",");
+
+    return {
+      text: question.text,
+      type: question.type,
+      optionsCsv,
+      correctIndexesCsv,
+    };
+  };
+
+  const buildQuestionsPayload = (questions: DraftQuestion[]) => {
+    return questions.map((question) => {
+      const options = question.type === "SHORT_ANSWER"
+        ? []
+        : question.optionsCsv
+            .split(",")
+            .map((option) => option.trim())
+            .filter(Boolean);
+
+      const correctIndexes = question.correctIndexesCsv
+        .split(",")
+        .map((value) => value.trim())
+        .filter(Boolean)
+        .map((value) => Number(value) - 1)
+        .filter((value) => Number.isInteger(value) && value >= 0);
+
+      return {
+        text: question.text,
+        type: question.type,
+        options: options.map((optionText, index) => ({
+          text: optionText,
+          isCorrect: correctIndexes.includes(index),
+        })),
+      };
+    });
+  };
+
   const submitQuiz = async (e: FormEvent) => {
     e.preventDefault();
     if (!isInstructor) return;
@@ -171,30 +235,7 @@ export default function QuizzesPage({ forceInstructorView = false }: QuizzesPage
     setIsSubmitting(true);
     setQuizFormError(null);
     try {
-      const questions = draftQuestions.map((question) => {
-        const options = question.type === "SHORT_ANSWER"
-          ? []
-          : question.optionsCsv
-              .split(",")
-              .map((option) => option.trim())
-              .filter(Boolean);
-
-        const correctIndexes = question.correctIndexesCsv
-          .split(",")
-          .map((value) => value.trim())
-          .filter(Boolean)
-          .map((value) => Number(value) - 1)
-          .filter((value) => Number.isInteger(value) && value >= 0);
-
-        return {
-          text: question.text,
-          type: question.type,
-          options: options.map((optionText, index) => ({
-            text: optionText,
-            isCorrect: correctIndexes.includes(index),
-          })),
-        };
-      });
+      const questions = buildQuestionsPayload(draftQuestions);
 
       const response = await fetch("/api/quizzes", {
         method: "POST",
@@ -289,6 +330,18 @@ export default function QuizzesPage({ forceInstructorView = false }: QuizzesPage
     setEditQuizId(quiz.id);
     setEditTitle(quiz.title);
     setEditDescription(quiz.description || "");
+    setEditDraftQuestions(
+      quiz.questions.length > 0
+        ? quiz.questions.map(draftQuestionFromQuizQuestion)
+        : [
+            {
+              text: "",
+              type: "SINGLE_CHOICE",
+              optionsCsv: "",
+              correctIndexesCsv: "",
+            },
+          ]
+    );
     setEditFormError(null);
     setActiveQuizId(null);
     setScoreVisibleQuizId(null);
@@ -308,6 +361,7 @@ export default function QuizzesPage({ forceInstructorView = false }: QuizzesPage
         body: JSON.stringify({
           title: editTitle,
           description: editDescription,
+          questions: buildQuestionsPayload(editDraftQuestions),
         }),
       });
 
@@ -322,6 +376,14 @@ export default function QuizzesPage({ forceInstructorView = false }: QuizzesPage
       setEditQuizId(null);
       setEditTitle("");
       setEditDescription("");
+      setEditDraftQuestions([
+        {
+          text: "",
+          type: "SINGLE_CHOICE",
+          optionsCsv: "",
+          correctIndexesCsv: "",
+        },
+      ]);
       await loadQuizzes();
     } catch (error) {
       setEditFormError(
@@ -703,6 +765,92 @@ export default function QuizzesPage({ forceInstructorView = false }: QuizzesPage
               />
             </div>
 
+            <div className="space-y-4">
+              {editDraftQuestions.map((question, index) => (
+                <div key={index} className="rounded-xl border bg-background p-4 space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-semibold">Question {index + 1}</p>
+                    {editDraftQuestions.length > 1 ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          setEditDraftQuestions((prev) => prev.filter((_, i) => i !== index))
+                        }
+                        className="gap-1"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Remove
+                      </Button>
+                    ) : null}
+                  </div>
+
+                  <Input
+                    value={question.text}
+                    onChange={(e) =>
+                      setEditDraftQuestions((prev) =>
+                        prev.map((item, i) => (i === index ? { ...item, text: e.target.value } : item))
+                      )
+                    }
+                    placeholder="Question text"
+                    required
+                  />
+
+                  <select
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    value={question.type}
+                    onChange={(e) =>
+                      setEditDraftQuestions((prev) =>
+                        prev.map((item, i) =>
+                          i === index
+                            ? { ...item, type: e.target.value as DraftQuestion["type"] }
+                            : item
+                        )
+                      )
+                    }
+                  >
+                    <option value="SINGLE_CHOICE">Single Choice</option>
+                    <option value="MULTIPLE_CHOICE">Multiple Choice</option>
+                    <option value="TRUE_FALSE">True/False</option>
+                    <option value="SHORT_ANSWER">Short Answer</option>
+                  </select>
+
+                  {question.type !== "SHORT_ANSWER" ? (
+                    <>
+                      <Input
+                        value={question.optionsCsv}
+                        onChange={(e) =>
+                          setEditDraftQuestions((prev) =>
+                            prev.map((item, i) => (i === index ? { ...item, optionsCsv: e.target.value } : item))
+                          )
+                        }
+                        placeholder="Options (comma separated)"
+                        required
+                      />
+                      <Input
+                        value={question.correctIndexesCsv}
+                        onChange={(e) =>
+                          setEditDraftQuestions((prev) =>
+                            prev.map((item, i) =>
+                              i === index ? { ...item, correctIndexesCsv: e.target.value } : item
+                            )
+                          )
+                        }
+                        placeholder="Correct option indexes (e.g. 1 or 1,3)"
+                        required
+                      />
+                    </>
+                  ) : null}
+                </div>
+              ))}
+
+              <Button type="button" variant="outline" className="gap-2" onClick={addEditDraftQuestion}>
+                <PlusCircle className="h-4 w-4" />
+                Add Question
+              </Button>
+            </div>
+
             <div className="flex flex-wrap items-center gap-2">
               <Button type="submit" disabled={isEditSubmitting} className="gap-2">
                 {isEditSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <SquarePen className="h-4 w-4" />}
@@ -715,6 +863,14 @@ export default function QuizzesPage({ forceInstructorView = false }: QuizzesPage
                   setEditQuizId(null);
                   setEditTitle("");
                   setEditDescription("");
+                  setEditDraftQuestions([
+                    {
+                      text: "",
+                      type: "SINGLE_CHOICE",
+                      optionsCsv: "",
+                      correctIndexesCsv: "",
+                    },
+                  ]);
                   setEditFormError(null);
                 }}
               >

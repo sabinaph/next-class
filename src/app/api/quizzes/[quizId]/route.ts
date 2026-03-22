@@ -5,10 +5,22 @@ import { z } from "zod";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/app/lib/prisma";
 
+const questionSchema = z.object({
+  text: z.string().min(2, "Question text is required"),
+  type: z.enum(["SINGLE_CHOICE", "MULTIPLE_CHOICE", "TRUE_FALSE", "SHORT_ANSWER"]),
+  options: z.array(
+    z.object({
+      text: z.string().min(1, "Option text is required"),
+      isCorrect: z.boolean().default(false),
+    })
+  ),
+});
+
 const updateQuizSchema = z.object({
   title: z.string().trim().min(3, "Quiz title must be at least 3 characters").optional(),
   description: z.string().trim().optional(),
   isPublished: z.boolean().optional(),
+  questions: z.array(questionSchema).min(1, "At least one question is required").optional(),
 });
 
 export async function PATCH(
@@ -29,7 +41,8 @@ export async function PATCH(
     if (
       parsed.title === undefined &&
       parsed.description === undefined &&
-      parsed.isPublished === undefined
+      parsed.isPublished === undefined &&
+      parsed.questions === undefined
     ) {
       return NextResponse.json(
         { success: false, error: "No quiz changes were provided" },
@@ -61,6 +74,25 @@ export async function PATCH(
           ? { description: parsed.description.length ? parsed.description : null }
           : {}),
         ...(parsed.isPublished !== undefined ? { isPublished: parsed.isPublished } : {}),
+        ...(parsed.questions !== undefined
+          ? {
+              questions: {
+                deleteMany: {},
+                create: parsed.questions.map((question, questionIndex) => ({
+                  text: question.text,
+                  type: question.type,
+                  order: questionIndex,
+                  options: {
+                    create: question.options.map((option, optionIndex) => ({
+                      text: option.text,
+                      isCorrect: option.isCorrect,
+                      order: optionIndex,
+                    })),
+                  },
+                })),
+              },
+            }
+          : {}),
       },
       select: {
         id: true,
