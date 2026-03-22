@@ -24,15 +24,52 @@ const hasRequiredDelegates = (client: PrismaClient | undefined) => {
   const instructorApplicationDelegate = typed.instructorApplication as
     | { findMany?: unknown; findFirst?: unknown; create?: unknown }
     | undefined;
+  const communityPostDelegate = typed.communityPost as
+    | { findMany?: unknown; findUnique?: unknown; create?: unknown }
+    | undefined;
+  const communityCommentDelegate = typed.communityComment as
+    | { findUnique?: unknown; create?: unknown }
+    | undefined;
+  const communityReactionDelegate = typed.communityReaction as
+    | { findFirst?: unknown; create?: unknown; delete?: unknown }
+    | undefined;
+  const quizDelegate = typed.quiz as
+    | { findMany?: unknown; findUnique?: unknown; create?: unknown }
+    | undefined;
+  const quizAttemptDelegate = typed.quizAttempt as
+    | { create?: unknown }
+    | undefined;
+  const userNotificationDelegate = typed.userNotification as
+    | { findMany?: unknown; createMany?: unknown }
+    | undefined;
   // Guard against stale dev singleton after schema changes (e.g., newly added models)
   return Boolean(
     typed.order &&
       typed.invoice &&
       typed.category &&
       instructorApplicationDelegate &&
+      communityPostDelegate &&
+      communityCommentDelegate &&
+      communityReactionDelegate &&
+      quizDelegate &&
+      quizAttemptDelegate &&
+      userNotificationDelegate &&
       typeof instructorApplicationDelegate.findMany === "function" &&
       typeof instructorApplicationDelegate.findFirst === "function" &&
-      typeof instructorApplicationDelegate.create === "function"
+      typeof instructorApplicationDelegate.create === "function" &&
+      typeof communityPostDelegate.findMany === "function" &&
+      typeof communityPostDelegate.create === "function" &&
+      typeof communityCommentDelegate.findUnique === "function" &&
+      typeof communityCommentDelegate.create === "function" &&
+      typeof communityReactionDelegate.findFirst === "function" &&
+      typeof communityReactionDelegate.create === "function" &&
+      typeof communityReactionDelegate.delete === "function" &&
+      typeof quizDelegate.findMany === "function" &&
+      typeof quizDelegate.findUnique === "function" &&
+      typeof quizDelegate.create === "function" &&
+      typeof quizAttemptDelegate.create === "function" &&
+      typeof userNotificationDelegate.findMany === "function" &&
+      typeof userNotificationDelegate.createMany === "function"
   );
 };
 
