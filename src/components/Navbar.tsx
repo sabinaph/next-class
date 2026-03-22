@@ -85,6 +85,8 @@ export default function Navbar({ className }: NavbarProps) {
       return;
     }
 
+    const storageKey = `notificationsReadUntil:${session.user.id}`;
+
     let isMounted = true;
 
     const loadNotifications = async () => {
@@ -103,11 +105,16 @@ export default function Navbar({ className }: NavbarProps) {
           notifications?: NotificationItem[];
         };
 
+        const cutoff = Number(window.localStorage.getItem(storageKey) || 0);
+        const visibleNotifications = (body.notifications || []).filter(
+          (item) => new Date(item.createdAt).getTime() > cutoff
+        );
+
         if (isMounted) {
-          setNotifications(body.notifications || []);
+          setNotifications(visibleNotifications);
         }
 
-        if (!hasAutoEmailedNotificationsRef.current && (body.notifications || []).length > 0) {
+        if (!hasAutoEmailedNotificationsRef.current && visibleNotifications.length > 0) {
           hasAutoEmailedNotificationsRef.current = true;
           void fetch("/api/notifications", {
             method: "POST",
@@ -217,6 +224,13 @@ export default function Navbar({ className }: NavbarProps) {
         throw new Error(body?.error || "Failed to mark notifications as read");
       }
 
+      const readUntil = Date.now();
+      if (session?.user?.id) {
+        window.localStorage.setItem(
+          `notificationsReadUntil:${session.user.id}`,
+          String(readUntil)
+        );
+      }
       setNotifications([]);
 
       showToast({
