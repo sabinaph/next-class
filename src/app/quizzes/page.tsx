@@ -436,7 +436,7 @@ export default function QuizzesPage() {
               return (
                 <article key={quiz.id} className="group relative overflow-hidden rounded-2xl border bg-card p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
                   <CardIllustration variant="quiz" className="-right-8 top-2 h-28 w-32 opacity-70" />
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-transparent to-primary/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                  <div className="pointer-events-none absolute inset-0 bg-linear-to-tr from-transparent via-transparent to-primary/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                   <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                     <span className="rounded-full border px-2 py-1">{quiz.questions.length} questions</span>
                     <span
