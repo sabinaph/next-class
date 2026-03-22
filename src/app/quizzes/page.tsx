@@ -74,9 +74,13 @@ export default function QuizzesPage() {
     setIsLoading(true);
     try {
       const response = await fetch("/api/quizzes", { cache: "no-store" });
-      const payload = (await response.json()) as { success?: boolean; quizzes?: Quiz[] };
+      const payload = (await response
+        .json()
+        .catch(() => null)) as { success?: boolean; quizzes?: Quiz[] } | null;
       if (response.ok && payload.success) {
         setQuizzes(payload.quizzes || []);
+      } else {
+        setQuizzes([]);
       }
     } finally {
       setIsLoading(false);

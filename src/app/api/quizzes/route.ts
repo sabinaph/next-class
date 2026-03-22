@@ -35,85 +35,92 @@ async function getAuthorizedSession() {
 }
 
 export async function GET() {
-  const session = await getAuthorizedSession();
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  try {
+    const session = await getAuthorizedSession();
+    if (!session) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
 
-  const whereClause =
-    session.user.role === "INSTRUCTOR"
-      ? {
-          OR: [
-            { isPublished: true },
-            { createdById: session.user.id },
-          ],
-        }
-      : {
-          isPublished: true,
-        };
+    const whereClause =
+      session.user.role === "INSTRUCTOR"
+        ? {
+            OR: [
+              { isPublished: true },
+              { createdById: session.user.id },
+            ],
+          }
+        : {
+            isPublished: true,
+          };
 
-  const quizzes = await prisma.quiz.findMany({
-    where: whereClause,
-    orderBy: { createdAt: "desc" },
-    include: {
-      course: {
-        select: {
-          id: true,
-          title: true,
+    const quizzes = await prisma.quiz.findMany({
+      where: whereClause,
+      orderBy: { createdAt: "desc" },
+      include: {
+        course: {
+          select: {
+            id: true,
+            title: true,
+          },
         },
-      },
-      createdBy: {
-        select: {
-          id: true,
-          name: true,
-          firstName: true,
-          lastName: true,
+        createdBy: {
+          select: {
+            id: true,
+            name: true,
+            firstName: true,
+            lastName: true,
+          },
         },
-      },
-      questions: {
-        orderBy: { order: "asc" },
-        include: {
-          options: {
-            orderBy: { order: "asc" },
-            select: {
-              id: true,
-              text: true,
-              isCorrect: true,
+        questions: {
+          orderBy: { order: "asc" },
+          include: {
+            options: {
+              orderBy: { order: "asc" },
+              select: {
+                id: true,
+                text: true,
+                isCorrect: true,
+              },
             },
           },
         },
-      },
-      attempts: {
-        where: {
-          studentId: session.user.id,
+        attempts: {
+          where: {
+            studentId: session.user.id,
+          },
+          orderBy: { startedAt: "desc" },
+          take: 1,
+          select: {
+            id: true,
+            score: true,
+            total: true,
+            submittedAt: true,
+          },
         },
-        orderBy: { startedAt: "desc" },
-        take: 1,
-        select: {
-          id: true,
-          score: true,
-          total: true,
-          submittedAt: true,
-        },
       },
-    },
-  });
+    });
 
-  const sanitizedQuizzes =
-    session.user.role === "INSTRUCTOR"
-      ? quizzes
-      : quizzes.map((quiz) => ({
-          ...quiz,
-          questions: quiz.questions.map((question) => ({
-            ...question,
-            options: question.options.map((option) => ({
-              ...option,
-              isCorrect: false,
+    const sanitizedQuizzes =
+      session.user.role === "INSTRUCTOR"
+        ? quizzes
+        : quizzes.map((quiz) => ({
+            ...quiz,
+            questions: quiz.questions.map((question) => ({
+              ...question,
+              options: question.options.map((option) => ({
+                ...option,
+                isCorrect: false,
+              })),
             })),
-          })),
-        }));
+          }));
 
-  return NextResponse.json({ success: true, quizzes: sanitizedQuizzes });
+    return NextResponse.json({ success: true, quizzes: sanitizedQuizzes });
+  } catch {
+    return NextResponse.json(
+      { success: false, error: "Failed to load quizzes" },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(request: NextRequest) {
