@@ -59,6 +59,7 @@ export default function CommunityPage() {
   const [postBody, setPostBody] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<"ALL" | "QUESTION" | "DISCUSSION">("ALL");
+  const [expandedPostId, setExpandedPostId] = useState<string | null>(null);
   const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
 
@@ -492,107 +493,132 @@ export default function CommunityPage() {
         ) : (
           filteredPosts.map((post) => (
             <article key={post.id} className="rounded-2xl border bg-card p-5 shadow-sm transition-transform duration-200 hover:-translate-y-0.5">
-              <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                <span
-                  className={`rounded-full px-2 py-1 ${
-                    post.type === "QUESTION"
-                      ? "border border-primary/35 bg-primary/10 text-primary"
-                      : "border border-border bg-muted/60 text-muted-foreground"
-                  }`}
-                >
-                  {post.type === "QUESTION" ? "Question" : "Discussion"}
-                </span>
-                <span>{new Date(post.createdAt).toLocaleString()}</span>
-                <span>by {getName(post.author)} ({post.author.role.toLowerCase()})</span>
-              </div>
-              <h2 className="mt-3 text-xl font-semibold">{post.title}</h2>
-              <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">{post.body}</p>
+              <button
+                type="button"
+                className="w-full text-left"
+                onClick={() => setExpandedPostId((prev) => (prev === post.id ? null : post.id))}
+              >
+                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                  <span
+                    className={`rounded-full px-2 py-1 ${
+                      post.type === "QUESTION"
+                        ? "border border-primary/35 bg-primary/10 text-primary"
+                        : "border border-border bg-muted/60 text-muted-foreground"
+                    }`}
+                  >
+                    {post.type === "QUESTION" ? "Question" : "Discussion"}
+                  </span>
+                  <span>{new Date(post.createdAt).toLocaleString()}</span>
+                  <span>by {getName(post.author)} ({post.author.role.toLowerCase()})</span>
+                </div>
 
-              <div className="mt-4 flex items-center gap-3">
-                <Button
-                  size="sm"
-                  variant={post.reactions.some((reaction) => reaction.userId === currentViewerId) ? "default" : "outline"}
-                  className="gap-2"
-                  onClick={() => void toggleReaction(post.id)}
-                >
-                  <ThumbsUp className="h-4 w-4" />
-                  {post.reactions.length}
-                </Button>
-                <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <MessageSquare className="h-3.5 w-3.5" />
-                  {post.comments.length} comments
-                </span>
-              </div>
+                <h2 className="mt-3 text-xl font-semibold">{post.title}</h2>
+                <p className="mt-2 line-clamp-2 whitespace-pre-wrap text-sm text-muted-foreground">{post.body}</p>
 
-              <div className="mt-5 space-y-3">
-                {post.comments.map((comment) => (
-                  <div key={comment.id} className="rounded-xl border bg-background p-3">
-                    <p className="text-sm font-medium">{getName(comment.author)}</p>
-                    <p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">{comment.body}</p>
+                <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                  <span className="inline-flex items-center gap-1 rounded-full border px-2 py-1">
+                    <ThumbsUp className="h-3.5 w-3.5" />
+                    {post.reactions.length} reacts
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-full border px-2 py-1">
+                    <MessageSquare className="h-3.5 w-3.5" />
+                    {post.comments.length} comments
+                  </span>
+                  <span className="text-primary">{expandedPostId === post.id ? "Hide thread" : "Open thread"}</span>
+                </div>
+              </button>
 
-                    <div className="mt-2 flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        variant={comment.reactions.some((reaction) => reaction.userId === currentViewerId) ? "default" : "outline"}
-                        className="h-7 gap-1 px-2"
-                        onClick={() => void toggleReaction(post.id, comment.id)}
-                      >
-                        <ThumbsUp className="h-3.5 w-3.5" />
-                        {comment.reactions.length}
-                      </Button>
-                    </div>
+              {expandedPostId === post.id ? (
+                <div className="mt-5 border-t pt-5">
+                  <p className="whitespace-pre-wrap text-sm text-muted-foreground">{post.body}</p>
 
-                    <div className="mt-3 flex gap-2">
+                  <div className="mt-4 flex items-center gap-3">
+                    <Button
+                      size="sm"
+                      variant={post.reactions.some((reaction) => reaction.userId === currentViewerId) ? "default" : "outline"}
+                      className="gap-2"
+                      onClick={() => void toggleReaction(post.id)}
+                    >
+                      <ThumbsUp className="h-4 w-4" />
+                      {post.reactions.length}
+                    </Button>
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <MessageSquare className="h-3.5 w-3.5" />
+                      {post.comments.length} comments
+                    </span>
+                  </div>
+
+                  <div className="mt-5 space-y-3">
+                    {post.comments.map((comment) => (
+                      <div key={comment.id} className="rounded-xl border bg-background p-3">
+                        <p className="text-sm font-medium">{getName(comment.author)}</p>
+                        <p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">{comment.body}</p>
+
+                        <div className="mt-2 flex items-center gap-2">
+                          <Button
+                            size="sm"
+                            variant={comment.reactions.some((reaction) => reaction.userId === currentViewerId) ? "default" : "outline"}
+                            className="h-7 gap-1 px-2"
+                            onClick={() => void toggleReaction(post.id, comment.id)}
+                          >
+                            <ThumbsUp className="h-3.5 w-3.5" />
+                            {comment.reactions.length}
+                          </Button>
+                        </div>
+
+                        <div className="mt-3 flex gap-2">
+                          <Input
+                            value={replyDrafts[comment.id] || ""}
+                            onChange={(e) =>
+                              setReplyDrafts((prev) => ({
+                                ...prev,
+                                [comment.id]: e.target.value,
+                              }))
+                            }
+                            placeholder="Reply to this comment"
+                          />
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="gap-1"
+                            onClick={() => void submitComment(post.id, comment.id)}
+                          >
+                            <Reply className="h-3.5 w-3.5" />
+                            Reply
+                          </Button>
+                        </div>
+
+                        {comment.replies.length > 0 ? (
+                          <div className="mt-3 space-y-2 border-l pl-4">
+                            {comment.replies.map((reply) => (
+                              <div key={reply.id} className="rounded-lg border bg-card p-2.5">
+                                <p className="text-xs font-medium">{getName(reply.author)}</p>
+                                <p className="mt-1 whitespace-pre-wrap text-xs text-muted-foreground">{reply.body}</p>
+                              </div>
+                            ))}
+                          </div>
+                        ) : null}
+                      </div>
+                    ))}
+
+                    <div className="flex gap-2">
                       <Input
-                        value={replyDrafts[comment.id] || ""}
+                        value={commentDrafts[post.id] || ""}
                         onChange={(e) =>
-                          setReplyDrafts((prev) => ({
+                          setCommentDrafts((prev) => ({
                             ...prev,
-                            [comment.id]: e.target.value,
+                            [post.id]: e.target.value,
                           }))
                         }
-                        placeholder="Reply to this comment"
+                        placeholder="Add a comment"
                       />
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="gap-1"
-                        onClick={() => void submitComment(post.id, comment.id)}
-                      >
-                        <Reply className="h-3.5 w-3.5" />
-                        Reply
+                      <Button size="sm" onClick={() => void submitComment(post.id)}>
+                        Comment
                       </Button>
                     </div>
-
-                    {comment.replies.length > 0 ? (
-                      <div className="mt-3 space-y-2 border-l pl-4">
-                        {comment.replies.map((reply) => (
-                          <div key={reply.id} className="rounded-lg border bg-card p-2.5">
-                            <p className="text-xs font-medium">{getName(reply.author)}</p>
-                            <p className="mt-1 whitespace-pre-wrap text-xs text-muted-foreground">{reply.body}</p>
-                          </div>
-                        ))}
-                      </div>
-                    ) : null}
                   </div>
-                ))}
-
-                <div className="flex gap-2">
-                  <Input
-                    value={commentDrafts[post.id] || ""}
-                    onChange={(e) =>
-                      setCommentDrafts((prev) => ({
-                        ...prev,
-                        [post.id]: e.target.value,
-                      }))
-                    }
-                    placeholder="Add a comment"
-                  />
-                  <Button size="sm" onClick={() => void submitComment(post.id)}>
-                    Comment
-                  </Button>
                 </div>
-              </div>
+              ) : null}
             </article>
           ))
         )}
