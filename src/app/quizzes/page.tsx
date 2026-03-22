@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
-import { Loader2, PlayCircle, PlusCircle, RotateCcw, Send, Trophy } from "lucide-react";
+import { Filter, Loader2, PlayCircle, PlusCircle, RotateCcw, Search, Send, Trophy } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,6 +54,8 @@ export default function QuizzesPage() {
   const [activeQuizId, setActiveQuizId] = useState<string | null>(null);
   const [scoreVisibleQuizId, setScoreVisibleQuizId] = useState<string | null>(null);
   const [isAttemptSubmitting, setIsAttemptSubmitting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [attemptFilter, setAttemptFilter] = useState<"ALL" | "ATTEMPTED" | "NOT_ATTEMPTED">("ALL");
   const [draftQuestions, setDraftQuestions] = useState<DraftQuestion[]>([
     {
       text: "",
@@ -71,6 +73,26 @@ export default function QuizzesPage() {
   );
   const isInstructor = session?.user?.role === "INSTRUCTOR";
   const activeQuiz = activeQuizId ? quizzes.find((quiz) => quiz.id === activeQuizId) || null : null;
+  const attemptedCount = useMemo(
+    () => quizzes.filter((quiz) => quiz.attempts.length > 0).length,
+    [quizzes]
+  );
+  const filteredQuizzes = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+
+    return quizzes.filter((quiz) => {
+      const hasAttempt = quiz.attempts.length > 0;
+      const matchesAttempt =
+        attemptFilter === "ALL" ||
+        (attemptFilter === "ATTEMPTED" && hasAttempt) ||
+        (attemptFilter === "NOT_ATTEMPTED" && !hasAttempt);
+
+      const haystack = `${quiz.title} ${quiz.description || ""}`.toLowerCase();
+      const matchesSearch = !query || haystack.includes(query);
+
+      return matchesAttempt && matchesSearch;
+    });
+  }, [quizzes, searchQuery, attemptFilter]);
 
   const loadQuizzes = async () => {
     if (!isAllowed) return;
@@ -221,11 +243,89 @@ export default function QuizzesPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Quizzes</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Instructors create quizzes. Students attempt and track progress.
-        </p>
+      <div className="mb-8 grid gap-4 lg:grid-cols-2">
+        <section className="relative overflow-hidden rounded-3xl border bg-card p-6 shadow-sm lg:p-8">
+          <div className="pointer-events-none absolute -left-16 -top-16 h-44 w-44 rounded-full bg-primary/12 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-20 -right-16 h-52 w-52 rounded-full bg-accent/30 blur-3xl" />
+          <div className="relative">
+            <p className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+              Quiz Arena
+            </p>
+            <h1 className="mt-3 text-3xl font-bold tracking-tight lg:text-4xl">Sharpen Skills With Smart Quizzes</h1>
+            <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">
+              Build quiz muscle with focused rounds, instant scores, and clean progress tracking across every attempt.
+            </p>
+
+            <div className="mt-6 grid grid-cols-3 gap-3">
+              <div className="rounded-xl border bg-background/80 p-3">
+                <p className="text-xs text-muted-foreground">Total Quizzes</p>
+                <p className="mt-1 text-lg font-semibold">{quizzes.length}</p>
+              </div>
+              <div className="rounded-xl border bg-background/80 p-3">
+                <p className="text-xs text-muted-foreground">Attempted</p>
+                <p className="mt-1 text-lg font-semibold">{attemptedCount}</p>
+              </div>
+              <div className="rounded-xl border bg-background/80 p-3">
+                <p className="text-xs text-muted-foreground">Pending</p>
+                <p className="mt-1 text-lg font-semibold">{Math.max(quizzes.length - attemptedCount, 0)}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-3xl border bg-card p-6 shadow-sm lg:p-8">
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <Filter className="h-4 w-4 text-primary" />
+            Find Your Next Quiz
+          </div>
+
+          <div className="mt-4 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="quizSearch">Search quizzes</Label>
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="quizSearch"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search by title or description"
+                  className="pl-9"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Attempt status</Label>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                <Button
+                  type="button"
+                  variant={attemptFilter === "ALL" ? "default" : "outline"}
+                  onClick={() => setAttemptFilter("ALL")}
+                >
+                  All
+                </Button>
+                <Button
+                  type="button"
+                  variant={attemptFilter === "ATTEMPTED" ? "default" : "outline"}
+                  onClick={() => setAttemptFilter("ATTEMPTED")}
+                >
+                  Attempted
+                </Button>
+                <Button
+                  type="button"
+                  variant={attemptFilter === "NOT_ATTEMPTED" ? "default" : "outline"}
+                  onClick={() => setAttemptFilter("NOT_ATTEMPTED")}
+                >
+                  Not Attempted
+                </Button>
+              </div>
+            </div>
+
+            <p className="text-xs text-muted-foreground">
+              Showing <span className="font-medium text-foreground">{filteredQuizzes.length}</span> of {quizzes.length} quizzes.
+            </p>
+          </div>
+        </section>
       </div>
 
       {isInstructor ? (
@@ -320,19 +420,29 @@ export default function QuizzesPage() {
           <div className="rounded-xl border bg-card p-5 text-sm text-muted-foreground">Loading quizzes...</div>
         ) : quizzes.length === 0 ? (
           <div className="rounded-xl border bg-card p-8 text-center text-muted-foreground">No quizzes available yet.</div>
+        ) : filteredQuizzes.length === 0 ? (
+          <div className="rounded-xl border bg-card p-8 text-center text-muted-foreground">
+            No quizzes matched your search or filter.
+          </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {quizzes.map((quiz) => {
+            {filteredQuizzes.map((quiz) => {
               const latestAttempt = quiz.attempts[0];
               const hasAttempt = Boolean(latestAttempt);
               const isActive = activeQuizId === quiz.id;
               const showScore = scoreVisibleQuizId === quiz.id;
 
               return (
-                <article key={quiz.id} className="rounded-2xl border bg-card p-5">
+                <article key={quiz.id} className="rounded-2xl border bg-card p-5 shadow-sm transition-transform duration-200 hover:-translate-y-0.5">
                   <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                     <span className="rounded-full border px-2 py-1">{quiz.questions.length} questions</span>
-                    <span className="rounded-full border px-2 py-1">
+                    <span
+                      className={`rounded-full px-2 py-1 ${
+                        hasAttempt
+                          ? "border border-primary/35 bg-primary/10 text-primary"
+                          : "border border-border bg-muted/60 text-muted-foreground"
+                      }`}
+                    >
                       {hasAttempt ? "Attempted" : "Not Attempted"}
                     </span>
                   </div>
