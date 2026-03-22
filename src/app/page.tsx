@@ -110,9 +110,9 @@ export default function Home() {
   ];
 
   return (
-    <main>
-      <section className="relative overflow-hidden bg-linear-to-br from-green-50 via-white to-emerald-50/60 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
+    <main suppressHydrationWarning>
+      <section className="relative overflow-hidden bg-linear-to-br from-green-50 via-white to-emerald-50/60 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950" suppressHydrationWarning>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28" suppressHydrationWarning>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8 animate-in slide-in-from-left-5 duration-700">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-sm font-semibold border border-green-200 dark:border-green-800">
@@ -198,7 +198,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="bg-white dark:bg-gray-950 border-y border-gray-100 dark:border-gray-800">
+      <section className="bg-white dark:bg-gray-950 border-y border-gray-100 dark:border-gray-800" suppressHydrationWarning>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             {[
@@ -219,7 +219,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-18 bg-linear-to-b from-white to-emerald-50/30 dark:from-gray-950 dark:to-gray-900/60">
+      <section className="py-18 bg-linear-to-b from-white to-emerald-50/30 dark:from-gray-950 dark:to-gray-900/60" suppressHydrationWarning>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <p className="inline-flex items-center gap-2 rounded-full border border-emerald-200 dark:border-emerald-800 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
@@ -250,7 +250,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-20 bg-white dark:bg-gray-950">
+      <section className="py-20 bg-white dark:bg-gray-950" suppressHydrationWarning>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-end justify-between gap-4 mb-10 flex-wrap">
             <div>
@@ -280,7 +280,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-20 bg-linear-to-b from-emerald-50/30 to-white dark:from-gray-900 dark:to-gray-950">
+      <section className="py-20 bg-linear-to-b from-emerald-50/30 to-white dark:from-gray-900 dark:to-gray-950" suppressHydrationWarning>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Real Projects Showcase</h2>
@@ -309,7 +309,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-20 bg-white dark:bg-gray-950">
+      <section className="py-20 bg-white dark:bg-gray-950" suppressHydrationWarning>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Before vs After NextClass</h2>
@@ -343,7 +343,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-20 bg-linear-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950">
+      <section className="py-20 bg-linear-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950" suppressHydrationWarning>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Learning Roadmap Preview</h2>
@@ -362,7 +362,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-20 bg-white dark:bg-gray-950">
+      <section className="py-20 bg-white dark:bg-gray-950" suppressHydrationWarning>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="rounded-3xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 p-6 md:p-8">
             <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-8 items-center">
@@ -391,7 +391,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-20 bg-linear-to-b from-white to-emerald-50/20 dark:from-gray-950 dark:to-gray-900/40">
+      <section className="py-20 bg-linear-to-b from-white to-emerald-50/20 dark:from-gray-950 dark:to-gray-900/40" suppressHydrationWarning>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Pricing: Free vs Pro</h2>
@@ -426,7 +426,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-20 bg-white dark:bg-gray-950">
+      <section className="py-20 bg-white dark:bg-gray-950" suppressHydrationWarning>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Choose Your Learning Track</h2>
@@ -503,7 +503,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-20 bg-white dark:bg-gray-950">
+      <section className="py-20 bg-white dark:bg-gray-950" suppressHydrationWarning>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white">What Learners Say</h2>
@@ -555,7 +555,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-20 bg-white dark:bg-gray-950 border-y border-gray-100 dark:border-gray-800">
+      <section className="py-20 bg-white dark:bg-gray-950 border-y border-gray-100 dark:border-gray-800" suppressHydrationWarning>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Who Is This For?</h2>
@@ -580,7 +580,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-20 bg-linear-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950">
+      <section className="py-20 bg-linear-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950" suppressHydrationWarning>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Frequently Asked Questions</h2>
@@ -601,7 +601,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-24 bg-gray-900 text-white relative overflow-hidden">
+      <section className="py-24 bg-gray-900 text-white relative overflow-hidden" suppressHydrationWarning>
         <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
         <div className="relative max-w-4xl mx-auto px-4 text-center space-y-7">
           <div className="inline-flex items-center gap-2 text-emerald-300 font-medium">
