@@ -32,17 +32,19 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
-        <SessionProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="light"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <LayoutWrapper>{children}</LayoutWrapper>
-            <AppToastHost />
-          </ThemeProvider>
-        </SessionProvider>
+        <div suppressHydrationWarning>
+          <SessionProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="light"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <LayoutWrapper>{children}</LayoutWrapper>
+              <AppToastHost />
+            </ThemeProvider>
+          </SessionProvider>
+        </div>
       </body>
     </html>
   );
