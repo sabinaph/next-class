@@ -59,11 +59,13 @@ export default function CommunityPage() {
   const [postType, setPostType] = useState<"QUESTION" | "DISCUSSION">("QUESTION");
   const [postTitle, setPostTitle] = useState("");
   const [postBody, setPostBody] = useState("");
+  const [postError, setPostError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<"ALL" | "QUESTION" | "DISCUSSION">("ALL");
   const [expandedPostId, setExpandedPostId] = useState<string | null>(null);
   const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
+  const [formErrorsByKey, setFormErrorsByKey] = useState<Record<string, string>>({});
 
   const isAllowed = useMemo(
     () => !!session?.user?.role && ["STUDENT", "INSTRUCTOR"].includes(session.user.role),
@@ -138,9 +140,13 @@ export default function CommunityPage() {
 
   const submitPost = async (e: FormEvent) => {
     e.preventDefault();
-    if (!postTitle.trim() || !postBody.trim()) return;
+    if (!postTitle.trim() || !postBody.trim()) {
+      setPostError("Please fill in both title and details.");
+      return;
+    }
 
     setIsSubmitting(true);
+    setPostError(null);
     try {
       const response = await fetch("/api/community/posts", {
         method: "POST",
@@ -152,12 +158,26 @@ export default function CommunityPage() {
         }),
       });
 
+      const payload = (await response
+        .json()
+        .catch(() => null)) as { success?: boolean; error?: string } | null;
+
+      if (!response.ok) {
+        throw new Error(payload?.error || "Failed to publish post");
+      }
+
       if (response.ok) {
         setPostTitle("");
         setPostBody("");
         setPostType("QUESTION");
         await loadPosts();
       }
+    } catch (error) {
+      setPostError(
+        error instanceof Error
+          ? error.message
+          : "Could not publish post right now. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -168,7 +188,19 @@ export default function CommunityPage() {
 
     const draftKey = parentId || postId;
     const text = (parentId ? replyDrafts[draftKey] : commentDrafts[draftKey]) || "";
-    if (!text.trim()) return;
+    if (!text.trim()) {
+      setFormErrorsByKey((prev) => ({
+        ...prev,
+        [draftKey]: parentId ? "Reply cannot be empty." : "Comment cannot be empty.",
+      }));
+      return;
+    }
+
+    setFormErrorsByKey((prev) => {
+      const next = { ...prev };
+      delete next[draftKey];
+      return next;
+    });
 
     const previousPosts = posts;
     const optimisticId = `temp-comment-${Date.now()}`;
@@ -216,10 +248,14 @@ export default function CommunityPage() {
 
       const payload = (await response
         .json()
-        .catch(() => null)) as { success?: boolean; comment?: Partial<CommunityComment> } | null;
+        .catch(() => null)) as {
+        success?: boolean;
+        error?: string;
+        comment?: Partial<CommunityComment>;
+      } | null;
 
       if (!response.ok || !payload?.success || !payload.comment) {
-        throw new Error("Failed to add comment");
+        throw new Error(payload?.error || "Failed to add comment");
       }
 
       const normalizedComment: CommunityComment = {
@@ -266,6 +302,10 @@ export default function CommunityPage() {
       } else {
         setCommentDrafts((prev) => ({ ...prev, [draftKey]: text }));
       }
+      setFormErrorsByKey((prev) => ({
+        ...prev,
+        [draftKey]: "Failed to submit. Please try again.",
+      }));
     }
   };
 
@@ -489,7 +529,10 @@ export default function CommunityPage() {
             <Input
               id="postTitle"
               value={postTitle}
-              onChange={(e) => setPostTitle(e.target.value)}
+              onChange={(e) => {
+                setPostTitle(e.target.value);
+                setPostError(null);
+              }}
               placeholder="What do you want to ask or share?"
               required
             />
@@ -502,7 +545,10 @@ export default function CommunityPage() {
             id="postBody"
             rows={4}
             value={postBody}
-            onChange={(e) => setPostBody(e.target.value)}
+            onChange={(e) => {
+              setPostBody(e.target.value);
+              setPostError(null);
+            }}
             placeholder="Describe your question or thought..."
             required
           />
@@ -512,6 +558,7 @@ export default function CommunityPage() {
           {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           Publish Post
         </Button>
+        {postError ? <p className="text-sm text-destructive">{postError}</p> : null}
       </form>
 
       <div className="space-y-5">
@@ -607,10 +654,17 @@ export default function CommunityPage() {
                           <Input
                             value={replyDrafts[comment.id] || ""}
                             onChange={(e) =>
-                              setReplyDrafts((prev) => ({
-                                ...prev,
-                                [comment.id]: e.target.value,
-                              }))
+                              {
+                                setReplyDrafts((prev) => ({
+                                  ...prev,
+                                  [comment.id]: e.target.value,
+                                }));
+                                setFormErrorsByKey((prev) => {
+                                  const next = { ...prev };
+                                  delete next[comment.id];
+                                  return next;
+                                });
+                              }
                             }
                             placeholder="Reply to this comment"
                           />
@@ -624,6 +678,9 @@ export default function CommunityPage() {
                             Reply
                           </Button>
                         </div>
+                        {formErrorsByKey[comment.id] ? (
+                          <p className="mt-2 text-xs text-destructive">{formErrorsByKey[comment.id]}</p>
+                        ) : null}
 
                         {comment.replies.length > 0 ? (
                           <div className="mt-3 space-y-2 border-l pl-4">
@@ -642,10 +699,17 @@ export default function CommunityPage() {
                       <Input
                         value={commentDrafts[post.id] || ""}
                         onChange={(e) =>
-                          setCommentDrafts((prev) => ({
-                            ...prev,
-                            [post.id]: e.target.value,
-                          }))
+                          {
+                            setCommentDrafts((prev) => ({
+                              ...prev,
+                              [post.id]: e.target.value,
+                            }));
+                            setFormErrorsByKey((prev) => {
+                              const next = { ...prev };
+                              delete next[post.id];
+                              return next;
+                            });
+                          }
                         }
                         placeholder="Add a comment"
                       />
@@ -653,6 +717,9 @@ export default function CommunityPage() {
                         Comment
                       </Button>
                     </div>
+                    {formErrorsByKey[post.id] ? (
+                      <p className="text-xs text-destructive">{formErrorsByKey[post.id]}</p>
+                    ) : null}
                   </div>
                 </div>
               ) : null}

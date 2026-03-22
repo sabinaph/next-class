@@ -7,8 +7,8 @@ import { prisma } from "@/app/lib/prisma";
 import { notifyCommunityPostCreated } from "@/lib/community-notifications";
 
 const createPostSchema = z.object({
-  title: z.string().min(5, "Title is required"),
-  body: z.string().min(10, "Post details are required"),
+  title: z.string().trim().min(5, "Title must be at least 5 characters"),
+  body: z.string().trim().min(10, "Post details must be at least 10 characters"),
   type: z.enum(["QUESTION", "DISCUSSION"]).default("QUESTION"),
   courseId: z.string().optional(),
 });
