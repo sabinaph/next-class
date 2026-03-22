@@ -19,6 +19,7 @@ import {
   Megaphone,
   BookPlus,
   Layers,
+  MessageSquare,
 } from "lucide-react";
 import { SimpleModeToggle } from "@/components/ModeToggle";
 import { cn } from "@/lib/utils";
