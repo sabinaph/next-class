@@ -64,6 +64,19 @@ export default function CommunityPage() {
     () => !!session?.user?.role && ["STUDENT", "INSTRUCTOR"].includes(session.user.role),
     [session?.user?.role]
   );
+  const currentViewerId = viewerId || session?.user?.id || "";
+  const sessionRole =
+    session?.user?.role && ["STUDENT", "INSTRUCTOR", "ADMIN"].includes(session.user.role)
+      ? (session.user.role as Role)
+      : "STUDENT";
+  const nameParts = (session?.user?.name || "").trim().split(/\s+/).filter(Boolean);
+  const currentAuthor: CommunityAuthor = {
+    id: currentViewerId,
+    name: session?.user?.name || null,
+    firstName: nameParts[0] || null,
+    lastName: nameParts.slice(1).join(" ") || null,
+    role: sessionRole,
+  };
 
   const loadPosts = async () => {
     if (!isAllowed) return;
@@ -124,35 +137,167 @@ export default function CommunityPage() {
   };
 
   const submitComment = async (postId: string, parentId?: string) => {
+    if (!currentViewerId) return;
+
     const draftKey = parentId || postId;
     const text = (parentId ? replyDrafts[draftKey] : commentDrafts[draftKey]) || "";
     if (!text.trim()) return;
 
-    const response = await fetch(`/api/community/posts/${postId}/comments`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ body: text, parentId }),
-    });
+    const previousPosts = posts;
+    const optimisticId = `temp-comment-${Date.now()}`;
+    const optimisticComment: CommunityComment = {
+      id: optimisticId,
+      body: text,
+      createdAt: new Date().toISOString(),
+      author: currentAuthor,
+      reactions: [],
+      replies: [],
+    };
 
-    if (response.ok) {
-      if (parentId) {
-        setReplyDrafts((prev) => ({ ...prev, [draftKey]: "" }));
-      } else {
-        setCommentDrafts((prev) => ({ ...prev, [draftKey]: "" }));
+    if (parentId) {
+      setReplyDrafts((prev) => ({ ...prev, [draftKey]: "" }));
+      setPosts((prev) =>
+        prev.map((post) => {
+          if (post.id !== postId) return post;
+          return {
+            ...post,
+            comments: post.comments.map((comment) =>
+              comment.id === parentId
+                ? { ...comment, replies: [...comment.replies, optimisticComment] }
+                : comment
+            ),
+          };
+        })
+      );
+    } else {
+      setCommentDrafts((prev) => ({ ...prev, [draftKey]: "" }));
+      setPosts((prev) =>
+        prev.map((post) =>
+          post.id === postId
+            ? { ...post, comments: [...post.comments, optimisticComment] }
+            : post
+        )
+      );
+    }
+
+    try {
+      const response = await fetch(`/api/community/posts/${postId}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ body: text, parentId }),
+      });
+
+      const payload = (await response
+        .json()
+        .catch(() => null)) as { success?: boolean; comment?: Partial<CommunityComment> } | null;
+
+      if (!response.ok || !payload?.success || !payload.comment) {
+        throw new Error("Failed to add comment");
       }
-      await loadPosts();
+
+      const normalizedComment: CommunityComment = {
+        id: payload.comment.id || optimisticId,
+        body: payload.comment.body || text,
+        createdAt: payload.comment.createdAt || new Date().toISOString(),
+        author: (payload.comment.author as CommunityAuthor) || currentAuthor,
+        reactions: payload.comment.reactions || [],
+        replies: payload.comment.replies || [],
+      };
+
+      setPosts((prev) =>
+        prev.map((post) => {
+          if (post.id !== postId) return post;
+
+          if (parentId) {
+            return {
+              ...post,
+              comments: post.comments.map((comment) =>
+                comment.id === parentId
+                  ? {
+                      ...comment,
+                      replies: comment.replies.map((reply) =>
+                        reply.id === optimisticId ? normalizedComment : reply
+                      ),
+                    }
+                  : comment
+              ),
+            };
+          }
+
+          return {
+            ...post,
+            comments: post.comments.map((comment) =>
+              comment.id === optimisticId ? normalizedComment : comment
+            ),
+          };
+        })
+      );
+    } catch {
+      setPosts(previousPosts);
+      if (parentId) {
+        setReplyDrafts((prev) => ({ ...prev, [draftKey]: text }));
+      } else {
+        setCommentDrafts((prev) => ({ ...prev, [draftKey]: text }));
+      }
     }
   };
 
   const toggleReaction = async (postId: string, commentId?: string) => {
-    const response = await fetch(`/api/community/posts/${postId}/reactions`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ commentId }),
-    });
+    if (!currentViewerId) return;
 
-    if (response.ok) {
-      await loadPosts();
+    const previousPosts = posts;
+
+    setPosts((prev) =>
+      prev.map((post) => {
+        if (post.id !== postId) return post;
+
+        if (commentId) {
+          return {
+            ...post,
+            comments: post.comments.map((comment) => {
+              if (comment.id !== commentId) return comment;
+
+              const hasReaction = comment.reactions.some(
+                (reaction) => reaction.userId === currentViewerId
+              );
+
+              return {
+                ...comment,
+                reactions: hasReaction
+                  ? comment.reactions.filter(
+                      (reaction) => reaction.userId !== currentViewerId
+                    )
+                  : [...comment.reactions, { id: `temp-${Date.now()}`, userId: currentViewerId }],
+              };
+            }),
+          };
+        }
+
+        const hasReaction = post.reactions.some(
+          (reaction) => reaction.userId === currentViewerId
+        );
+
+        return {
+          ...post,
+          reactions: hasReaction
+            ? post.reactions.filter((reaction) => reaction.userId !== currentViewerId)
+            : [...post.reactions, { id: `temp-${Date.now()}`, userId: currentViewerId }],
+        };
+      })
+    );
+
+    try {
+      const response = await fetch(`/api/community/posts/${postId}/reactions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ commentId }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update reaction");
+      }
+    } catch {
+      setPosts(previousPosts);
     }
   };
 
@@ -253,7 +398,7 @@ export default function CommunityPage() {
               <div className="mt-4 flex items-center gap-3">
                 <Button
                   size="sm"
-                  variant={post.reactions.some((reaction) => reaction.userId === viewerId) ? "default" : "outline"}
+                  variant={post.reactions.some((reaction) => reaction.userId === currentViewerId) ? "default" : "outline"}
                   className="gap-2"
                   onClick={() => void toggleReaction(post.id)}
                 >
@@ -275,7 +420,7 @@ export default function CommunityPage() {
                     <div className="mt-2 flex items-center gap-2">
                       <Button
                         size="sm"
-                        variant={comment.reactions.some((reaction) => reaction.userId === viewerId) ? "default" : "outline"}
+                        variant={comment.reactions.some((reaction) => reaction.userId === currentViewerId) ? "default" : "outline"}
                         className="h-7 gap-1 px-2"
                         onClick={() => void toggleReaction(post.id, comment.id)}
                       >
