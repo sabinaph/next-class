@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { CardIllustration } from "@/components/ui/card-illustration";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 
 type QuizOption = {
@@ -221,10 +222,43 @@ export default function QuizzesPage() {
     }
   };
 
+  const renderQuizSkeletons = () => (
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      {Array.from({ length: 6 }).map((_, index) => (
+        <article key={index} className="rounded-2xl border bg-card p-5 shadow-sm">
+          <div className="flex gap-2">
+            <Skeleton className="h-6 w-24 rounded-full" />
+            <Skeleton className="h-6 w-28 rounded-full" />
+          </div>
+          <Skeleton className="mt-4 h-7 w-3/4" />
+          <Skeleton className="mt-3 h-4 w-full" />
+          <Skeleton className="mt-2 h-4 w-5/6" />
+          <div className="mt-5 flex gap-2">
+            <Skeleton className="h-9 w-28" />
+            <Skeleton className="h-9 w-24" />
+          </div>
+        </article>
+      ))}
+    </div>
+  );
+
   if (status === "loading") {
     return (
-      <div className="mx-auto max-w-5xl px-4 py-20 text-center text-muted-foreground">
-        Loading quizzes...
+      <div className="mx-auto max-w-6xl px-4 py-10">
+        <div className="mb-8 grid gap-4 lg:grid-cols-2">
+          <section className="rounded-3xl border bg-card p-6 shadow-sm lg:p-8">
+            <Skeleton className="h-6 w-28" />
+            <Skeleton className="mt-4 h-10 w-3/4" />
+            <Skeleton className="mt-3 h-4 w-full" />
+            <Skeleton className="mt-2 h-4 w-4/5" />
+          </section>
+          <section className="rounded-3xl border bg-card p-6 shadow-sm lg:p-8">
+            <Skeleton className="h-5 w-44" />
+            <Skeleton className="mt-4 h-10 w-full" />
+            <Skeleton className="mt-3 h-10 w-full" />
+          </section>
+        </div>
+        {renderQuizSkeletons()}
       </div>
     );
   }
@@ -418,7 +452,7 @@ export default function QuizzesPage() {
 
       <div className="space-y-6">
         {isLoading ? (
-          <div className="rounded-xl border bg-card p-5 text-sm text-muted-foreground">Loading quizzes...</div>
+          renderQuizSkeletons()
         ) : quizzes.length === 0 ? (
           <div className="rounded-xl border bg-card p-8 text-center text-muted-foreground">No quizzes available yet.</div>
         ) : filteredQuizzes.length === 0 ? (
