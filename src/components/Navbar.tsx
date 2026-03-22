@@ -40,10 +40,18 @@ interface NavbarProps {
 }
 
 type NotificationType = "ANNOUNCEMENT" | "NEW_LESSON" | "NEW_COURSE";
+type ExtendedNotificationType =
+  | NotificationType
+  | "COMMUNITY_POST"
+  | "COMMUNITY_COMMENT"
+  | "COMMUNITY_REPLY"
+  | "COMMUNITY_REACTION"
+  | "QUIZ_PUBLISHED"
+  | "QUIZ_ATTEMPTED";
 
 interface NotificationItem {
   id: string;
-  type: NotificationType;
+  type: ExtendedNotificationType;
   title: string;
   description: string;
   href: string;
@@ -62,6 +70,8 @@ export default function Navbar({ className }: NavbarProps) {
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/courses", label: "Courses" },
+    ...(session ? [{ href: "/community", label: "Community" }] : []),
+    ...(session ? [{ href: "/quizzes", label: "Quizzes" }] : []),
     ...(session ? [{ href: "/my-courses", label: "My Courses" }] : []),
     { href: "/about", label: "About" },
   ];
@@ -143,12 +153,21 @@ export default function Navbar({ className }: NavbarProps) {
     };
   }, [isMobileMenuOpen]);
 
-  const getNotificationIcon = (type: NotificationType) => {
+  const getNotificationIcon = (type: ExtendedNotificationType) => {
     if (type === "ANNOUNCEMENT") {
       return <Megaphone className="h-4 w-4 text-blue-600" />;
     }
     if (type === "NEW_LESSON") {
       return <Layers className="h-4 w-4 text-emerald-600" />;
+    }
+    if (type === "COMMUNITY_POST" || type === "COMMUNITY_COMMENT" || type === "COMMUNITY_REPLY") {
+      return <MessageSquare className="h-4 w-4 text-amber-600" />;
+    }
+    if (type === "COMMUNITY_REACTION") {
+      return <Heart className="h-4 w-4 text-rose-600" />;
+    }
+    if (type === "QUIZ_PUBLISHED" || type === "QUIZ_ATTEMPTED") {
+      return <BookOpen className="h-4 w-4 text-indigo-600" />;
     }
     return <BookPlus className="h-4 w-4 text-violet-600" />;
   };
