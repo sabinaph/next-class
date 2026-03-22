@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
-import { Loader2, PlusCircle, Send, Trophy } from "lucide-react";
+import { Loader2, PlayCircle, PlusCircle, RotateCcw, Send, Trophy } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,6 +51,9 @@ export default function QuizzesPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [activeQuizId, setActiveQuizId] = useState<string | null>(null);
+  const [scoreVisibleQuizId, setScoreVisibleQuizId] = useState<string | null>(null);
+  const [isAttemptSubmitting, setIsAttemptSubmitting] = useState(false);
   const [draftQuestions, setDraftQuestions] = useState<DraftQuestion[]>([
     {
       text: "",
@@ -67,6 +70,7 @@ export default function QuizzesPage() {
     [session?.user?.role]
   );
   const isInstructor = session?.user?.role === "INSTRUCTOR";
+  const activeQuiz = activeQuizId ? quizzes.find((quiz) => quiz.id === activeQuizId) || null : null;
 
   const loadQuizzes = async () => {
     if (!isAllowed) return;
@@ -166,6 +170,8 @@ export default function QuizzesPage() {
   };
 
   const submitAttempt = async (quiz: Quiz) => {
+    setIsAttemptSubmitting(true);
+
     const selectedByQuestion = answersByQuiz[quiz.id] || {};
     const textByQuestion = textAnswersByQuiz[quiz.id] || {};
 
@@ -175,14 +181,20 @@ export default function QuizzesPage() {
       textAnswer: textByQuestion[question.id] || "",
     }));
 
-    const response = await fetch(`/api/quizzes/${quiz.id}/attempts`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ answers }),
-    });
+    try {
+      const response = await fetch(`/api/quizzes/${quiz.id}/attempts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ answers }),
+      });
 
-    if (response.ok) {
-      await loadQuizzes();
+      if (response.ok) {
+        setActiveQuizId(null);
+        setScoreVisibleQuizId(quiz.id);
+        await loadQuizzes();
+      }
+    } finally {
+      setIsAttemptSubmitting(false);
     }
   };
 
@@ -309,92 +321,168 @@ export default function QuizzesPage() {
         ) : quizzes.length === 0 ? (
           <div className="rounded-xl border bg-card p-8 text-center text-muted-foreground">No quizzes available yet.</div>
         ) : (
-          quizzes.map((quiz) => (
-            <article key={quiz.id} className="rounded-2xl border bg-card p-5">
-              <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                <span className="rounded-full border px-2 py-1">{quiz.questions.length} questions</span>
-                <span>{quiz.isPublished ? "Published" : "Draft"}</span>
-              </div>
-              <h2 className="mt-3 text-xl font-semibold">{quiz.title}</h2>
-              {quiz.description ? <p className="mt-2 text-sm text-muted-foreground">{quiz.description}</p> : null}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {quizzes.map((quiz) => {
+              const latestAttempt = quiz.attempts[0];
+              const hasAttempt = Boolean(latestAttempt);
+              const isActive = activeQuizId === quiz.id;
+              const showScore = scoreVisibleQuizId === quiz.id;
 
-              <div className="mt-4 space-y-4">
-                {quiz.questions.map((question) => (
-                  <div key={question.id} className="rounded-xl border bg-background p-4">
-                    <p className="font-medium text-sm">{question.text}</p>
-
-                    {question.type === "SHORT_ANSWER" ? (
-                      <Textarea
-                        rows={2}
-                        className="mt-2"
-                        value={textAnswersByQuiz[quiz.id]?.[question.id] || ""}
-                        onChange={(e) =>
-                          setTextAnswersByQuiz((prev) => ({
-                            ...prev,
-                            [quiz.id]: {
-                              ...(prev[quiz.id] || {}),
-                              [question.id]: e.target.value,
-                            },
-                          }))
-                        }
-                        placeholder="Write your answer"
-                      />
-                    ) : (
-                      <div className="mt-2 space-y-2">
-                        {question.options.map((option) => {
-                          const isMulti = question.type === "MULTIPLE_CHOICE";
-                          const selected = answersByQuiz[quiz.id]?.[question.id] || [];
-                          const checked = selected.includes(option.id);
-
-                          return (
-                            <label key={option.id} className="flex items-center gap-2 text-sm">
-                              <input
-                                type={isMulti ? "checkbox" : "radio"}
-                                checked={checked}
-                                onChange={(e) => {
-                                  setAnswersByQuiz((prev) => {
-                                    const quizAnswers = { ...(prev[quiz.id] || {}) };
-                                    const current = new Set(quizAnswers[question.id] || []);
-
-                                    if (isMulti) {
-                                      if (e.target.checked) current.add(option.id);
-                                      else current.delete(option.id);
-                                    } else {
-                                      current.clear();
-                                      if (e.target.checked) current.add(option.id);
-                                    }
-
-                                    quizAnswers[question.id] = Array.from(current);
-                                    return { ...prev, [quiz.id]: quizAnswers };
-                                  });
-                                }}
-                              />
-                              {option.text}
-                            </label>
-                          );
-                        })}
-                      </div>
-                    )}
+              return (
+                <article key={quiz.id} className="rounded-2xl border bg-card p-5">
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                    <span className="rounded-full border px-2 py-1">{quiz.questions.length} questions</span>
+                    <span className="rounded-full border px-2 py-1">
+                      {hasAttempt ? "Attempted" : "Not Attempted"}
+                    </span>
                   </div>
-                ))}
-              </div>
 
-              <div className="mt-5 flex flex-wrap items-center gap-3">
-                <Button onClick={() => void submitAttempt(quiz)} className="gap-2">
-                  <Trophy className="h-4 w-4" />
-                  Submit Attempt
-                </Button>
-
-                {quiz.attempts[0] ? (
-                  <p className="text-sm text-muted-foreground">
-                    Last score: {quiz.attempts[0].score}/{quiz.attempts[0].total}
+                  <h2 className="mt-3 text-xl font-semibold">{quiz.title}</h2>
+                  <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">
+                    {quiz.description || "No description provided for this quiz."}
                   </p>
-                ) : null}
-              </div>
-            </article>
-          ))
+
+                  {showScore && latestAttempt ? (
+                    <div className="mt-4 rounded-xl border bg-background p-3 text-sm">
+                      <p className="font-medium">Score: {latestAttempt.score}/{latestAttempt.total}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {latestAttempt.submittedAt
+                          ? `Submitted on ${new Date(latestAttempt.submittedAt).toLocaleString()}`
+                          : "Submitted"}
+                      </p>
+                    </div>
+                  ) : null}
+
+                  <div className="mt-5 flex flex-wrap items-center gap-2">
+                    {hasAttempt ? (
+                      <>
+                        <Button
+                          variant="outline"
+                          onClick={() =>
+                            setScoreVisibleQuizId((prev) => (prev === quiz.id ? null : quiz.id))
+                          }
+                        >
+                          View Score
+                        </Button>
+                        <Button
+                          className="gap-2"
+                          onClick={() => {
+                            setActiveQuizId(quiz.id);
+                            setScoreVisibleQuizId(null);
+                          }}
+                        >
+                          <RotateCcw className="h-4 w-4" />
+                          Reattempt
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        className="gap-2"
+                        onClick={() => {
+                          setActiveQuizId(quiz.id);
+                          setScoreVisibleQuizId(null);
+                        }}
+                      >
+                        <PlayCircle className="h-4 w-4" />
+                        Start Quiz
+                      </Button>
+                    )}
+
+                    {isActive ? (
+                      <span className="text-xs text-emerald-600">Quiz opened below</span>
+                    ) : null}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
         )}
       </div>
+
+      {activeQuiz ? (
+        <section className="mt-8 rounded-2xl border bg-card p-5">
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold">{activeQuiz.title}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Answer all questions and submit your attempt.</p>
+          </div>
+
+          <div className="space-y-4">
+            {activeQuiz.questions.map((question) => (
+              <div key={question.id} className="rounded-xl border bg-background p-4">
+                <p className="text-sm font-medium">{question.text}</p>
+
+                {question.type === "SHORT_ANSWER" ? (
+                  <Textarea
+                    rows={2}
+                    className="mt-2"
+                    value={textAnswersByQuiz[activeQuiz.id]?.[question.id] || ""}
+                    onChange={(e) =>
+                      setTextAnswersByQuiz((prev) => ({
+                        ...prev,
+                        [activeQuiz.id]: {
+                          ...(prev[activeQuiz.id] || {}),
+                          [question.id]: e.target.value,
+                        },
+                      }))
+                    }
+                    placeholder="Write your answer"
+                  />
+                ) : (
+                  <div className="mt-2 space-y-2">
+                    {question.options.map((option) => {
+                      const isMulti = question.type === "MULTIPLE_CHOICE";
+                      const selected = answersByQuiz[activeQuiz.id]?.[question.id] || [];
+                      const checked = selected.includes(option.id);
+
+                      return (
+                        <label key={option.id} className="flex items-center gap-2 text-sm">
+                          <input
+                            type={isMulti ? "checkbox" : "radio"}
+                            checked={checked}
+                            onChange={(e) => {
+                              setAnswersByQuiz((prev) => {
+                                const quizAnswers = { ...(prev[activeQuiz.id] || {}) };
+                                const current = new Set(quizAnswers[question.id] || []);
+
+                                if (isMulti) {
+                                  if (e.target.checked) current.add(option.id);
+                                  else current.delete(option.id);
+                                } else {
+                                  current.clear();
+                                  if (e.target.checked) current.add(option.id);
+                                }
+
+                                quizAnswers[question.id] = Array.from(current);
+                                return { ...prev, [activeQuiz.id]: quizAnswers };
+                              });
+                            }}
+                          />
+                          {option.text}
+                        </label>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <Button
+              onClick={() => void submitAttempt(activeQuiz)}
+              className="gap-2"
+              disabled={isAttemptSubmitting}
+            >
+              {isAttemptSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trophy className="h-4 w-4" />}
+              Submit Attempt
+            </Button>
+
+            <Button variant="outline" onClick={() => setActiveQuizId(null)}>
+              Cancel
+            </Button>
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 }
