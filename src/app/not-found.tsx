@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { GraduationCap, Home, Search } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export default function NotFoundPage() {
   return (
@@ -22,26 +23,20 @@ export default function NotFoundPage() {
         </p>
 
         <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <Button asChild className="gap-2">
-            <Link href="/">
-              <Home className="h-4 w-4" />
-              Home
-            </Link>
-          </Button>
+          <Link href="/" className={cn(buttonVariants(), "gap-2")}>
+            <Home className="h-4 w-4" />
+            Home
+          </Link>
 
-          <Button asChild variant="outline" className="gap-2">
-            <Link href="/courses">
-              <Search className="h-4 w-4" />
-              Explore Courses
-            </Link>
-          </Button>
+          <Link href="/courses" className={cn(buttonVariants({ variant: "outline" }), "gap-2")}>
+            <Search className="h-4 w-4" />
+            Explore Courses
+          </Link>
 
-          <Button asChild variant="secondary" className="gap-2">
-            <Link href="/community">
-              <GraduationCap className="h-4 w-4" />
-              Community
-            </Link>
-          </Button>
+          <Link href="/community" className={cn(buttonVariants({ variant: "secondary" }), "gap-2")}>
+            <GraduationCap className="h-4 w-4" />
+            Community
+          </Link>
         </div>
       </section>
     </div>
