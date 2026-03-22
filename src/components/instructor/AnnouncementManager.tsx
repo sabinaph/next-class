@@ -44,11 +44,33 @@ export default function AnnouncementManager({
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<{
+    courseId?: string;
+    title?: string;
+    content?: string;
+  }>({});
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccess("");
+    setFieldErrors({});
+
+    const nextFieldErrors: { courseId?: string; title?: string; content?: string } = {};
+    if (!form.courseId) {
+      nextFieldErrors.courseId = "Please select a course.";
+    }
+    if (form.title.trim().length < 5) {
+      nextFieldErrors.title = "Title must be at least 5 characters.";
+    }
+    if (form.content.trim().length < 10) {
+      nextFieldErrors.content = "Content must be at least 10 characters.";
+    }
+
+    if (Object.keys(nextFieldErrors).length > 0) {
+      setFieldErrors(nextFieldErrors);
+      return;
+    }
 
     startTransition(async () => {
       try {
@@ -102,7 +124,10 @@ export default function AnnouncementManager({
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 value={form.courseId}
                 onChange={(e) =>
-                  setForm((prev) => ({ ...prev, courseId: e.target.value }))
+                  {
+                    setForm((prev) => ({ ...prev, courseId: e.target.value }));
+                    setFieldErrors((prev) => ({ ...prev, courseId: undefined }));
+                  }
                 }
                 disabled={isPending || courses.length === 0}
               >
@@ -112,6 +137,9 @@ export default function AnnouncementManager({
                   </option>
                 ))}
               </select>
+              {fieldErrors.courseId ? (
+                <p className="text-xs text-destructive">{fieldErrors.courseId}</p>
+              ) : null}
             </div>
 
             <div className="space-y-2">
@@ -120,11 +148,17 @@ export default function AnnouncementManager({
                 id="title"
                 value={form.title}
                 onChange={(e) =>
-                  setForm((prev) => ({ ...prev, title: e.target.value }))
+                  {
+                    setForm((prev) => ({ ...prev, title: e.target.value }));
+                    setFieldErrors((prev) => ({ ...prev, title: undefined }));
+                  }
                 }
                 placeholder="e.g. Live Q&A this Friday"
                 disabled={isPending}
               />
+              {fieldErrors.title ? (
+                <p className="text-xs text-destructive">{fieldErrors.title}</p>
+              ) : null}
             </div>
 
             <div className="space-y-2">
@@ -133,12 +167,18 @@ export default function AnnouncementManager({
                 id="content"
                 value={form.content}
                 onChange={(e) =>
-                  setForm((prev) => ({ ...prev, content: e.target.value }))
+                  {
+                    setForm((prev) => ({ ...prev, content: e.target.value }));
+                    setFieldErrors((prev) => ({ ...prev, content: undefined }));
+                  }
                 }
                 placeholder="Write your update for students..."
                 rows={5}
                 disabled={isPending}
               />
+              {fieldErrors.content ? (
+                <p className="text-xs text-destructive">{fieldErrors.content}</p>
+              ) : null}
             </div>
 
             {error && (

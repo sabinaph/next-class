@@ -44,6 +44,8 @@ export default function InstructorSettingsPage() {
   const [user, setUser] = useState<InstructorUser | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -98,7 +100,18 @@ export default function InstructorSettingsPage() {
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setProfileError(null);
     setSuccess(null);
+
+    if (formData.firstName.trim().length < 2) {
+      setProfileError("First name must be at least 2 characters.");
+      return;
+    }
+    if (formData.lastName.trim().length < 2) {
+      setProfileError("Last name must be at least 2 characters.");
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -112,7 +125,9 @@ export default function InstructorSettingsPage() {
       });
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update profile");
+      const message = err instanceof Error ? err.message : "Failed to update profile";
+      setError(message);
+      setProfileError(message);
     } finally {
       setSubmitting(false);
     }
@@ -121,7 +136,22 @@ export default function InstructorSettingsPage() {
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setPasswordError(null);
     setSuccess(null);
+
+    if (!passwordForm.currentPassword.trim()) {
+      setPasswordError("Current password is required.");
+      return;
+    }
+    if (passwordForm.newPassword.length < 8) {
+      setPasswordError("New password must be at least 8 characters.");
+      return;
+    }
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordError("New password and confirm password must match.");
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -138,9 +168,9 @@ export default function InstructorSettingsPage() {
       });
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to change password"
-      );
+      const message = err instanceof Error ? err.message : "Failed to change password";
+      setError(message);
+      setPasswordError(message);
     } finally {
       setSubmitting(false);
     }
@@ -266,6 +296,7 @@ export default function InstructorSettingsPage() {
                 {submitting ? "Saving..." : "Save Changes"}
               </Button>
             </div>
+            {profileError ? <p className="text-sm text-destructive">{profileError}</p> : null}
           </form>
         </CardContent>
       </Card>
@@ -380,6 +411,7 @@ export default function InstructorSettingsPage() {
                 {submitting ? "Changing..." : "Change Password"}
               </Button>
             </div>
+            {passwordError ? <p className="text-sm text-destructive">{passwordError}</p> : null}
           </form>
         </CardContent>
       </Card>

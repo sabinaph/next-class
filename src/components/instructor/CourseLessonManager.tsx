@@ -62,6 +62,8 @@ export function CourseLessonManager({
   const [isFree, setIsFree] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadingFile, setIsUploadingFile] = useState(false);
+  const [addFormError, setAddFormError] = useState<string | null>(null);
+  const [editFormError, setEditFormError] = useState<string | null>(null);
 
   // Reset form helper
   const resetForm = () => {
@@ -74,10 +76,41 @@ export function CourseLessonManager({
     setIsFree(false);
     setIsAdding(false);
     setEditingLesson(null);
+    setAddFormError(null);
+    setEditFormError(null);
+  };
+
+  const validateLessonPayload = () => {
+    const trimmedTitle = title.trim();
+    if (trimmedTitle.length < 3) {
+      return "Lesson title must be at least 3 characters.";
+    }
+
+    if ((type === "VIDEO" || type === "PDF") && !content.trim()) {
+      return `Please upload a ${type === "VIDEO" ? "video" : "PDF"} file.`;
+    }
+
+    if (!(type === "VIDEO" || type === "PDF") && content.trim().length < 5) {
+      return "Lesson content must be at least 5 characters.";
+    }
+
+    if (duration !== "" && Number(duration) < 1) {
+      return "Duration must be at least 1 minute.";
+    }
+
+    return null;
   };
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
+    setAddFormError(null);
+
+    const validationError = validateLessonPayload();
+    if (validationError) {
+      setAddFormError(validationError);
+      return;
+    }
+
     setIsLoading(true);
     try {
       await createLesson(courseId, title, type, content, {
@@ -88,6 +121,7 @@ export function CourseLessonManager({
       window.location.reload();
     } catch (error) {
       console.error(error);
+      setAddFormError(error instanceof Error ? error.message : "Failed to add lesson.");
       showToast({
         type: "error",
         title: "Lesson Not Added",
@@ -140,6 +174,13 @@ export function CourseLessonManager({
     e.preventDefault();
     if (!editingLesson) return;
 
+    setEditFormError(null);
+    const validationError = validateLessonPayload();
+    if (validationError) {
+      setEditFormError(validationError);
+      return;
+    }
+
     setIsLoading(true);
     try {
       await updateLesson(editingLesson.id, {
@@ -154,6 +195,7 @@ export function CourseLessonManager({
       window.location.reload();
     } catch (error) {
       console.error(error);
+      setEditFormError(error instanceof Error ? error.message : "Failed to update lesson.");
       showToast({
         type: "error",
         title: "Lesson Update Failed",
@@ -414,6 +456,9 @@ export function CourseLessonManager({
                     Create Lesson
                   </Button>
                 </div>
+                {addFormError ? (
+                  <p className="text-sm text-destructive">{addFormError}</p>
+                ) : null}
               </form>
             </div>
           </div>
@@ -651,6 +696,9 @@ export function CourseLessonManager({
                   Save Changes
                 </Button>
               </DialogFooter>
+              {editFormError ? (
+                <p className="text-sm text-destructive">{editFormError}</p>
+              ) : null}
             </form>
           )}
         </DialogContent>
