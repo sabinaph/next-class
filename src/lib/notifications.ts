@@ -25,6 +25,7 @@ export async function buildNotificationItemsForUser(
   const userNotifications = await prisma.userNotification.findMany({
     where: {
       userId,
+      isRead: false,
     },
     orderBy: {
       createdAt: "desc",

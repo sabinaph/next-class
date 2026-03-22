@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Menu,
   X,
@@ -66,7 +66,8 @@ export default function Navbar({ className }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [isNotificationsLoading, setIsNotificationsLoading] = useState(false);
-  const [isSendingNotificationsEmail, setIsSendingNotificationsEmail] = useState(false);
+  const [isMarkingNotificationsRead, setIsMarkingNotificationsRead] = useState(false);
+  const hasAutoEmailedNotificationsRef = useRef(false);
 
   const navLinks = [
     { href: "/", label: "Home" },
@@ -80,6 +81,7 @@ export default function Navbar({ className }: NavbarProps) {
   useEffect(() => {
     if (!session?.user?.id) {
       setNotifications([]);
+      hasAutoEmailedNotificationsRef.current = false;
       return;
     }
 
@@ -103,6 +105,13 @@ export default function Navbar({ className }: NavbarProps) {
 
         if (isMounted) {
           setNotifications(body.notifications || []);
+        }
+
+        if (!hasAutoEmailedNotificationsRef.current && (body.notifications || []).length > 0) {
+          hasAutoEmailedNotificationsRef.current = true;
+          void fetch("/api/notifications", {
+            method: "POST",
+          }).catch(() => null);
         }
       } catch {
         if (isMounted) {
@@ -192,45 +201,42 @@ export default function Navbar({ className }: NavbarProps) {
   };
 
   const sendNotificationsToEmail = async () => {
-    if (isSendingNotificationsEmail) return;
+    if (isMarkingNotificationsRead) return;
 
-    setIsSendingNotificationsEmail(true);
+    setIsMarkingNotificationsRead(true);
     try {
       const response = await fetch("/api/notifications", {
-        method: "POST",
+        method: "PATCH",
       });
 
       const body = (await response.json().catch(() => null)) as
-        | { count?: number; error?: string }
+        | { success?: boolean; error?: string }
         | null;
 
       if (!response.ok) {
-        throw new Error(body?.error || "Failed to send notifications email");
+        throw new Error(body?.error || "Failed to mark notifications as read");
       }
 
-      const count = body?.count || 0;
+      setNotifications([]);
 
       showToast({
         type: "success",
-        title: "Email Sent",
-        message:
-          count > 0
-            ? `${count} notifications were sent to your email.`
-            : "No new notifications right now, but we sent a quick update email.",
+        title: "All Set",
+        message: "All notifications have been marked as read.",
       });
     } catch (error) {
       const message =
         error instanceof Error
           ? error.message
-          : "Could not send notifications email right now. Please try again.";
+          : "Could not mark notifications as read right now. Please try again.";
 
       showToast({
         type: "error",
-        title: "Email Failed",
+        title: "Action Failed",
         message,
       });
     } finally {
-      setIsSendingNotificationsEmail(false);
+      setIsMarkingNotificationsRead(false);
     }
   };
 
@@ -339,9 +345,9 @@ export default function Navbar({ className }: NavbarProps) {
                         variant="outline"
                         className="h-7 px-2 text-xs"
                         onClick={sendNotificationsToEmail}
-                        disabled={isSendingNotificationsEmail}
+                        disabled={isMarkingNotificationsRead || notifications.length === 0}
                       >
-                        {isSendingNotificationsEmail ? "Sending..." : "Send to email"}
+                        {isMarkingNotificationsRead ? "Marking..." : "Mark all as read"}
                       </Button>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
@@ -513,9 +519,9 @@ export default function Navbar({ className }: NavbarProps) {
                       variant="outline"
                       className="h-7 px-2 text-xs"
                       onClick={sendNotificationsToEmail}
-                      disabled={isSendingNotificationsEmail}
+                      disabled={isMarkingNotificationsRead || notifications.length === 0}
                     >
-                      {isSendingNotificationsEmail ? "Sending..." : "Send to email"}
+                      {isMarkingNotificationsRead ? "Marking..." : "Mark all as read"}
                     </Button>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
