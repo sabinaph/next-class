@@ -12,6 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { CardIllustration } from "@/components/ui/card-illustration";
 import { Clock, Users } from "lucide-react";
 
 interface CourseCardProps {
@@ -41,6 +42,16 @@ export default function CourseCard({ course }: CourseCardProps) {
     }).format(amount);
 
   const fallbackThumbnail = "/default-coures.jpg";
+  const illustrationVariant = (() => {
+    const key = `${category || ""} ${level || ""}`.toLowerCase();
+    if (key.includes("design") || key.includes("creative") || key.includes("intermediate")) {
+      return "community" as const;
+    }
+    if (key.includes("advanced") || key.includes("data") || key.includes("quiz")) {
+      return "quiz" as const;
+    }
+    return "course" as const;
+  })();
 
   // Get level badge variant/color
   const getLevelBadgeVariant = (level: string) => {
@@ -58,9 +69,11 @@ export default function CourseCard({ course }: CourseCardProps) {
 
   return (
     <Link href={`/courses/${id}`}>
-      <Card className="h-full overflow-hidden hover:shadow-lg transition-all duration-300 group border-border/50 bg-card/50 hover:bg-card hover:-translate-y-1">
+      <Card className="group relative h-full overflow-hidden border-border/50 bg-card/60 transition-all duration-300 hover:-translate-y-1 hover:bg-card hover:shadow-lg">
+        <CardIllustration variant={illustrationVariant} className="-right-8 top-16 h-28 w-32 opacity-70" />
         {/* Thumbnail Section */}
         <div className="relative aspect-video w-full overflow-hidden bg-muted">
+          <div className="absolute inset-0 z-10 bg-linear-to-tr from-background/10 via-transparent to-primary/10 transition-opacity duration-300 group-hover:opacity-80" />
           <Image
             src={thumbnail || fallbackThumbnail}
             alt={title}
