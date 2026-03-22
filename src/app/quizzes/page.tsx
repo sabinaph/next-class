@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
-import { Filter, Loader2, PlayCircle, PlusCircle, RotateCcw, Search, Send, Trophy } from "lucide-react";
+import { Filter, Loader2, PlayCircle, PlusCircle, RotateCcw, Search, Send, SquarePen, Trophy } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { CardIllustration } from "@/components/ui/card-illustration";
@@ -46,7 +46,11 @@ type DraftQuestion = {
   correctIndexesCsv: string;
 };
 
-export default function QuizzesPage() {
+type QuizzesPageProps = {
+  forceInstructorView?: boolean;
+};
+
+export default function QuizzesPage({ forceInstructorView = false }: QuizzesPageProps = {}) {
   const { data: session, status } = useSession();
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -60,6 +64,11 @@ export default function QuizzesPage() {
   const [attemptFormError, setAttemptFormError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [attemptFilter, setAttemptFilter] = useState<"ALL" | "ATTEMPTED" | "NOT_ATTEMPTED">("ALL");
+  const [editQuizId, setEditQuizId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editFormError, setEditFormError] = useState<string | null>(null);
+  const [isEditSubmitting, setIsEditSubmitting] = useState(false);
   const [draftQuestions, setDraftQuestions] = useState<DraftQuestion[]>([
     {
       text: "",
@@ -71,12 +80,26 @@ export default function QuizzesPage() {
   const [answersByQuiz, setAnswersByQuiz] = useState<Record<string, Record<string, string[]>>>({});
   const [textAnswersByQuiz, setTextAnswersByQuiz] = useState<Record<string, Record<string, string>>>({});
 
-  const isAllowed = useMemo(
-    () => !!session?.user?.role && ["STUDENT", "INSTRUCTOR"].includes(session.user.role),
-    [session?.user?.role]
-  );
   const isInstructor = session?.user?.role === "INSTRUCTOR";
+  const isInstructorView = forceInstructorView || isInstructor;
+  const isAllowed = useMemo(() => {
+    if (!session?.user?.role) return false;
+
+    if (forceInstructorView) {
+      return session.user.role === "INSTRUCTOR";
+    }
+
+    return ["STUDENT", "INSTRUCTOR"].includes(session.user.role);
+  }, [forceInstructorView, session?.user?.role]);
   const activeQuiz = activeQuizId ? quizzes.find((quiz) => quiz.id === activeQuizId) || null : null;
+  const instructorOwnedCount = useMemo(
+    () => quizzes.filter((quiz) => quiz.createdById === session?.user?.id).length,
+    [quizzes, session?.user?.id]
+  );
+  const publishedCount = useMemo(
+    () => quizzes.filter((quiz) => quiz.isPublished).length,
+    [quizzes]
+  );
   const attemptedCount = useMemo(
     () => quizzes.filter((quiz) => quiz.attempts.length > 0).length,
     [quizzes]
@@ -86,7 +109,13 @@ export default function QuizzesPage() {
 
     return quizzes.filter((quiz) => {
       const hasAttempt = quiz.attempts.length > 0;
+      const isOwnedByInstructor = !session?.user?.id || quiz.createdById === session.user.id;
+      if (isInstructorView && !isOwnedByInstructor) {
+        return false;
+      }
+
       const matchesAttempt =
+        isInstructorView ||
         attemptFilter === "ALL" ||
         (attemptFilter === "ATTEMPTED" && hasAttempt) ||
         (attemptFilter === "NOT_ATTEMPTED" && !hasAttempt);
@@ -211,6 +240,8 @@ export default function QuizzesPage() {
   };
 
   const submitAttempt = async (quiz: Quiz) => {
+    if (isInstructorView) return;
+
     setIsAttemptSubmitting(true);
     setAttemptFormError(null);
 
@@ -251,6 +282,55 @@ export default function QuizzesPage() {
       );
     } finally {
       setIsAttemptSubmitting(false);
+    }
+  };
+
+  const beginEditQuiz = (quiz: Quiz) => {
+    setEditQuizId(quiz.id);
+    setEditTitle(quiz.title);
+    setEditDescription(quiz.description || "");
+    setEditFormError(null);
+    setActiveQuizId(null);
+    setScoreVisibleQuizId(null);
+  };
+
+  const submitQuizEdit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!editQuizId || !isInstructorView) return;
+
+    setIsEditSubmitting(true);
+    setEditFormError(null);
+
+    try {
+      const response = await fetch(`/api/quizzes/${editQuizId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: editTitle,
+          description: editDescription,
+        }),
+      });
+
+      const payload = (await response
+        .json()
+        .catch(() => null)) as { success?: boolean; error?: string } | null;
+
+      if (!response.ok) {
+        throw new Error(payload?.error || "Failed to update quiz");
+      }
+
+      setEditQuizId(null);
+      setEditTitle("");
+      setEditDescription("");
+      await loadQuizzes();
+    } catch (error) {
+      setEditFormError(
+        error instanceof Error
+          ? error.message
+          : "Could not update this quiz. Please try again."
+      );
+    } finally {
+      setIsEditSubmitting(false);
     }
   };
 
@@ -329,12 +409,12 @@ export default function QuizzesPage() {
                 <p className="mt-1 text-lg font-semibold">{quizzes.length}</p>
               </div>
               <div className="rounded-xl border bg-background/80 p-3">
-                <p className="text-xs text-muted-foreground">Attempted</p>
-                <p className="mt-1 text-lg font-semibold">{attemptedCount}</p>
+                <p className="text-xs text-muted-foreground">{isInstructorView ? "Your Quizzes" : "Attempted"}</p>
+                <p className="mt-1 text-lg font-semibold">{isInstructorView ? instructorOwnedCount : attemptedCount}</p>
               </div>
               <div className="rounded-xl border bg-background/80 p-3">
-                <p className="text-xs text-muted-foreground">Pending</p>
-                <p className="mt-1 text-lg font-semibold">{Math.max(quizzes.length - attemptedCount, 0)}</p>
+                <p className="text-xs text-muted-foreground">{isInstructorView ? "Published" : "Pending"}</p>
+                <p className="mt-1 text-lg font-semibold">{isInstructorView ? publishedCount : Math.max(quizzes.length - attemptedCount, 0)}</p>
               </div>
             </div>
           </div>
@@ -361,32 +441,34 @@ export default function QuizzesPage() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label>Attempt status</Label>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                <Button
-                  type="button"
-                  variant={attemptFilter === "ALL" ? "default" : "outline"}
-                  onClick={() => setAttemptFilter("ALL")}
-                >
-                  All
-                </Button>
-                <Button
-                  type="button"
-                  variant={attemptFilter === "ATTEMPTED" ? "default" : "outline"}
-                  onClick={() => setAttemptFilter("ATTEMPTED")}
-                >
-                  Attempted
-                </Button>
-                <Button
-                  type="button"
-                  variant={attemptFilter === "NOT_ATTEMPTED" ? "default" : "outline"}
-                  onClick={() => setAttemptFilter("NOT_ATTEMPTED")}
-                >
-                  Not Attempted
-                </Button>
+            {!isInstructorView ? (
+              <div className="space-y-2">
+                <Label>Attempt status</Label>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                  <Button
+                    type="button"
+                    variant={attemptFilter === "ALL" ? "default" : "outline"}
+                    onClick={() => setAttemptFilter("ALL")}
+                  >
+                    All
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={attemptFilter === "ATTEMPTED" ? "default" : "outline"}
+                    onClick={() => setAttemptFilter("ATTEMPTED")}
+                  >
+                    Attempted
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={attemptFilter === "NOT_ATTEMPTED" ? "default" : "outline"}
+                    onClick={() => setAttemptFilter("NOT_ATTEMPTED")}
+                  >
+                    Not Attempted
+                  </Button>
+                </div>
               </div>
-            </div>
+            ) : null}
 
             <p className="text-xs text-muted-foreground">
               Showing <span className="font-medium text-foreground">{filteredQuizzes.length}</span> of {quizzes.length} quizzes.
@@ -508,12 +590,18 @@ export default function QuizzesPage() {
                     <span className="rounded-full border px-2 py-1">{quiz.questions.length} questions</span>
                     <span
                       className={`rounded-full px-2 py-1 ${
-                        hasAttempt
-                          ? "border border-primary/35 bg-primary/10 text-primary"
-                          : "border border-border bg-muted/60 text-muted-foreground"
+                        isInstructorView
+                          ? quiz.isPublished
+                            ? "border border-primary/35 bg-primary/10 text-primary"
+                            : "border border-border bg-muted/60 text-muted-foreground"
+                          : hasAttempt
+                            ? "border border-primary/35 bg-primary/10 text-primary"
+                            : "border border-border bg-muted/60 text-muted-foreground"
                       }`}
                     >
-                      {hasAttempt ? "Attempted" : "Not Attempted"}
+                      {isInstructorView
+                        ? (quiz.isPublished ? "Published" : "Draft")
+                        : (hasAttempt ? "Attempted" : "Not Attempted")}
                     </span>
                   </div>
 
@@ -534,7 +622,15 @@ export default function QuizzesPage() {
                   ) : null}
 
                   <div className="mt-5 flex flex-wrap items-center gap-2">
-                    {hasAttempt ? (
+                    {isInstructorView ? (
+                      <Button
+                        className="gap-2"
+                        onClick={() => beginEditQuiz(quiz)}
+                      >
+                        <SquarePen className="h-4 w-4" />
+                        Edit Quiz
+                      </Button>
+                    ) : hasAttempt ? (
                       <>
                         <Button
                           variant="outline"
@@ -579,7 +675,58 @@ export default function QuizzesPage() {
         )}
       </div>
 
-      {activeQuiz ? (
+      {isInstructorView && editQuizId ? (
+        <section className="mt-8 rounded-2xl border bg-card p-5">
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold">Edit Quiz</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Update quiz details and save your changes.</p>
+          </div>
+
+          <form onSubmit={submitQuizEdit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="editQuizTitle">Title</Label>
+              <Input
+                id="editQuizTitle"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="editQuizDescription">Description</Label>
+              <Textarea
+                id="editQuizDescription"
+                rows={3}
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+              />
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <Button type="submit" disabled={isEditSubmitting} className="gap-2">
+                {isEditSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <SquarePen className="h-4 w-4" />}
+                Save Changes
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setEditQuizId(null);
+                  setEditTitle("");
+                  setEditDescription("");
+                  setEditFormError(null);
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+            {editFormError ? <p className="text-sm text-destructive">{editFormError}</p> : null}
+          </form>
+        </section>
+      ) : null}
+
+      {!isInstructorView && activeQuiz ? (
         <section className="mt-8 rounded-2xl border bg-card p-5">
           <div className="mb-4">
             <h2 className="text-xl font-semibold">{activeQuiz.title}</h2>
