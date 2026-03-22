@@ -48,7 +48,6 @@ async function createAndSendNotifications(params: {
       id: { in: recipientIds },
       isActive: true,
       deletedAt: null,
-      email: { not: null },
     },
     select: {
       email: true,
