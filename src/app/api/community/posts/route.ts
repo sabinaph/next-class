@@ -21,85 +21,92 @@ async function getAuthorizedSession() {
 }
 
 export async function GET() {
-  const session = await getAuthorizedSession();
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    const session = await getAuthorizedSession();
+    if (!session) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
+    const posts = await prisma.communityPost.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 50,
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            firstName: true,
+            lastName: true,
+            role: true,
+          },
+        },
+        course: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+        comments: {
+          where: { parentId: null },
+          orderBy: { createdAt: "asc" },
+          include: {
+            author: {
+              select: {
+                id: true,
+                name: true,
+                firstName: true,
+                lastName: true,
+                role: true,
+              },
+            },
+            replies: {
+              orderBy: { createdAt: "asc" },
+              include: {
+                author: {
+                  select: {
+                    id: true,
+                    name: true,
+                    firstName: true,
+                    lastName: true,
+                    role: true,
+                  },
+                },
+                reactions: {
+                  select: {
+                    id: true,
+                    userId: true,
+                  },
+                },
+              },
+            },
+            reactions: {
+              select: {
+                id: true,
+                userId: true,
+              },
+            },
+          },
+        },
+        reactions: {
+          select: {
+            id: true,
+            userId: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      posts,
+      viewerId: session.user.id,
+    });
+  } catch {
+    return NextResponse.json(
+      { success: false, error: "Failed to load community posts" },
+      { status: 500 }
+    );
   }
-
-  const posts = await prisma.communityPost.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 50,
-    include: {
-      author: {
-        select: {
-          id: true,
-          name: true,
-          firstName: true,
-          lastName: true,
-          role: true,
-        },
-      },
-      course: {
-        select: {
-          id: true,
-          title: true,
-        },
-      },
-      comments: {
-        where: { parentId: null },
-        orderBy: { createdAt: "asc" },
-        include: {
-          author: {
-            select: {
-              id: true,
-              name: true,
-              firstName: true,
-              lastName: true,
-              role: true,
-            },
-          },
-          replies: {
-            orderBy: { createdAt: "asc" },
-            include: {
-              author: {
-                select: {
-                  id: true,
-                  name: true,
-                  firstName: true,
-                  lastName: true,
-                  role: true,
-                },
-              },
-              reactions: {
-                select: {
-                  id: true,
-                  userId: true,
-                },
-              },
-            },
-          },
-          reactions: {
-            select: {
-              id: true,
-              userId: true,
-            },
-          },
-        },
-      },
-      reactions: {
-        select: {
-          id: true,
-          userId: true,
-        },
-      },
-    },
-  });
-
-  return NextResponse.json({
-    success: true,
-    posts,
-    viewerId: session.user.id,
-  });
 }
 
 export async function POST(request: NextRequest) {

@@ -71,15 +71,19 @@ export default function CommunityPage() {
     setIsLoading(true);
     try {
       const response = await fetch("/api/community/posts", { cache: "no-store" });
-      const payload = (await response.json()) as {
+      const payload = (await response
+        .json()
+        .catch(() => null)) as {
         success?: boolean;
         posts?: CommunityPost[];
         viewerId?: string;
-      };
+      } | null;
 
-      if (response.ok && payload.success) {
+      if (response.ok && payload?.success) {
         setPosts(payload.posts || []);
         setViewerId(payload.viewerId || "");
+      } else {
+        setPosts([]);
       }
     } finally {
       setIsLoading(false);
