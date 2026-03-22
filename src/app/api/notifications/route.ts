@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { prisma } from "@/app/lib/prisma";
 import { isBlockedRecipientEmail, sendNotificationsDigestEmail } from "@/lib/email";
 import { buildNotificationItemsForUser } from "@/lib/notifications";
 
@@ -35,9 +36,26 @@ export async function POST() {
     );
   }
 
-  const notifications = await buildNotificationItemsForUser(session.user.id);
-
   const appUrl = process.env.NEXTAUTH_URL || process.env.APP_URL || "http://localhost:3000";
+
+  const pendingEmailNotifications = await prisma.userNotification.findMany({
+    where: {
+      userId: session.user.id,
+      isRead: false,
+      emailedAt: null,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    take: 25,
+  });
+
+  const notifications = pendingEmailNotifications.map((notification) => ({
+    title: notification.title,
+    description: notification.description,
+    href: notification.href,
+    createdAt: notification.createdAt.toISOString(),
+  }));
 
   const sent = await sendNotificationsDigestEmail({
     to: session.user.email,
@@ -53,8 +71,42 @@ export async function POST() {
     );
   }
 
+  if (pendingEmailNotifications.length > 0) {
+    await prisma.userNotification.updateMany({
+      where: {
+        id: {
+          in: pendingEmailNotifications.map((item) => item.id),
+        },
+      },
+      data: {
+        emailedAt: new Date(),
+      },
+    });
+  }
+
   return NextResponse.json({
     message: "Notifications sent to your email.",
     count: notifications.length,
+  });
+}
+
+export async function PATCH() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  await prisma.userNotification.updateMany({
+    where: {
+      userId: session.user.id,
+      isRead: false,
+    },
+    data: {
+      isRead: true,
+    },
+  });
+
+  return NextResponse.json({
+    success: true,
   });
 }
