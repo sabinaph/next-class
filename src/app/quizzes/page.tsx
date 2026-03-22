@@ -81,7 +81,7 @@ export default function QuizzesPage() {
       const payload = (await response
         .json()
         .catch(() => null)) as { success?: boolean; quizzes?: Quiz[] } | null;
-      if (response.ok && payload.success) {
+      if (response.ok && payload?.success) {
         setQuizzes(payload.quizzes || []);
       } else {
         setQuizzes([]);
