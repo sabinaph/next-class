@@ -78,7 +78,7 @@ export async function GET() {
             select: {
               id: true,
               text: true,
-              isCorrect: session.user.role === "INSTRUCTOR" && session.user.id,
+              isCorrect: true,
             },
           },
         },
@@ -99,7 +99,21 @@ export async function GET() {
     },
   });
 
-  return NextResponse.json({ success: true, quizzes });
+  const sanitizedQuizzes =
+    session.user.role === "INSTRUCTOR"
+      ? quizzes
+      : quizzes.map((quiz) => ({
+          ...quiz,
+          questions: quiz.questions.map((question) => ({
+            ...question,
+            options: question.options.map((option) => ({
+              ...option,
+              isCorrect: false,
+            })),
+          })),
+        }));
+
+  return NextResponse.json({ success: true, quizzes: sanitizedQuizzes });
 }
 
 export async function POST(request: NextRequest) {
