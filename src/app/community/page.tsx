@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
-import { Loader2, MessageSquare, Reply, Send, ThumbsUp } from "lucide-react";
+import { Filter, Loader2, MessageSquare, Reply, Search, Send, ThumbsUp } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,6 +57,8 @@ export default function CommunityPage() {
   const [postType, setPostType] = useState<"QUESTION" | "DISCUSSION">("QUESTION");
   const [postTitle, setPostTitle] = useState("");
   const [postBody, setPostBody] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState<"ALL" | "QUESTION" | "DISCUSSION">("ALL");
   const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
 
@@ -77,6 +79,28 @@ export default function CommunityPage() {
     lastName: nameParts.slice(1).join(" ") || null,
     role: sessionRole,
   };
+  const questionsCount = useMemo(
+    () => posts.filter((post) => post.type === "QUESTION").length,
+    [posts]
+  );
+  const discussionsCount = useMemo(
+    () => posts.filter((post) => post.type === "DISCUSSION").length,
+    [posts]
+  );
+  const totalCommentsCount = useMemo(
+    () => posts.reduce((sum, post) => sum + post.comments.length, 0),
+    [posts]
+  );
+  const filteredPosts = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+
+    return posts.filter((post) => {
+      const matchesType = typeFilter === "ALL" || post.type === typeFilter;
+      const haystack = `${post.title} ${post.body} ${getName(post.author)}`.toLowerCase();
+      const matchesSearch = !query || haystack.includes(query);
+      return matchesType && matchesSearch;
+    });
+  }, [posts, searchQuery, typeFilter]);
 
   const loadPosts = async () => {
     if (!isAllowed) return;
@@ -324,11 +348,90 @@ export default function CommunityPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Community Q and A</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Ask questions, share ideas, comment, reply, and react with the learning community.
-        </p>
+      <div className="mb-8 grid gap-4 lg:grid-cols-2">
+        <section className="relative overflow-hidden rounded-3xl border bg-card p-6 shadow-sm lg:p-8">
+          <div className="pointer-events-none absolute -left-16 -top-16 h-44 w-44 rounded-full bg-primary/12 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-20 -right-16 h-52 w-52 rounded-full bg-accent/30 blur-3xl" />
+          <div className="relative">
+            <p className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+              Community Hub
+            </p>
+            <h1 className="mt-3 text-3xl font-bold tracking-tight lg:text-4xl">Ask, Share, And Learn Together</h1>
+            <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">
+              Start meaningful discussions, get answers faster, and build your learning momentum with the community.
+            </p>
+
+            <div className="mt-6 grid grid-cols-3 gap-3">
+              <div className="rounded-xl border bg-background/80 p-3">
+                <p className="text-xs text-muted-foreground">Total Posts</p>
+                <p className="mt-1 text-lg font-semibold">{posts.length}</p>
+              </div>
+              <div className="rounded-xl border bg-background/80 p-3">
+                <p className="text-xs text-muted-foreground">Questions</p>
+                <p className="mt-1 text-lg font-semibold">{questionsCount}</p>
+              </div>
+              <div className="rounded-xl border bg-background/80 p-3">
+                <p className="text-xs text-muted-foreground">Comments</p>
+                <p className="mt-1 text-lg font-semibold">{totalCommentsCount}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-3xl border bg-card p-6 shadow-sm lg:p-8">
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <Filter className="h-4 w-4 text-primary" />
+            Explore Discussions
+          </div>
+
+          <div className="mt-4 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="communitySearch">Search posts</Label>
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="communitySearch"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search by title, text, or author"
+                  className="pl-9"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Post type</Label>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                <Button
+                  type="button"
+                  variant={typeFilter === "ALL" ? "default" : "outline"}
+                  onClick={() => setTypeFilter("ALL")}
+                >
+                  All
+                </Button>
+                <Button
+                  type="button"
+                  variant={typeFilter === "QUESTION" ? "default" : "outline"}
+                  onClick={() => setTypeFilter("QUESTION")}
+                >
+                  Questions
+                </Button>
+                <Button
+                  type="button"
+                  variant={typeFilter === "DISCUSSION" ? "default" : "outline"}
+                  onClick={() => setTypeFilter("DISCUSSION")}
+                >
+                  Discussions
+                </Button>
+              </div>
+            </div>
+
+            <p className="text-xs text-muted-foreground">
+              Showing <span className="font-medium text-foreground">{filteredPosts.length}</span> of {posts.length} posts.
+              <span className="ml-2">Discussions: {discussionsCount}</span>
+            </p>
+          </div>
+        </section>
       </div>
 
       <form onSubmit={submitPost} className="mb-8 space-y-4 rounded-2xl border bg-card p-5">
@@ -382,11 +485,21 @@ export default function CommunityPage() {
           <div className="rounded-xl border bg-card p-8 text-center text-muted-foreground">
             No posts yet. Start the first discussion.
           </div>
+        ) : filteredPosts.length === 0 ? (
+          <div className="rounded-xl border bg-card p-8 text-center text-muted-foreground">
+            No posts matched your search or filter.
+          </div>
         ) : (
-          posts.map((post) => (
-            <article key={post.id} className="rounded-2xl border bg-card p-5">
+          filteredPosts.map((post) => (
+            <article key={post.id} className="rounded-2xl border bg-card p-5 shadow-sm transition-transform duration-200 hover:-translate-y-0.5">
               <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                <span className="rounded-full border px-2 py-1">
+                <span
+                  className={`rounded-full px-2 py-1 ${
+                    post.type === "QUESTION"
+                      ? "border border-primary/35 bg-primary/10 text-primary"
+                      : "border border-border bg-muted/60 text-muted-foreground"
+                  }`}
+                >
                   {post.type === "QUESTION" ? "Question" : "Discussion"}
                 </span>
                 <span>{new Date(post.createdAt).toLocaleString()}</span>
