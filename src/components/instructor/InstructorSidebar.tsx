@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   BookOpen,
   MessageSquare,
+  ClipboardList,
   Menu,
   GraduationCap,
   LogOut,
@@ -21,6 +22,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 const sidebarItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/instructor" },
   { icon: BookOpen, label: "My Courses", href: "/instructor/courses" },
+  { icon: MessageSquare, label: "Community", href: "/instructor/community" },
+  { icon: ClipboardList, label: "Quizzes", href: "/instructor/quizzes" },
   {
     icon: MessageSquare,
     label: "Communication",
