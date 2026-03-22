@@ -112,11 +112,18 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const session = await getAuthorizedSession();
   if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    const body = await request.json();
+    const body = (await request.json().catch(() => null)) as unknown;
+    if (!body) {
+      return NextResponse.json(
+        { success: false, error: "Invalid JSON body" },
+        { status: 400 }
+      );
+    }
+
     const data = createPostSchema.parse(body);
 
     const createdPost = await prisma.communityPost.create({
@@ -140,11 +147,14 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    await notifyCommunityPostCreated({
+    // Do not block post creation on notification/email side effects.
+    void notifyCommunityPostCreated({
       actorId: session.user.id,
       title: "New community post",
       description: createdPost.title,
       href: "/community",
+    }).catch((error) => {
+      console.error("Failed to dispatch community post notifications:", error);
     });
 
     return NextResponse.json({ success: true, post: createdPost });
@@ -157,7 +167,11 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { success: false, error: "Failed to create post" },
+      {
+        success: false,
+        error: "Failed to create post",
+        message: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }
