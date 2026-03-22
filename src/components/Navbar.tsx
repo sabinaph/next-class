@@ -68,6 +68,9 @@ export default function Navbar({ className }: NavbarProps) {
   const [isNotificationsLoading, setIsNotificationsLoading] = useState(false);
   const [isMarkingNotificationsRead, setIsMarkingNotificationsRead] = useState(false);
   const hasAutoEmailedNotificationsRef = useRef(false);
+  const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
+  const previousNotificationIdsRef = useRef<Set<string>>(new Set());
+  const hasLoadedNotificationsOnceRef = useRef(false);
 
   const navLinks = [
     { href: "/", label: "Home" },
@@ -82,6 +85,8 @@ export default function Navbar({ className }: NavbarProps) {
     if (!session?.user?.id) {
       setNotifications([]);
       hasAutoEmailedNotificationsRef.current = false;
+      previousNotificationIdsRef.current = new Set();
+      hasLoadedNotificationsOnceRef.current = false;
       return;
     }
 
@@ -109,6 +114,31 @@ export default function Navbar({ className }: NavbarProps) {
         const visibleNotifications = (body.notifications || []).filter(
           (item) => new Date(item.createdAt).getTime() > cutoff
         );
+        const currentNotificationIds = new Set(visibleNotifications.map((item) => item.id));
+
+        if (hasLoadedNotificationsOnceRef.current) {
+          const hasNewNotification = Array.from(currentNotificationIds).some(
+            (id) => !previousNotificationIdsRef.current.has(id)
+          );
+
+          if (hasNewNotification) {
+            try {
+              if (!notificationAudioRef.current) {
+                notificationAudioRef.current = new Audio("/notification/notification-sound.wav");
+                notificationAudioRef.current.preload = "auto";
+                notificationAudioRef.current.volume = 0.75;
+              }
+
+              notificationAudioRef.current.currentTime = 0;
+              void notificationAudioRef.current.play().catch(() => null);
+            } catch {
+              // Ignore browser autoplay restrictions and continue silently.
+            }
+          }
+        }
+
+        previousNotificationIdsRef.current = currentNotificationIds;
+        hasLoadedNotificationsOnceRef.current = true;
 
         if (isMounted) {
           setNotifications(visibleNotifications);
