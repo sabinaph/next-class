@@ -20,7 +20,7 @@ export const signUpSchema = z
       ),
     email: z.string().email("Invalid email address"),
     gender: z.nativeEnum(Gender, {
-      errorMap: () => ({ message: "Please select a gender" }),
+      message: "Please select a gender",
     }),
     password: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string(),
