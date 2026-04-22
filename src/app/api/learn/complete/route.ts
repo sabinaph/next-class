@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { prisma } from "@/app/lib/prisma";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 
 const makeCertificateNumber = () =>
   `CERT-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
@@ -166,3 +166,4 @@ export async function POST(request: Request) {
     );
   }
 }
+

@@ -2,7 +2,7 @@
 
 import { prisma } from "@/app/lib/prisma";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { notifyStudentsAboutAnnouncement } from "@/lib/notification-emails";
 
@@ -115,3 +115,4 @@ export async function deleteInstructorAnnouncement(id: string) {
 
   revalidatePath("/instructor/announcements");
 }
+

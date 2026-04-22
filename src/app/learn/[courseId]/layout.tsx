@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { prisma } from "@/app/lib/prisma"; // Adjust path if needed
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { CourseSidebar } from "@/components/learn/CourseSidebar";
 import Navbar from "@/components/Navbar";
 

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import Link from "next/link";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { CompleteLessonButton } from "@/components/learn/CompleteLessonButton";
 // Note: ReactMarkdown handling might need a client component, but let's try a simple server render or client wrapper if needed.
 // Actually, I'll stick to simple text display if no markdown renderer is installed.

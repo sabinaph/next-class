@@ -2,7 +2,7 @@
 
 import { prisma } from "@/app/lib/prisma";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
 export async function getPublicCourse(id: string) {
@@ -191,3 +191,4 @@ export async function toggleWishlist(courseId: string) {
     return true; // Added
   }
 }
+

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/app/lib/prisma";
 import { stripe } from "@/lib/stripe";
 import { ensureInvoiceForOrder, emailInvoice } from "@/actions/invoices";
@@ -78,3 +78,4 @@ export async function GET(req: Request) {
     );
   }
 }
+

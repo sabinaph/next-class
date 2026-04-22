@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"; // Adjust path if needed
+import { authOptions } from "@/lib/auth"; // Adjust path if needed
 import { prisma } from "@/app/lib/prisma"; // Adjust path if needed
 import { z } from "zod";
 
@@ -52,3 +52,4 @@ export async function PUT(req: Request) {
     );
   }
 }
+

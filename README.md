@@ -1,280 +1,173 @@
-# 🎓 NextClass - Online Course Booking System
+# NextClass - Learning and Digital Resource Marketplace
 
-A production-ready, full-stack course booking and management system built with Next.js 15, TypeScript, PostgreSQL, and Prisma.
+NextClass is a full-stack learning platform and digital marketplace built with Next.js, TypeScript, PostgreSQL, and Prisma.
 
-## ✨ Features
+It combines course publishing, secure digital access, quizzes, community discussions, role-based dashboards, payments, invoices, and notifications in one system.
 
-### ✅ Implemented
-- **Complete Database Schema** - 8 models with proper relations and constraints
-- **RESTful API** - GET/POST endpoints with filtering, pagination, and RBAC
-- **Course Management** - Browse, filter, and search courses
-- **TypeScript** - Full type safety across the entire application
-- **Responsive UI** - Beautiful, mobile-friendly interface with TailwindCSS
-- **Role-Based Access Control** - ADMIN, INSTRUCTOR, STUDENT roles
-- **Audit Logging** - Complete activity tracking
-- **Soft Delete** - Data preservation with recovery options
+## Core Features
 
-### 🚀 Ready for Implementation
-- User Authentication (NextAuth.js integration guide included)
-- Session Management
-- Booking System with Waitlist
-- Payment Integration (Stripe ready)
-- Certificate Generation
-- Email Notifications
-- Student/Instructor/Admin Dashboards
+### Authentication and Authorization
+- NextAuth-based authentication (credentials + OAuth-ready architecture)
+- Role-based access control for ADMIN, INSTRUCTOR, and STUDENT
+- Session-backed protected routes and APIs
+- Password hashing with bcryptjs
 
-## 🏗️ Tech Stack
+### Course and Content Management
+- Course creation, editing, publishing, and archival
+- Course metadata: category, level, tags, pricing, outcomes, syllabus
+- Lesson management by instructors (video, text, PDF, quiz, assignment)
+- Course announcements for enrolled learners
+- Category and tag organization
 
-- **Frontend**: Next.js 15 (App Router), React 19, TailwindCSS v4
-- **Backend**: Next.js API Routes
-- **Database**: PostgreSQL
-- **ORM**: Prisma
-- **Language**: TypeScript
-- **Authentication**: NextAuth.js (ready for integration)
-- **Password Hashing**: bcryptjs
+### Student Learning Experience
+- Browse and search courses
+- Multi-filter discovery (category, price, level, instructor)
+- Course detail and learning pages
+- My courses and profile management
+- Lesson progress tracking
 
-## 📦 Database Models
+### Marketplace, Cart, and Orders
+- Add-to-cart and cart management
+- Checkout flow
+- Order creation and status tracking
+- Order items mapped to purchased courses
+- Wishlist/save for later
 
-```
-User ──┬──→ Course (as Instructor)
-       ├──→ Booking
-       ├──→ Waitlist
-       ├──→ Payment
-       ├──→ Certificate
-       └──→ Audit
+### Payments and Invoicing
+- Payment pipeline with gateway metadata support
+- Khalti and Stripe integration points in the codebase
+- Payment status lifecycle (pending, completed, failed, refunded)
+- Invoice generation with invoice numbers and totals
 
-Course ──┬──→ Session
-         ├──→ Booking
-         ├──→ Waitlist
-         └──→ Certificate
+### Downloads and Access Control
+- Secure digital access tied to purchases
+- Download entitlement tracking
+- Download logs (who downloaded what and when)
 
-Session ──→ Booking
+### Reviews and Feedback
+- Course rating and review system
+- Instructor replies to student reviews
 
-Booking ──→ Payment
-```
+### Quizzes
+- Quiz authoring by instructors/admins
+- Multiple question types:
+  - Single choice
+  - Multiple choice
+  - True/false
+  - Short answer
+- Quiz attempts, answer tracking, and scoring
+- Quiz publication workflow
 
-**8 Core Models**: User, Course, Session, Booking, Waitlist, Payment, Certificate, Audit
+### Community and Engagement
+- Community posts (questions/discussions)
+- Nested comments and replies
+- Reactions on posts and comments
+- Solved-state support for discussion threads
 
-## 🚀 Quick Start
+### Notifications
+- In-app user notifications
+- Notification events for community activity and quiz activity
+- Read/unread states and notification links
+- Email notification extension points
 
-### Prerequisites
+### Admin and Instructor Operations
+- Admin panel for users, content, categories, settings, and analytics
+- Instructor dashboard for content and course operations
+- Instructor application and review workflow
+- Revenue/analytics and platform operations modules
+
+### Legacy Course Session and Booking Domain
+- Course sessions, bookings, waitlists, payments, certificates, and audit models remain available
+- System has transitioned to marketplace-first flows while retaining these entities where needed
+
+## Tech Stack
+
+- Frontend: Next.js 16 (App Router), React 19, Tailwind CSS 4
+- Backend: Next.js server actions and API routes
+- Database: PostgreSQL
+- ORM: Prisma
+- Auth: NextAuth + Prisma adapter
+- Validation: Zod
+- Uploads: UploadThing
+- Charts/Analytics UI: Recharts
+
+## Database Domain Overview
+
+Main entities include:
+- User, Account, Session, VerificationToken
+- Course, Lesson, LessonProgress, Announcement, Review
+- CartItem, Order, OrderItem, Invoice, Wishlist
+- Quiz, QuizQuestion, QuizOption, QuizAttempt, QuizAnswer
+- CommunityPost, CommunityComment, CommunityReaction, UserNotification
+- Booking, CourseSession, Waitlist, Payment, Certificate, Audit
+- InstructorApplication, Category
+
+## Application Areas
+
+Key route groups currently in the app:
+- Public pages: home, about, blog, contact, help center, legal pages
+- Learning and catalog: courses, learn, my-courses, quizzes, community
+- Commerce: cart, checkout, invoices, success, khalti-payment
+- Role areas: admin, instructor, profile
+- Auth: sign-in/sign-up and auth APIs
+
+## Quick Start
+
+Prerequisites:
 - Node.js 18+
-- PostgreSQL database
+- PostgreSQL
 - npm or pnpm
 
-### Installation
+Install and run:
 
 ```bash
-# 1. Install dependencies
+# Install dependencies
 npm install
 
-# 2. Setup environment variables
-# Copy .env.example to .env and update DATABASE_URL
-cp .env.example .env
-
-# 3. Generate Prisma Client
+# Generate Prisma client
 npx prisma generate
 
-# 4. Create database and run migrations
-npx prisma migrate dev --name init
+# Run migrations
+npx prisma migrate dev
 
-# 5. Seed database with sample data
+# Seed sample data
 npx prisma db seed
 
-# 6. Start development server
-npm run dev
-```
-
-Visit **http://localhost:3000/courses** to see the courses page.
-
-## 🎮 Test Credentials
-
-After running `npx prisma db seed`:
-
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | admin@nextclass.com | Password123! |
-| Instructor | john.doe@nextclass.com | Password123! |
-| Instructor | jane.smith@nextclass.com | Password123! |
-| Student | student1@example.com | Password123! |
-| Student | student2@example.com | Password123! |
-
-## 📡 API Endpoints
-
-### GET /api/courses
-Fetch courses with optional filters:
-```bash
-GET /api/courses?search=nextjs&category=Web%20Development&level=Intermediate&page=1
-```
-
-### POST /api/courses
-Create a new course (Instructor/Admin only):
-```bash
-POST /api/courses
-Headers:
-  x-user-id: <instructor-id>
-  x-user-role: INSTRUCTOR
-Body: {
-  "title": "My Course",
-  "description": "...",
-  "category": "Web Development",
-  "level": "Beginner",
-  "price": 199.99,
-  "duration": 20,
-  "instructorId": "<instructor-id>"
-}
-```
-
-## 📁 Project Structure
-
-```
-next-class/
-├── prisma/
-│   ├── schema.prisma          # Database schema
-│   └── seed.ts                # Sample data
-├── src/
-│   ├── app/
-│   │   ├── api/courses/       # Course API endpoints
-│   │   ├── courses/           # Courses page
-│   │   └── lib/prisma.ts      # Prisma client
-│   ├── components/courses/    # Course components
-│   └── types/                 # TypeScript types
-├── .env.example               # Environment template
-├── SETUP.md                   # Detailed setup guide
-├── ARCHITECTURE.md            # System architecture
-├── IMPLEMENTATION.md          # What's implemented
-└── QUICK_REFERENCE.md         # Quick commands
-```
-
-## 🗄️ Database Commands
-
-```bash
-# View data in GUI
-npx prisma studio
-
-# Create migration
-npx prisma migrate dev --name your_migration
-
-# Reset database (WARNING: deletes all data)
-npx prisma migrate reset
-
-# Seed database
-npx prisma db seed
-```
-
-## 📚 Documentation
-
-- **[SETUP.md](SETUP.md)** - Complete setup and configuration guide
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - System architecture and integration guide
-- **[IMPLEMENTATION.md](IMPLEMENTATION.md)** - Implementation summary
-- **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)** - Quick commands and references
-
-## 🔐 Authentication
-
-Currently uses header-based authentication for development:
-- `x-user-id`: User ID
-- `x-user-role`: ADMIN | INSTRUCTOR | STUDENT
-
-See **[ARCHITECTURE.md](ARCHITECTURE.md)** for production NextAuth.js integration guide.
-
-## 🎨 UI Components
-
-### CourseFilter
-Client component with search, category, level, and price filters.
-
-### CourseCard
-Beautiful course card with instructor info, price, duration, and enrollment count.
-
-### CoursesPage
-Full-featured course listing with pagination, loading states, and error handling.
-
-## 🚀 Next Steps
-
-1. **Implement Authentication** - Add NextAuth.js (guide in ARCHITECTURE.md)
-2. **Session Management** - Create session booking system
-3. **Payment Integration** - Add Stripe for payments
-4. **User Dashboards** - Build student/instructor/admin interfaces
-5. **Notifications** - Email/SMS alerts
-6. **Certificate Generation** - Auto-generate on completion
-
-See **[ARCHITECTURE.md](ARCHITECTURE.md)** for detailed implementation guides.
-
-## 🧪 Testing
-
-```bash
-# Test API
-curl http://localhost:3000/api/courses
-
-# View in browser
-http://localhost:3000/courses
-```
-
-## 🛠️ Development
-
-```bash
 # Start dev server
 npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
-
-# Lint code
-npm run lint
 ```
 
-## 📊 Database Schema Highlights
+Open:
+- http://localhost:3000
 
-- **User Roles**: ADMIN, INSTRUCTOR, STUDENT
-- **Booking Statuses**: PENDING, CONFIRMED, CANCELLED, COMPLETED, NO_SHOW
-- **Payment Methods**: CREDIT_CARD, DEBIT_CARD, PAYPAL, BANK_TRANSFER
-- **Soft Delete**: All major entities support soft deletion
-- **Audit Logging**: Complete activity tracking
-- **Indexes**: Optimized for performance
+## Useful Commands
 
-## 🔒 Security Features
+```bash
+# Development
+npm run dev
 
-- Password hashing with bcryptjs
-- Role-based access control (RBAC)
-- Input validation
-- Soft delete (data preservation)
-- Audit trail
-- SQL injection prevention (Prisma)
+# Build
+npm run build
 
-## 🎯 Production Ready
+# Start production build
+npm run start
 
-- ✅ Full TypeScript typing
-- ✅ Error handling
-- ✅ Input validation
-- ✅ Database indexes
-- ✅ Pagination
-- ✅ Responsive design
-- ✅ Loading states
-- ✅ Empty states
-- ✅ Documentation
+# Lint
+npm run lint
 
-## 📄 License
+# Prisma Studio
+npx prisma studio
+```
 
-This project is for educational purposes as part of a Final Year Project.
+## Documentation
 
-## 🤝 Contributing
+- [SETUP.md](SETUP.md) - setup and environment guide
+- [ARCHITECTURE.md](ARCHITECTURE.md) - architecture and integration notes
+- [AUTHENTICATION.md](AUTHENTICATION.md) - auth implementation details
+- [ROLES_AND_PERMISSIONS.md](ROLES_AND_PERMISSIONS.md) - role matrix
+- [PROJECT_STATUS.md](PROJECT_STATUS.md) - current module completion
+- [QUICK_REFERENCE.md](QUICK_REFERENCE.md) - command cheatsheet
 
-This is a FYP project. For questions or suggestions, please refer to the documentation files.
+## License
 
-## 📞 Support
-
-- Check **[SETUP.md](SETUP.md)** for setup issues
-- Review **[ARCHITECTURE.md](ARCHITECTURE.md)** for implementation details
-- See **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)** for quick commands
-
----
-
-**Built with ❤️ using Next.js, TypeScript, PostgreSQL, and Prisma**
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is developed as a final year project and educational platform.

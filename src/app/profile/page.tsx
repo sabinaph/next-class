@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
 import { prisma } from "@/app/lib/prisma";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import ProfileDashboard from "@/components/profile/ProfileDashboard";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -164,3 +164,4 @@ export default async function ProfilePage() {
     </div>
   );
 }
+

@@ -2,7 +2,7 @@
 
 import { prisma } from "@/app/lib/prisma";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
@@ -403,3 +403,4 @@ export async function rejectInstructorApplication(formData: FormData) {
 
   revalidatePath("/admin/instructor-applications");
 }
+

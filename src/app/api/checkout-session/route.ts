@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/app/lib/prisma";
 
 const KHALTI_INITIATE_URL =
@@ -98,3 +98,4 @@ export async function POST(req: Request) {
     );
   }
 }
+

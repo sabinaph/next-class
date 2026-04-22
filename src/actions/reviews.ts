@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/app/lib/prisma";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 
@@ -92,3 +92,4 @@ export async function replyToReview(reviewId: string, reply: string) {
   revalidatePath(`/courses/${review.course.id}`);
   revalidatePath(`/instructor/courses/${review.course.id}`);
 }
+

@@ -5,7 +5,7 @@ import { readFile } from "fs/promises";
 import path from "path";
 
 import { prisma } from "@/app/lib/prisma";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 
 export async function GET(
   request: Request,

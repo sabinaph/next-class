@@ -4,7 +4,7 @@ import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import crypto from "crypto";
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 
 type UploadKind = "thumbnail" | "video" | "pdf" | "file";
 
@@ -106,3 +106,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Upload failed." }, { status: 500 });
   }
 }
+

@@ -10,7 +10,7 @@ import {
   UserRole,
 } from "@/types";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 
 // ============================================
 // Helper Functions
@@ -451,3 +451,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(response, { status: 500 });
   }
 }
+

@@ -2,7 +2,7 @@
 
 import { prisma } from "@/app/lib/prisma";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { getPlatformShare } from "@/lib/revenue-share";
 
 export async function getAnalyticsData() {
@@ -256,3 +256,4 @@ export async function getRevenueByCategory() {
     };
   });
 }
+

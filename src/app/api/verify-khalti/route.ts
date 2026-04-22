@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 import { emailInvoice, ensureInvoiceForOrder } from "@/actions/invoices";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 
 const KHALTI_VERIFY_URL =
   process.env.KHALTI_VERIFY_URL ||
@@ -149,3 +149,4 @@ export async function GET(req: Request) {
     );
   }
 }
+

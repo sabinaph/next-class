@@ -2,7 +2,7 @@
 
 import { prisma } from "@/app/lib/prisma";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { CreateCourseInput, UpdateCourseInput } from "@/types";
 import {
@@ -347,3 +347,4 @@ export async function toggleCoursePublish(id: string, isPublished: boolean) {
   revalidatePath("/instructor/courses");
   revalidatePath("/courses"); // Update public list
 }
+
