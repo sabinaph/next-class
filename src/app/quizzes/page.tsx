@@ -46,11 +46,7 @@ type DraftQuestion = {
   correctIndexesCsv: string;
 };
 
-type QuizzesPageProps = {
-  forceInstructorView?: boolean;
-};
-
-export default function QuizzesPage({ forceInstructorView = false }: QuizzesPageProps = {}) {
+export default function QuizzesPage() {
   const { data: session, status } = useSession();
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -87,6 +83,7 @@ export default function QuizzesPage({ forceInstructorView = false }: QuizzesPage
   ]);
   const [answersByQuiz, setAnswersByQuiz] = useState<Record<string, Record<string, string[]>>>({});
   const [textAnswersByQuiz, setTextAnswersByQuiz] = useState<Record<string, Record<string, string>>>({});
+  const forceInstructorView = false;
 
   const isInstructor = session?.user?.role === "INSTRUCTOR";
   const isInstructorView = forceInstructorView || isInstructor;
