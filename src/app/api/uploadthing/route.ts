@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const missingTokenResponse = () =>
   NextResponse.json(
@@ -22,13 +22,13 @@ const getUploadthingHandler = async () => {
   });
 };
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const handler = await getUploadthingHandler();
   if (!handler) return missingTokenResponse();
   return handler.GET(request);
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   const handler = await getUploadthingHandler();
   if (!handler) return missingTokenResponse();
   return handler.POST(request);
